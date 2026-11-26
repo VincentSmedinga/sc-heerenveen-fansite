@@ -226,14 +226,20 @@ describe('the closing of the window of the Uitblinker in the import', () => {
       .$returningId()
     const [player] = await database.db
       .insert(players)
-      .values({ name: 'Test Speler', searchTerm: 'Speler', season: '2026/27', source: 'selectie' })
+      .values({ searchTerm: 'Speler', season: '2026/27', source: 'selectie', sourceName: 'Test Speler' })
       .$returningId()
 
     await database.db.insert(matchReports).values({ matchId: match?.id ?? 0, status: 'klaar' })
 
     const [appearance] = await database.db
       .insert(matchAppearances)
-      .values({ matchId: match?.id ?? 0, name: 'Test Speler', ours: true, playerId: player?.id ?? 0, starter: true })
+      .values({
+        matchId: match?.id ?? 0,
+        ours: true,
+        playerId: player?.id ?? 0,
+        sourceName: 'Test Speler',
+        starter: true,
+      })
       .$returningId()
     const [fan] = await database.db
       .insert(supporters)

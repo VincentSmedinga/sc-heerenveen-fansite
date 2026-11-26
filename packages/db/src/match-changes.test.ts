@@ -92,7 +92,7 @@ async function heldChange(newValue: null | string = 'sc Heerenveen 3–0 Ajax') 
   const id = inserted?.id ?? 0
   const proposal: Proposal = { clubId: values!.clubId, goals: [goal], match: read }
 
-  await database.db.insert(matchGoals).values({ matchId: id, minute: 12, ours: true, player: 'Hakim Ziyech' })
+  await database.db.insert(matchGoals).values({ matchId: id, minute: 12, ours: true, sourceName: 'Hakim Ziyech' })
 
   const [change] = await database.db
     .insert(matchChanges)
@@ -136,7 +136,7 @@ describe('decideChange', () => {
 
     expect(match).toMatchObject({ goalsAgainst: 0, goalsFor: 3 })
     expect(match?.resultSetAt).toEqual(now)
-    expect(goals).toMatchObject([{ penalty: true, player: 'Ziyech' }])
+    expect(goals).toMatchObject([{ penalty: true, sourceName: 'Ziyech' }])
     expect(change).toMatchObject({ decidedAt: now, resolution: 'person', status: 'accepted' })
     expect(await log()).toMatchObject([
       {
@@ -195,7 +195,7 @@ describe('decideChange', () => {
     const [change] = await database.db.select().from(matchChanges)
 
     expect(match).toMatchObject({ goalsFor: 2 })
-    expect(await database.db.select().from(matchGoals)).toMatchObject([{ player: 'Hakim Ziyech' }])
+    expect(await database.db.select().from(matchGoals)).toMatchObject([{ sourceName: 'Hakim Ziyech' }])
     expect(change).toMatchObject({ decidedAt: now, resolution: 'person', status: 'rejected' })
     expect(await log()).toMatchObject([{ action: 'match.keep', itemId: matchId, userId: adminId }])
   })

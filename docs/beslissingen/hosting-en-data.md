@@ -1435,3 +1435,27 @@
   Clubkleuren veranderen zelden.
   De lijst op `slug` vraagt geen import en geen verzoek naar een ander domein.
 - **Alternatieven:** de importer leest de eerste kleur die niet wit is uit de Engelse Wikipedia, met correcties in het beheer; alleen invullen in het beheer, voor meer dan honderd clubs; de lijst bij het importeren in de database zetten (een nieuwe kleur wacht dan op een import).
+
+## De naam van een speler hoort bij de persoon, de tekst op een regel is de naam van de bron
+
+- **Datum:** 26 november 2026
+- **Besluit:** pagina's en beheer tonen de naam van de persoon, voor onze spelers en voor tegenstanders (#1697).
+  `players.name`, `match_appearances.name` en `match_goals.player` blijven als de naam zoals de bron hem schreef, voor het koppelen en voor een regel zonder persoon.
+- **Waarom:** een wijziging in het beheer geldt dan overal, zonder migratie, en de import houdt wat hij nodig heeft om de volgende keer te koppelen.
+- **Hoe:** de regel staat op één plek, `packages/db/src/shown-name.ts`.
+  In de code heet de ruwe tekst `sourceName`, ook bij `club_squad_players.name`; de kolommen houden hun naam.
+  - **Welke persoon:** een selectieregel `players.person_id`; een opstellingsregel van ons de persoon van `player_id`, en van de tegenstander `match_appearances.person_id`; een doelpunt `match_goals.person_id` en anders de persoon van `player_id`; een speler van een tegenstander `club_squad_players.person_id`.
+  - **De zoekterm** is het voorvoegsel met de achternaam van de persoon, en zonder achternaam `players.search_term`.
+  - **De doelpuntenregel** toont de achternaam uit de persoon, met een hoofdletter vooraan, omdat hij alleen staat: "Van Aken".
+  - **Het verslag:** het formulier toont de namen van de personen, en opslaan houdt bij een regel die er al was de naam van de bron en de persoon.
+- **Alternatieven:** de naam van onze regels weghalen (migraties, een nieuwe sleutel voor de import, meer pull requests, en de schrijfwijze van de bron is weg); de naam bij een wijziging naar alle regels kopiëren (elke nieuwe koppeling of import kan weer afwijken); alleen onze spelers de persoon laten volgen (tegenstanders houden dan twee schrijfwijzen).
+
+## Een persoon op een regel is niet verplicht
+
+- **Datum:** 26 november 2026
+- **Besluit:** de database eist geen persoon.
+  Zonder persoon tonen we de naam van de bron.
+  Het beheer en de import blijven koppelen, en `import:status` blijft de selectieregels zonder persoon noemen.
+- **Waarom:** op de kopie van acceptatie hebben alle selectieregels en al onze opstellingsregels al een persoon.
+  Een mislukte opvraag of een verwijderde persoon mag niets stukmaken.
+- **Alternatieven:** een verplichte persoon voor onze regels (een migratie, en de import moet personen maken van alleen een naam, met kans op dubbele).

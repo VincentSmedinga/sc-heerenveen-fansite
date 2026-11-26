@@ -20,13 +20,16 @@ export type FactsFields = Pick<Match, 'attendance' | 'note' | 'referee' | 'stadi
 }
 
 /** The goals that are stored, as the comparison needs them. */
-export type GoalFields = Pick<
-  MatchGoal,
-  'minute' | 'ours' | 'ownGoal' | 'penalty' | 'player' | 'playerId' | 'stoppageMinutes'
->
+export type GoalFields = Pick<MatchGoal, 'minute' | 'ours' | 'ownGoal' | 'penalty' | 'playerId' | 'stoppageMinutes'> & {
+  /** The name as the source wrote it, which is what the log and a comparison keep. */
+  player: string
+}
 
-/** The goal as `before_goals` keeps it: a row of `match_goals` without its numbers. */
-export type GoalSnapshot = Omit<NewMatchGoal, 'id' | 'matchId'>
+/**
+ * The goal as `before_goals` keeps it: a row of `match_goals` without its numbers. The name of
+ * the source stays under `player`, the name of the column, because stored snapshots have it so.
+ */
+export type GoalSnapshot = Omit<NewMatchGoal, 'id' | 'matchId' | 'sourceName'> & { player: string }
 
 /** The kick-off of one match, for a judgement and a line of text. */
 export type KickoffFields = Pick<Match, 'dateText' | 'kickoffAt' | 'matchDate'>
@@ -199,6 +202,11 @@ export function describeEntryResult(match: ResultFields): string {
   return extra.length === 0 ? score : `${score} (${extra.join(', ')})`
 }
 
+/** A stored goal as a comparison, a line of the log and a snapshot read it (`player`). */
+export function goalFieldsOf<Goal extends Pick<MatchGoal, 'sourceName'>>({ sourceName, ...goal }: Goal) {
+  return { ...goal, player: sourceName }
+}
+
 const kickoffKeys = ['dateText', 'kickoffAt', 'matchDate'] as const
 
 const factsKeys = ['attendance', 'note', 'referee', 'stadium', 'stadiumId'] as const
@@ -250,7 +258,7 @@ export function encodeGoals(goals: MatchGoal[]): string {
       ownGoal: goal.ownGoal,
       penalty: goal.penalty,
       personId: goal.personId,
-      player: goal.player,
+      player: goal.sourceName,
       playerId: goal.playerId,
       stoppageMinutes: goal.stoppageMinutes,
       wikipediaPage: goal.wikipediaPage,
@@ -300,11 +308,12 @@ export async function insertGoals(db: Pick<Database, 'insert' | 'select'>, match
   )
 
   await db.insert(matchGoals).values(
-    goals.map((goal) => ({
+    goals.map(({ player, ...goal }) => ({
       ...goal,
       matchId,
       playerId:
         goal.playerId !== null && goal.playerId !== undefined && known.has(goal.playerId) ? goal.playerId : null,
+      sourceName: player,
     })),
   )
 }

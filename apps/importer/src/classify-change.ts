@@ -7,6 +7,7 @@ import type { LinkedGoal } from '@fansite/db/match-changes'
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
 import { conflictStandsMs } from '@fansite/db/match-conflicts'
+import { goalFieldsOf } from '@fansite/db/match-edits'
 
 import type { ReadGoal } from './read-wikipedia.ts'
 
@@ -135,7 +136,7 @@ export function describeState(match: MatchState, goals: GoalState[]): string {
 
 /** The goal of a stored row as the importer compares it. */
 export function goalStateOf(goal: MatchGoal): GoalState {
-  return { ...goal, page: goal.wikipediaPage }
+  return { ...goalFieldsOf(goal), page: goal.wikipediaPage }
 }
 
 /** The goal of a read match as the importer compares it. */

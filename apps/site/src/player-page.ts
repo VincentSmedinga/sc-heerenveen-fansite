@@ -86,7 +86,7 @@ export const loadPlayerPage = cache(async (slug: string): Promise<PlayerPageLoad
 
     const { person } = found
     const rows = await db
-      .select({ name: players.name, season: players.season })
+      .select({ season: players.season, sourceName: players.sourceName })
       .from(players)
       .where(eq(players.personId, person.id))
       .orderBy(desc(players.season), asc(players.id))
@@ -144,11 +144,11 @@ export function periodsOf(seasons: readonly string[]): { first: string; last: st
  */
 export function playerPageOf(
   person: Person,
-  rows: readonly { name: string; season: string }[],
+  rows: readonly { season: string; sourceName: string }[],
   birthPlace: string | undefined,
   today = new Date(),
 ): PlayerPage {
-  const name = person.name ?? rows[0]?.name ?? ''
+  const name = person.name || rows[0]?.sourceName || ''
   const parts = personNameParts({
     personFamilyName: person.familyName,
     personFamilyNamePrefix: person.familyNamePrefix,

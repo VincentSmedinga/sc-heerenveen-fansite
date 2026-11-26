@@ -865,53 +865,53 @@ const madeUpScorers: [name: string, shirtNumber: number, inSquad: boolean][] = [
  */
 export const madeUpGoals: Record<string, MadeUpGoal[]> = {
   'Eredivisie|Speelronde 1': [
-    { minute: 12, ours: true, player: 'Demo', stoppageMinutes: null, wikipediaPage: 'Rick Demo' },
-    { minute: 25, ours: true, player: 'Dummy', stoppageMinutes: null, wikipediaPage: 'Teun Dummy' },
-    { minute: 41, ours: true, player: 'Monster', stoppageMinutes: null, wikipediaPage: 'Sander Monster' },
-    { minute: 58, ours: true, player: 'Probeer', stoppageMinutes: null, wikipediaPage: 'Lennart Probeer' },
-    { minute: 77, ours: true, player: 'Nepper', stoppageMinutes: null, wikipediaPage: 'Gerrit Nepper' },
-    { minute: 83, ours: true, player: 'Demo', stoppageMinutes: null, wikipediaPage: 'Rick Demo' },
+    { minute: 12, ours: true, sourceName: 'Demo', stoppageMinutes: null, wikipediaPage: 'Rick Demo' },
+    { minute: 25, ours: true, sourceName: 'Dummy', stoppageMinutes: null, wikipediaPage: 'Teun Dummy' },
+    { minute: 41, ours: true, sourceName: 'Monster', stoppageMinutes: null, wikipediaPage: 'Sander Monster' },
+    { minute: 58, ours: true, sourceName: 'Probeer', stoppageMinutes: null, wikipediaPage: 'Lennart Probeer' },
+    { minute: 77, ours: true, sourceName: 'Nepper', stoppageMinutes: null, wikipediaPage: 'Gerrit Nepper' },
+    { minute: 83, ours: true, sourceName: 'Demo', stoppageMinutes: null, wikipediaPage: 'Rick Demo' },
   ],
   'Eredivisie|Speelronde 2': [
-    { minute: 8, ours: true, player: 'Sjabloon', stoppageMinutes: null, wikipediaPage: 'Marijn Sjabloon' },
-    { minute: 23, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
-    { minute: 51, ours: true, player: 'Steekproef', stoppageMinutes: null, wikipediaPage: 'Niels Steekproef' },
-    { minute: 66, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Joris Testvoort' },
-    { minute: 67, ours: true, player: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Bas Testvoort' },
-    { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4, wikipediaPage: 'Gerrit Nepper' },
+    { minute: 8, ours: true, sourceName: 'Sjabloon', stoppageMinutes: null, wikipediaPage: 'Marijn Sjabloon' },
+    { minute: 23, ours: true, sourceName: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
+    { minute: 51, ours: true, sourceName: 'Steekproef', stoppageMinutes: null, wikipediaPage: 'Niels Steekproef' },
+    { minute: 66, ours: true, sourceName: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Joris Testvoort' },
+    { minute: 67, ours: true, sourceName: 'Testvoort', stoppageMinutes: null, wikipediaPage: 'Bas Testvoort' },
+    { minute: 90, ours: true, sourceName: 'Nepper', stoppageMinutes: 4, wikipediaPage: 'Gerrit Nepper' },
   ],
   'KNVB Beker|Achtste finale': [
     {
       minute: 30,
       ours: true,
-      player: 'Van der Voorbeeldstraat-Proefmans',
+      sourceName: 'Van der Voorbeeldstraat-Proefmans',
       stoppageMinutes: null,
       wikipediaPage: 'Jan van der Voorbeeldstraat-Proefmans',
     },
     // The minute is not known, like the minute of 4 goals of the old fansite.
-    { minute: null, ours: false, player: 'Oefenaar', stoppageMinutes: null },
+    { minute: null, ours: false, sourceName: 'Oefenaar', stoppageMinutes: null },
   ],
   'KNVB Beker|Eerste ronde': [
-    { minute: 12, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
-    { minute: 55, ours: false, player: 'Teststraat', stoppageMinutes: null },
-    { minute: 105, ours: true, player: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
+    { minute: 12, ours: true, sourceName: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
+    { minute: 55, ours: false, sourceName: 'Teststraat', stoppageMinutes: null },
+    { minute: 105, ours: true, sourceName: 'Proefman', stoppageMinutes: null, wikipediaPage: 'Wouter Proefman' },
   ],
   'KNVB Beker|Kwartfinale': [
     {
       minute: 18,
       ours: true,
       penalty: true,
-      player: 'Voorbeeld',
+      sourceName: 'Voorbeeld',
       stoppageMinutes: null,
       wikipediaPage: 'Pieter Voorbeeld',
     },
-    { minute: 45, ours: false, player: 'Teststraat', stoppageMinutes: 1 },
-    { minute: 70, ours: true, ownGoal: true, player: 'Kopie', stoppageMinutes: null },
-    { minute: 88, ours: false, player: 'Teststraat', stoppageMinutes: null },
+    { minute: 45, ours: false, sourceName: 'Teststraat', stoppageMinutes: 1 },
+    { minute: 70, ours: true, ownGoal: true, sourceName: 'Kopie', stoppageMinutes: null },
+    { minute: 88, ours: false, sourceName: 'Teststraat', stoppageMinutes: null },
   ],
   'Play-offs Conference League|Halve finale': [
-    { minute: 46, ours: false, player: 'Teststraat', stoppageMinutes: null },
-    { minute: 58, ours: false, player: 'Oefenaar', stoppageMinutes: null },
+    { minute: 46, ours: false, sourceName: 'Teststraat', stoppageMinutes: null },
+    { minute: 58, ours: false, sourceName: 'Oefenaar', stoppageMinutes: null },
   ],
 }
 
@@ -1013,23 +1013,23 @@ export function madeUpSquad(now: Date): NewPlayer[] {
 
   const squad = rows.map(([position, shirtNumber, name, searchTerm], index): NewPlayer => ({
     country: madeUpCountries[index] ?? null,
-    name,
     position,
     searchTerm,
     season,
     shirtNumber,
     source: 'selectie',
+    sourceName: name,
     wikipediaPage: name,
   }))
   const scorers = madeUpScorers.map(([name, shirtNumber, inSquad]): NewPlayer => ({
     inSquad,
     leftSquadAt: inSquad ? null : new Date(now.getTime() - 3 * day),
-    name,
     position: 'aanvaller',
     searchTerm: name.split(' ').slice(1).join(' '),
     season,
     shirtNumber,
     source: 'selectie',
+    sourceName: name,
     wikipediaPage: name,
   }))
 
@@ -1622,7 +1622,7 @@ const madeUpSides: Record<string, 'links' | 'midden' | 'rechts'> = {
  */
 async function personsForMadeUpPlayers(db: Pick<Database, 'insert' | 'select' | 'update'>, season: string) {
   const squad = await db
-    .select({ id: players.id, name: players.name, page: players.wikipediaPage, searchTerm: players.searchTerm })
+    .select({ id: players.id, name: players.sourceName, page: players.wikipediaPage, searchTerm: players.searchTerm })
     .from(players)
     .where(and(eq(players.season, season), isNotNull(players.wikipediaPage), isNull(players.personId)))
 
@@ -1699,7 +1699,7 @@ async function seedOneMadeUpReport(
     .from(matchReports)
     .where(eq(matchReports.matchId, match.id))
   const squad = await db.select().from(players).where(eq(players.season, season))
-  const playerNamed = new Map(squad.map((player) => [player.name, player]))
+  const playerNamed = new Map(squad.map((player) => [player.sourceName, player]))
   const goals = await db.select().from(matchGoals).where(eq(matchGoals.matchId, match.id))
 
   if (
@@ -1729,26 +1729,26 @@ async function seedOneMadeUpReport(
       return {
         captain: name === report.captain,
         matchId: match.id,
-        name,
         ours: true,
         playerId: player.id,
         shirtNumber: (report.withoutShirtNumber ?? []).includes(name) ? null : player.shirtNumber!,
+        sourceName: name,
         starter,
       }
     }),
     ...report.opponent.map(([shirtNumber, name, starter]) => ({
       captain: shirtNumber === report.opponentCaptain,
       matchId: match.id,
-      name,
       ours: false,
       playerId: null,
       shirtNumber,
+      sourceName: name,
       starter,
     })),
   ])
 
   const appearances = await db.select().from(matchAppearances).where(eq(matchAppearances.matchId, match.id))
-  const ours = (name: string) => appearances.find((player) => player.ours && player.name === name)!
+  const ours = (name: string) => appearances.find((player) => player.ours && player.sourceName === name)!
   const theirs = (shirtNumber: number) =>
     appearances.find((player) => !player.ours && player.shirtNumber === shirtNumber)!
   const who = (person: MadeUpWho) => (typeof person === 'string' ? ours(person) : theirs(person))

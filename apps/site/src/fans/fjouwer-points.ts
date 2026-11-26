@@ -11,6 +11,7 @@ import {
   players,
   supporters,
 } from '@fansite/db/schema'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import {
   type FantasyFacts,
   fantasyFacts,
@@ -424,7 +425,7 @@ async function namesOf(db: Database, playerIds: readonly number[]) {
       familyNamePrefix: persons.familyNamePrefix,
       givenName: persons.givenName,
       id: players.id,
-      name: players.name,
+      name: shownPlayerName(),
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))

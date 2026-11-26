@@ -260,15 +260,15 @@ async function storeReport(
     row: {
       captain: false,
       matchId,
-      name: one.name,
       ours: one.ours,
       playerId: one.playerKey === null ? null : (playerIds.get(one.playerKey) ?? null),
       shirtNumber: null,
+      sourceName: one.name,
       starter: one.starter,
     },
   }))
   const ids = new Map<string, number>()
-  const have = new Map(current.appearances.map((row) => [appearanceKey(row.ours, row.name), row]))
+  const have = new Map(current.appearances.map((row) => [appearanceKey(row.ours, row.sourceName), row]))
   const fresh: (typeof matchAppearances.$inferInsert)[] = []
 
   for (const { key, row } of wantedRows) {
@@ -283,7 +283,7 @@ async function storeReport(
     have.delete(key)
 
     if (
-      was.name !== row.name ||
+      was.sourceName !== row.sourceName ||
       was.playerId !== row.playerId ||
       was.starter !== row.starter ||
       was.captain ||
@@ -291,7 +291,13 @@ async function storeReport(
     ) {
       await db
         .update(matchAppearances)
-        .set({ captain: false, name: row.name, playerId: row.playerId, shirtNumber: null, starter: row.starter })
+        .set({
+          captain: false,
+          playerId: row.playerId,
+          shirtNumber: null,
+          sourceName: row.sourceName,
+          starter: row.starter,
+        })
         .where(eq(matchAppearances.id, was.id))
       touched = true
     }
@@ -308,7 +314,7 @@ async function storeReport(
     touched = true
 
     for (const row of await db.select().from(matchAppearances).where(eq(matchAppearances.matchId, matchId))) {
-      ids.set(appearanceKey(row.ours, row.name), row.id)
+      ids.set(appearanceKey(row.ours, row.sourceName), row.id)
     }
   }
 

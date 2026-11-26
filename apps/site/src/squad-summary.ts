@@ -99,7 +99,7 @@ const keptFor = 5 * 60 * 1000
 async function loadBirths(season: string) {
   const { db } = getDatabase()
 
-  return new Map((await listSeasonPlayerBirths(db, season)).map(({ name, ...birth }) => [name, birth]))
+  return new Map((await listSeasonPlayerBirths(db, season)).map(({ sourceName, ...birth }) => [sourceName, birth]))
 }
 
 const seasonBirths = cacheForKey(keptFor, loadBirths)

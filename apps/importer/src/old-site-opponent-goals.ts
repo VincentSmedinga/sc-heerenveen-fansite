@@ -223,7 +223,7 @@ export async function readOpponentGoals(db: Reader): Promise<OpponentGoal[]> {
     .select({
       id: matchGoals.id,
       matchId: matchGoals.matchId,
-      name: matchGoals.player,
+      name: matchGoals.sourceName,
       personId: matchGoals.personId,
       season: matches.season,
     })

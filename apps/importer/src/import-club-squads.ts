@@ -9,7 +9,8 @@ import type { ClubSquadImport } from '@fansite/db/schema'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import { clubs, clubSquadImports, clubSquadPlayers, matches } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, asc, eq, isNotNull } from 'drizzle-orm'
+import { rowsByName, shownClubPlayerName } from '@fansite/db/shown-name'
+import { and, asc, eq, getTableColumns, isNotNull } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
 import type { ClubSquadPlayer } from './read-club-squad.ts'
@@ -209,8 +210,12 @@ async function storeClubSquad(
       aliases: aliasMap(personTitleAliases),
       redirects: lookup.redirects,
     })
-    const rows = await transaction.select().from(clubSquadPlayers).where(eq(clubSquadPlayers.clubId, club.id))
-    const byName = new Map(rows.map((row) => [nameKey(row.name), row]))
+    // A row is found by the name of the source and by the name of its person (#1697).
+    const rows = await transaction
+      .select({ ...getTableColumns(clubSquadPlayers), name: shownClubPlayerName() })
+      .from(clubSquadPlayers)
+      .where(eq(clubSquadPlayers.clubId, club.id))
+    const byName = rowsByName(rows, nameKey)
     const seen = new Set<number>()
 
     for (const player of found) {
@@ -224,11 +229,11 @@ async function storeClubSquad(
         counts.added++
         await transaction.insert(clubSquadPlayers).values({
           clubId: club.id,
-          name: player.name,
           personId,
           position: player.position,
           readAt: now,
           shirtNumber: player.shirtNumber,
+          sourceName: player.name,
         })
 
         continue
@@ -242,7 +247,7 @@ async function storeClubSquad(
         before.personId !== wantedPerson ||
         before.position !== player.position ||
         before.shirtNumber !== player.shirtNumber ||
-        before.name !== player.name
+        before.sourceName !== player.name
       ) {
         counts.updated++
       }
@@ -250,17 +255,17 @@ async function storeClubSquad(
       await transaction
         .update(clubSquadPlayers)
         .set({
-          name: player.name,
           personId: wantedPerson,
           position: player.position,
           readAt: now,
           shirtNumber: player.shirtNumber,
+          sourceName: player.name,
         })
         .where(eq(clubSquadPlayers.id, before.id))
     }
 
     for (const row of rows) {
-      if (!seen.has(row.id) && !found.some((player) => nameKey(player.name) === nameKey(row.name))) {
+      if (!seen.has(row.id) && !found.some((player) => nameKey(player.name) === nameKey(row.sourceName))) {
         counts.removed++
         await transaction.delete(clubSquadPlayers).where(eq(clubSquadPlayers.id, row.id))
       }

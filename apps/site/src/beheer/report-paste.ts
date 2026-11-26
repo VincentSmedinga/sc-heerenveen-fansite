@@ -297,7 +297,19 @@ export function readPastedReport(
         number: player.shirtNumber,
         term: player.searchTerm ?? termOf(player.name),
       }))
-      const named = name === '' ? undefined : lookup(mine, name)
+      const byShown = name === '' ? undefined : lookup(mine, name)
+      // A pasted source may still write the name as it was before the editors changed it.
+      const named =
+        byShown?.kind === 'none'
+          ? lookup(
+              mine.map((player) => ({
+                ...player,
+                name: squad[player.index]!.sourceName ?? player.name,
+                term: termOf(squad[player.index]!.sourceName ?? player.name),
+              })),
+              name,
+            )
+          : byShown
       let chosen: ReportSquadPlayer | undefined
       let names: string[] = []
 
@@ -306,7 +318,7 @@ export function readPastedReport(
       // Whole words of the name only: `Aken` and `Joost` agree with Joost van Aken, `Voskuilen`
       // does not agree with a Vos.
       const agrees = (player: ReportSquadPlayer) => {
-        const words = fold(player.name).split(' ')
+        const words = [player.name, player.sourceName ?? ''].flatMap((known) => fold(known).split(' '))
 
         return fold(name)
           .split(' ')

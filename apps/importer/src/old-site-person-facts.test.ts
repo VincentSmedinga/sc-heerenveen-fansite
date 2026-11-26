@@ -66,7 +66,9 @@ async function addPerson(name: string, columns: Partial<typeof persons.$inferIns
     .$returningId()
   const id = inserted!.id
 
-  await database.db.insert(players).values({ name, personId: id, searchTerm: name, season, source: 'verslag' })
+  await database.db
+    .insert(players)
+    .values({ personId: id, searchTerm: name, season, source: 'verslag', sourceName: name })
 
   return id
 }
@@ -153,7 +155,7 @@ describe('the step linie en land', () => {
   it('skips and counts an old player without a person, and one that is in no match', async () => {
     await database.db
       .insert(players)
-      .values({ name: 'Hans Vonk', searchTerm: 'Vonk', season: '2001/02', source: 'verslag' })
+      .values({ searchTerm: 'Vonk', season: '2001/02', source: 'verslag', sourceName: 'Hans Vonk' })
     // A namesake in another season is another row, and the old player is not in a match of it.
     await addPerson('Hans Vonk', {}, '2015/16')
 

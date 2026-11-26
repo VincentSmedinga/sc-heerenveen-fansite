@@ -99,7 +99,7 @@ export async function updatePlayerAddresses(db: SlugDatabase): Promise<number> {
       current: persons.slug,
       id: persons.id,
       name: persons.name,
-      playerName: players.name,
+      playerName: players.sourceName,
     })
     .from(persons)
     .innerJoin(players, eq(players.personId, persons.id))

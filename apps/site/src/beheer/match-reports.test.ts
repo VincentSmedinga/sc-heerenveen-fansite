@@ -2,6 +2,7 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { markedParts } from '@fansite/db/match-edits'
+import { selectReportGoals } from '@fansite/db/match-reports'
 import { readMatchReport } from '@fansite/db/match-reports'
 import {
   adminUsers,
@@ -116,24 +117,24 @@ beforeEach(async () => {
 
   await database.db.insert(players).values(
     squadOf(1).map((player) => ({
-      name: player.name,
       personId: player.shirtNumber === 9 ? (person?.id ?? null) : null,
       searchTerm: player.name,
       season: '2026/27',
       shirtNumber: player.shirtNumber,
+      sourceName: player.name,
       wikipediaPage: player.shirtNumber === 9 ? 'Speler 9 (voetballer)' : null,
     })),
   )
   squad = (await database.db.select().from(players).orderBy(asc(players.shirtNumber))).map((player) => ({
     id: player.id,
-    name: player.name,
+    name: player.sourceName,
     shirtNumber: player.shirtNumber,
   }))
 })
 
 /** What Wikipedia says of the goals: the scorers by their surnames, one with a page. */
 async function wikipediaGoals() {
-  const [nine] = await database.db.select().from(players).where(eq(players.name, 'Speler 9'))
+  const [nine] = await database.db.select().from(players).where(eq(players.sourceName, 'Speler 9'))
 
   await database.db.insert(matchGoals).values([
     {
@@ -141,12 +142,12 @@ async function wikipediaGoals() {
       minute: 12,
       ours: true,
       personId: nine?.personId ?? null,
-      player: 'Speler 9',
       playerId: nine?.id ?? null,
+      sourceName: 'Speler 9',
       wikipediaPage: 'Speler 9 (voetballer)',
     },
-    { matchId, minute: 40, ours: false, player: 'Sibbing' },
-    { matchId, minute: 77, ours: true, player: 'Speler 10' },
+    { matchId, minute: 40, ours: false, sourceName: 'Sibbing' },
+    { matchId, minute: 77, ours: true, sourceName: 'Speler 10' },
   ])
 }
 
@@ -170,8 +171,7 @@ const playedResult = {
   penaltiesFor: null,
   status: 'played',
 } as const
-const goalsOf = () =>
-  database.db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId)).orderBy(asc(matchGoals.id))
+const goalsOf = () => selectReportGoals(database.db).where(eq(matchGoals.matchId, matchId)).orderBy(asc(matchGoals.id))
 const edits = () => database.db.select().from(matchEdits)
 
 /** A kick row with these fields. */
@@ -216,6 +216,69 @@ function series() {
 
   return base
 }
+
+describe('a report after a name is changed (#1697)', () => {
+  const lines = async () =>
+    (await database.db.select().from(matchAppearances).orderBy(asc(matchAppearances.id))).map((line) => [
+      line.sourceName,
+      line.personId,
+    ])
+  const scorers = async () => (await goalsOf()).map((one) => [one.sourceName, one.personId, one.wikipediaPage])
+
+  /** A saved report whose opponent has a linked player, with the persons renamed after it. */
+  async function renamed() {
+    await wikipediaGoals()
+    await save(
+      report({ zij: { doelpunt: [goal({ minuut: '40', naam: 'Sibbing' })], speler: [opponent('Sven Sibbing')] } }),
+    )
+
+    const [theirs] = await database.db.insert(persons).values({ name: 'Sven Sibbing' }).$returningId()
+
+    await database.db.update(matchAppearances).set({ personId: theirs!.id }).where(eq(matchAppearances.ours, false))
+    await database.db.update(persons).set({ name: 'Nieuwe Negen' }).where(eq(persons.name, 'Speler 9'))
+    await database.db.update(persons).set({ name: 'Sven Nieuw' }).where(eq(persons.id, theirs!.id))
+
+    const screen = (await findReportScreen(database.db, matchId, t1))!
+
+    return {
+      screen,
+      theirs: theirs!.id,
+      values: valuesOfReport(screen.report, screen.goals, screen.squad, screen.match),
+    }
+  }
+
+  const opponent = (naam: string) => ({ ...emptyRow('speler'), naam, rol: 'basis', rugnummer: '7' })
+  const savedAgain = (values: ReportValues, screen: { squad: ReportSquadPlayer[] }) => {
+    const found = checkReportForm(values, { match: seen, squad: screen.squad })
+
+    expect(found.errors).toEqual({})
+
+    return saveReport(database.db, userId, matchId, found.plan!, t1)
+  }
+
+  it('shows the names of the persons in the form, and saving it as it is changes nothing', async () => {
+    const { screen, values } = await renamed()
+
+    expect(values.zij.speler[0]?.naam).toBe('Sven Nieuw')
+    expect(screen.squad.map((player) => player.name)).toContain('Nieuwe Negen')
+    expect(screen.report?.appearances.map((line) => line.name)).toContain('Nieuwe Negen')
+
+    const before = [await lines(), await scorers()]
+
+    expect(await savedAgain(values, screen)).toEqual({ status: 'unchanged' })
+    expect([await lines(), await scorers()]).toEqual(before)
+  })
+
+  it('keeps the names of the sources and the persons when something else changes', async () => {
+    const { screen, theirs, values } = await renamed()
+    const before = [await lines(), await scorers()]
+
+    expect(await savedAgain({ ...values, bron: 'een ander formulier' }, screen)).toEqual({ status: 'saved' })
+    expect([await lines(), await scorers()]).toEqual(before)
+    expect(await lines()).toContainEqual(['Sven Sibbing', theirs])
+    expect(await lines()).toContainEqual(['Speler 9', null])
+  })
+})
 
 describe('saveReport', () => {
   it('stores the score at half-time with the match, changes it alone, and takes it away when it is emptied', async () => {
@@ -265,10 +328,10 @@ describe('saveReport', () => {
     expect(appearances).toHaveLength(14)
     expect(appearances[0]).toMatchObject({
       captain: true,
-      name: 'Speler 1',
       ours: true,
       playerId: squad[0]?.id,
       shirtNumber: 1,
+      sourceName: 'Speler 1',
       starter: true,
     })
     expect(appearances[11]).toMatchObject({ starter: false })
@@ -289,7 +352,7 @@ describe('saveReport', () => {
     const goals = await goalsOf()
 
     expect(
-      goals.map((row) => [row.minute, row.player, row.appearanceId, row.assistAppearanceId, row.playerId]),
+      goals.map((row) => [row.minute, row.sourceName, row.appearanceId, row.assistAppearanceId, row.playerId]),
     ).toEqual([
       [12, 'Speler 9', appearances[8]?.id, null, squad[8]?.id],
       [40, 'Sibbing', null, null, null],
@@ -370,7 +433,7 @@ describe('saveReport', () => {
     expect(await database.db.select().from(matchSubstitutions)).toHaveLength(0)
     expect(await database.db.select().from(matchCards)).toHaveLength(1)
     expect(await database.db.select().from(matchAppearances)).toHaveLength(14)
-    expect((await goalsOf()).every((row) => row.appearanceId !== null || row.player === 'Sibbing')).toBe(true)
+    expect((await goalsOf()).every((row) => row.appearanceId !== null || row.sourceName === 'Sibbing')).toBe(true)
   })
 
   it('gives a player of the opponent his person when the report is saved, and keeps it when the report is saved again (#1544)', async () => {
@@ -386,9 +449,9 @@ describe('saveReport', () => {
     await save(withOpponent('basis'))
 
     const personOf = async () =>
-      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Rik Tegenstander'))).map(
-        (row) => row.personId,
-      )
+      (
+        await database.db.select().from(matchAppearances).where(eq(matchAppearances.sourceName, 'Rik Tegenstander'))
+      ).map((row) => row.personId)
 
     expect(await personOf()).toEqual([person?.id])
 
@@ -406,9 +469,9 @@ describe('saveReport', () => {
 
     await database.db.insert(clubSquadPlayers).values({
       clubId: match?.clubId ?? 0,
-      name: 'Rik Tegenstander',
       personId: wanted?.id ?? null,
       readAt: new Date('2026-11-20T10:00:00Z'),
+      sourceName: 'Rik Tegenstander',
     })
     await save(
       report({
@@ -420,9 +483,9 @@ describe('saveReport', () => {
     )
 
     expect(
-      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Rik Tegenstander'))).map(
-        (row) => row.personId,
-      ),
+      (
+        await database.db.select().from(matchAppearances).where(eq(matchAppearances.sourceName, 'Rik Tegenstander'))
+      ).map((row) => row.personId),
     ).toEqual([wanted?.id])
   })
 
@@ -478,8 +541,8 @@ describe('saveReport', () => {
     const stored = await readMatchReport(database.db, matchId)
     const without = stored!.appearances.filter((one) => one.shirtNumber === null)
 
-    expect(without.map((one) => one.name)).toEqual(['Gast', 'Zonder Een', 'Zonder Twee'])
-    expect((await database.db.select().from(players).where(eq(players.name, 'Gast')))[0]?.shirtNumber).toBeNull()
+    expect(without.map((one) => one.sourceName)).toEqual(['Gast', 'Zonder Een', 'Zonder Twee'])
+    expect((await database.db.select().from(players).where(eq(players.sourceName, 'Gast')))[0]?.shirtNumber).toBeNull()
 
     const again = valuesOfReport(stored, await goalsOf(), squad)
 
@@ -503,7 +566,7 @@ describe('saveReport', () => {
 
     expect(again.wij.speler.map((row) => row.keuze)).toEqual([before[1], before[0], ...before.slice(2)])
     // The order of the rows is the order of the players: the pitch reads it as it is.
-    expect(stored!.appearances.filter((one) => one.ours).map((one) => one.name)).toEqual(
+    expect(stored!.appearances.filter((one) => one.ours).map((one) => one.sourceName)).toEqual(
       again.wij.speler.map((row) => squad.find((player) => String(player.id) === row.keuze)?.name),
     )
   })
@@ -555,7 +618,9 @@ describe('saveReport', () => {
 
     const added = (await database.db.select().from(players)).filter((player) => player.source === 'verslag')
 
-    expect(added).toMatchObject([{ name: 'Nieuwe Speler', searchTerm: 'Speler', season: '2026/27', shirtNumber: 40 }])
+    expect(added).toMatchObject([
+      { searchTerm: 'Speler', season: '2026/27', shirtNumber: 40, sourceName: 'Nieuwe Speler' },
+    ])
     expect(await save(report({ wij: { speler: rows } }), t1)).toEqual({ status: 'unchanged' })
 
     // The same name again, typed as another player, is the same row.
@@ -1112,7 +1177,7 @@ describe('removeReport', () => {
     expect(await database.db.select().from(matchAppearances)).toHaveLength(0)
     expect(await database.db.select().from(matchSubstitutions)).toHaveLength(0)
     expect(await edits()).toHaveLength(0)
-    expect((await goalsOf()).map((row) => [row.player, row.appearanceId, row.assistAppearanceId])).toEqual([
+    expect((await goalsOf()).map((row) => [row.sourceName, row.appearanceId, row.assistAppearanceId])).toEqual([
       ['Speler 9', null, null],
       ['Sibbing', null, null],
       ['Speler 10', null, null],
@@ -1137,7 +1202,7 @@ describe('removeReport', () => {
     await database.db.delete(matchEdits)
     await removeReport(database.db, userId, matchId, 'Weg', t1)
 
-    expect((await goalsOf()).map((row) => row.player)).toEqual(['Speler 9', 'Sibbing', 'Speler 10'])
+    expect((await goalsOf()).map((row) => row.sourceName)).toEqual(['Speler 9', 'Sibbing', 'Speler 10'])
     expect((await log()).at(-1)?.detail).toBe('Verslag weggehaald')
   })
 })
@@ -1169,7 +1234,7 @@ describe('the match with a report', () => {
     expect(await undoEntry(database.db, userId, matchId, 'Terug', t1)).toBe('done')
     expect(markedParts((await edits())[0]!)).toEqual(['goals'])
     expect((await database.db.select().from(matches))[0]?.kickoffAt).toEqual(new Date('2026-10-31T17:45:00Z'))
-    expect((await goalsOf()).every((row) => row.appearanceId !== null || row.player === 'Sibbing')).toBe(true)
+    expect((await goalsOf()).every((row) => row.appearanceId !== null || row.sourceName === 'Sibbing')).toBe(true)
 
     // Nothing else is left to take away: the goals belong to the report.
     expect(await undoEntry(database.db, userId, matchId, 'Nog een keer', t1)).toBe('none')
@@ -1267,7 +1332,7 @@ describe('findPreviousLineUp', () => {
         previous,
         ownRows((player) => (player.name === 'Speler 9' ? '29' : String(player.shirtNumber))),
       )
-      await database.db.update(players).set({ shirtNumber: 9 }).where(eq(players.name, 'Speler 9'))
+      await database.db.update(players).set({ shirtNumber: 9 }).where(eq(players.sourceName, 'Speler 9'))
     }
 
     it('gives a player the number of the squad on the day of this match, not the one of the previous match', async () => {
@@ -1464,7 +1529,9 @@ describe('findPreviousOpponentLineUp (#1543)', () => {
 
     await database.db
       .insert(clubSquadPlayers)
-      .values([1, 2, 3, 12].map((number) => ({ clubId: clubId ?? 0, name: `speler  ${number}`, readAt: new Date(t0) })))
+      .values(
+        [1, 2, 3, 12].map((number) => ({ clubId: clubId ?? 0, readAt: new Date(t0), sourceName: `speler  ${number}` })),
+      )
 
     const found = await findPreviousOpponentLineUp(database.db, await current())
 
@@ -1519,13 +1586,13 @@ describe('the number a player wore on the day of a match (#1076)', () => {
     expect(found.errors).toEqual({})
     await saveReport(database.db, userId, matchId, found.plan as ReportPlan, t0)
 
-    const stored = await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Speler 9'))
+    const stored = await database.db.select().from(matchAppearances).where(eq(matchAppearances.sourceName, 'Speler 9'))
 
     expect(stored.map((row) => row.shirtNumber)).toEqual([29])
     // The report keeps its numbers when the number of the squad changes again.
     await database.pool.query("UPDATE players SET shirt_number = 5 WHERE name = 'Speler 9'")
     expect(
-      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Speler 9'))).map(
+      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.sourceName, 'Speler 9'))).map(
         (row) => row.shirtNumber,
       ),
     ).toEqual([29])
@@ -1534,7 +1601,7 @@ describe('the number a player wore on the day of a match (#1076)', () => {
   it('finds the player in a pasted line-up on his previous number before the day, and not on his current one', async () => {
     await changeNumber()
 
-    const idOfNine = (await database.db.select().from(players).where(eq(players.name, 'Speler 9')))[0]?.id
+    const idOfNine = (await database.db.select().from(players).where(eq(players.sourceName, 'Speler 9')))[0]?.id
     const before = await readSquad(database.db, '2026/27', '2026-10-31')
     const after = await readSquad(database.db, '2026/27', '2026-11-14')
 

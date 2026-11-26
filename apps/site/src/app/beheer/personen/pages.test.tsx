@@ -57,8 +57,8 @@ beforeEach(async () => {
 
   personId = insertId
   await database.db.insert(players).values([
-    { name: 'Jan Verzonnen', personId, searchTerm: 'Verzonnen', season: '2005/06' },
-    { name: 'Jan Verzonnen', personId, searchTerm: 'Verzonnen', season: '2004/05' },
+    { personId, searchTerm: 'Verzonnen', season: '2005/06', sourceName: 'Jan Verzonnen' },
+    { personId, searchTerm: 'Verzonnen', season: '2004/05', sourceName: 'Jan Verzonnen' },
   ])
   playerIds = (await database.db.select({ id: players.id }).from(players).orderBy(players.season)).map((row) => row.id)
 })

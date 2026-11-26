@@ -100,8 +100,8 @@ describe('fillFromSeasonProgramme', () => {
 
     ;[ajax, feyenoord, testdorp] = [id('Ajax'), id('Feyenoord'), id('Testdorp')]
     await database.db.insert(players).values([
-      { name: 'Piet Proef', searchTerm: 'piet proef', season, source: 'verslag', wikipediaPage: null },
-      { name: 'Kees Test', searchTerm: 'kees test', season, source: 'verslag', wikipediaPage: null },
+      { searchTerm: 'piet proef', season, source: 'verslag', sourceName: 'Piet Proef', wikipediaPage: null },
+      { searchTerm: 'kees test', season, source: 'verslag', sourceName: 'Kees Test', wikipediaPage: null },
     ])
   })
 
@@ -117,9 +117,9 @@ describe('fillFromSeasonProgramme', () => {
     expect(match).toMatchObject({ goalsAgainst: 2, goalsFor: 3, status: 'played' })
 
     const goals = await goalsOf(match!.id)
-    const proef = (await database.db.select().from(players).where(eq(players.name, 'Piet Proef')))[0]
+    const proef = (await database.db.select().from(players).where(eq(players.sourceName, 'Piet Proef')))[0]
 
-    expect(goals.map((goal) => [goal.minute, goal.ours, goal.player, goal.penalty, goal.stoppageMinutes])).toEqual([
+    expect(goals.map((goal) => [goal.minute, goal.ours, goal.sourceName, goal.penalty, goal.stoppageMinutes])).toEqual([
       [40, false, 'Voorbeeld', false, null],
       [42, true, 'Piet Proef', false, null],
       [58, false, 'Test', true, null],
@@ -194,7 +194,7 @@ describe('fillFromSeasonProgramme', () => {
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId: insertId, minute: 7, ours: true, ownGoal: false, penalty: false, player: 'Iemand Anders' })
+      .values({ matchId: insertId, minute: 7, ours: true, ownGoal: false, penalty: false, sourceName: 'Iemand Anders' })
     await insert({
       clubId: feyenoord,
       goalsAgainst: 0,
@@ -213,7 +213,7 @@ describe('fillFromSeasonProgramme', () => {
       { goalsAgainst: 1, goalsFor: 1 },
       { goalsAgainst: 0, goalsFor: 2 },
     ])
-    expect((await goalsOf(insertId)).map((goal) => goal.player)).toEqual(['Iemand Anders'])
+    expect((await goalsOf(insertId)).map((goal) => goal.sourceName)).toEqual(['Iemand Anders'])
     expect(report.lines.join('\n')).toContain('left as it is, the database has 2-0 and the programme 0-1')
   })
 

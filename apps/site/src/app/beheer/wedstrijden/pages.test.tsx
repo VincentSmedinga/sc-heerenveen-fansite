@@ -364,7 +364,9 @@ describe('the match', () => {
   it('shows the form with the values of the match, a label for every field and one button per goal that names it', async () => {
     const id = await addMatch({ competition: 'KNVB Beker', round: 'Tweede ronde' })
 
-    await database.db.insert(players).values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season })
+    await database.db
+      .insert(players)
+      .values({ position: 'aanvaller', searchTerm: 'oyen', season, sourceName: 'Luca Oyen' })
 
     const html = await form(id)
 
@@ -432,7 +434,9 @@ describe('the match', () => {
   it('names the goal in every field and button of it, and offers the squad', async () => {
     const id = await addMatch()
 
-    await database.db.insert(players).values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season })
+    await database.db
+      .insert(players)
+      .values({ position: 'aanvaller', searchTerm: 'oyen', season, sourceName: 'Luca Oyen' })
     await saveEntry(
       database.db,
       userId,
@@ -493,7 +497,9 @@ describe('the match', () => {
       wikipediaPage: null,
     })
 
-    await database.db.insert(players).values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season })
+    await database.db
+      .insert(players)
+      .values({ position: 'aanvaller', searchTerm: 'oyen', season, sourceName: 'Luca Oyen' })
     await saveEntry(
       database.db,
       userId,
@@ -767,7 +773,7 @@ describe('the match', () => {
           matchId: id,
           minute: 12,
           ours: true,
-          player: 'Van Bergen',
+          sourceName: 'Van Bergen',
         })
         await database.db.insert(matchChanges).values({
           changed: part,
@@ -958,7 +964,7 @@ describe('the match', () => {
 
       await database.db
         .insert(matchGoals)
-        .values({ matchId: id, minute: 12, ours: true, ownGoal: false, penalty: false, player: 'Hakim Ziyech' })
+        .values({ matchId: id, minute: 12, ours: true, ownGoal: false, penalty: false, sourceName: 'Hakim Ziyech' })
 
       const [inserted] = await database.db
         .insert(matchChanges)
@@ -1194,8 +1200,8 @@ describe('the parts of the form of a match (#1162)', () => {
     const id = await addMatch({ goalsAgainst: 0, goalsFor: 2, status: 'played' })
 
     await database.db.insert(matchGoals).values([
-      { matchId: id, minute: 12, ours: true, player: 'Hansen' },
-      { matchId: id, minute: 40, ours: true, player: '' },
+      { matchId: id, minute: 12, ours: true, sourceName: 'Hansen' },
+      { matchId: id, minute: 40, ours: true, sourceName: '' },
     ])
 
     expect(await partForm(id, 'doelpunten')).toContain(
@@ -1240,16 +1246,16 @@ describe('the report in the list and on the match', () => {
 
     await database.db.insert(players).values(
       squadOf(1).map((player) => ({
-        name: player.name,
         searchTerm: player.name,
         season,
         shirtNumber: player.shirtNumber,
+        sourceName: player.name,
       })),
     )
 
     const squad = (await database.db.select().from(players)).map((player) => ({
       id: player.id,
-      name: player.name,
+      name: player.sourceName,
       shirtNumber: player.shirtNumber,
     }))
     const checked = checkReportForm(reportOf(squad), {

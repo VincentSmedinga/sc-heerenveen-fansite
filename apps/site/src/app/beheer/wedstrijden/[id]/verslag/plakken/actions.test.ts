@@ -93,20 +93,20 @@ beforeEach(async () => {
   matchId = inserted?.id ?? 0
   await database.db.insert(players).values(
     squadOf(1).map((player) => ({
-      name: player.name,
       searchTerm: player.name,
       season: '2026/27',
       shirtNumber: player.shirtNumber,
+      sourceName: player.name,
     })),
   )
   squad = (await database.db.select().from(players).orderBy(asc(players.shirtNumber))).map((player) => ({
     id: player.id,
-    name: player.name,
+    name: player.sourceName,
     shirtNumber: player.shirtNumber,
   }))
   await database.db.insert(matchGoals).values([
-    { matchId, minute: 12, ours: true, player: 'Speler 9' },
-    { matchId, minute: 40, ours: false, player: 'Sibbing' },
+    { matchId, minute: 12, ours: true, sourceName: 'Speler 9' },
+    { matchId, minute: 40, ours: false, sourceName: 'Sibbing' },
   ])
 })
 

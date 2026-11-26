@@ -58,10 +58,10 @@ describe('the page of the persons without a line or a country', () => {
 
     await database.db.insert(players).values(
       ['2001/02', '2003/04'].map((season) => ({
-        name: 'Verzonnen Spits',
         personId: person?.id ?? 0,
         searchTerm: 'spits',
         season,
+        sourceName: 'Verzonnen Spits',
       })),
     )
 

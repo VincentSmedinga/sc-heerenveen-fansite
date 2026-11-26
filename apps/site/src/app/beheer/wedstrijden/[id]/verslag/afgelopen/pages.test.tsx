@@ -63,9 +63,9 @@ beforeEach(async () => {
   await database.db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'bezig' })
   // Two goals for us and one for N.E.C.
   await database.db.insert(matchGoals).values([
-    { matchId, minute: 12, ours: true, player: 'Speler 9' },
-    { matchId, minute: 40, ours: false, player: 'Sibbing' },
-    { matchId, minute: 77, ours: true, player: 'Speler 10' },
+    { matchId, minute: 12, ours: true, sourceName: 'Speler 9' },
+    { matchId, minute: 40, ours: false, sourceName: 'Sibbing' },
+    { matchId, minute: 77, ours: true, sourceName: 'Speler 10' },
   ])
 })
 

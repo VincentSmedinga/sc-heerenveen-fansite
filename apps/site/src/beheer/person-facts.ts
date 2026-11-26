@@ -26,7 +26,7 @@ export const personListLength = 50
 export const personFactsPath = `${playerQualityPath}/personen/snel`
 
 /** The name of a person in the list: the name, the title of the article or a player's name. */
-const listedName = sql<string>`COALESCE(${persons.name}, ${persons.wikipediaPage}, MAX(${players.name}), CONCAT('Persoon ', ${persons.id}))`
+const listedName = sql<string>`COALESCE(${persons.name}, ${persons.wikipediaPage}, MAX(${players.sourceName}), CONCAT('Persoon ', ${persons.id}))`
 
 /** The name of a person as the log shows it: the name, or else the title of the article. */
 const shownName = sql<string>`COALESCE(${persons.name}, ${persons.wikipediaPage}, CONCAT('Persoon ', ${persons.id}))`

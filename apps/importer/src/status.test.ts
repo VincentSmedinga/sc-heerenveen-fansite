@@ -237,8 +237,8 @@ describe('the overview', () => {
       .$returningId()) as [{ id: number }, { id: number }]
 
     await database.db.insert(players).values([
-      { name: 'Uğur Yıldırım', personId: a.id, searchTerm: 'Yıldırım', season: '2004/05' },
-      { name: 'Ugur Yildirim', personId: b.id, searchTerm: 'Yildirim', season: '2004/05' },
+      { personId: a.id, searchTerm: 'Yıldırım', season: '2004/05', sourceName: 'Uğur Yıldırım' },
+      { personId: b.id, searchTerm: 'Yildirim', season: '2004/05', sourceName: 'Ugur Yildirim' },
     ])
 
     try {
@@ -258,10 +258,10 @@ describe('the overview', () => {
     ]
 
     await database.db.insert(players).values([
-      { name: 'Een Speler', personId: id, searchTerm: 'Speler', season: '2018/19' },
-      { name: 'Zonder Een', searchTerm: 'Een', season: '2018/19' },
-      { name: 'Zonder Twee', searchTerm: 'Twee', season: '2018/19' },
-      { name: 'Met Persoon', personId: id, searchTerm: 'Persoon', season: '2020/21' },
+      { personId: id, searchTerm: 'Speler', season: '2018/19', sourceName: 'Een Speler' },
+      { searchTerm: 'Een', season: '2018/19', sourceName: 'Zonder Een' },
+      { searchTerm: 'Twee', season: '2018/19', sourceName: 'Zonder Twee' },
+      { personId: id, searchTerm: 'Persoon', season: '2020/21', sourceName: 'Met Persoon' },
     ])
 
     try {

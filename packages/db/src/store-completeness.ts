@@ -4,13 +4,21 @@
 // (#1040) calculate the row the same way. It reads the mark of the editors that the squad is
 // complete (#1675), so all of them agree on that too. A second calculation with nothing new
 // writes nothing.
-import { and, asc, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { PlayerSource, SquadCompletenessRow } from './schema.ts'
 import type { CompletenessScorer } from './squad-completeness.ts'
 
-import { matches, matchGoals, players, playerSources, squadCompleteMarks, squadCompleteness } from './schema.ts'
+import {
+  matches,
+  matchGoals,
+  persons,
+  players,
+  playerSources,
+  squadCompleteMarks,
+  squadCompleteness,
+} from './schema.ts'
 import { squadCompleteness as calculate, missingScorers, nameKey } from './squad-completeness.ts'
 
 /** What a calculation did to the row of a season. */
@@ -28,11 +36,22 @@ export type CompletenessTotals = { goalsTotal: null | number; matchesTotal: null
  */
 export async function findMissingScorers(db: Pick<Database, 'select'>, season: string): Promise<string[]> {
   const list = await db
-    .select({ name: players.name, personId: players.personId })
+    .select({ name: players.sourceName, personId: players.personId })
     .from(players)
     .where(eq(players.season, season))
 
-  return missingScorers(list, (await scorersOf(db, season)) ?? []).map((scorer) => scorer.name)
+  const missing = missingScorers(list, (await scorersOf(db, season)) ?? [])
+  const ids = missing.flatMap((scorer) => (scorer.personId === null ? [] : [scorer.personId]))
+  const named = new Map(
+    ids.length === 0
+      ? []
+      : (await db.select({ id: persons.id, name: persons.name }).from(persons).where(inArray(persons.id, ids))).map(
+          (person) => [person.id, person.name],
+        ),
+  )
+
+  // The list names a scorer as the pages do: by the person, and else as the source wrote him.
+  return missing.map((scorer) => (scorer.personId === null ? undefined : named.get(scorer.personId)) || scorer.name)
 }
 
 /**
@@ -51,7 +70,7 @@ export async function storeCompleteness(
 ): Promise<CompletenessChange> {
   const [was] = await db.select().from(squadCompleteness).where(eq(squadCompleteness.season, season))
   const list = await db
-    .select({ name: players.name, personId: players.personId, source: players.source })
+    .select({ name: players.sourceName, personId: players.personId, source: players.source })
     .from(players)
     .where(eq(players.season, season))
 
@@ -130,9 +149,9 @@ function sameOutcome(a: SquadCompletenessRow, b: SquadCompletenessRow): boolean 
 async function scorersOf(db: Pick<Database, 'select'>, season: string): Promise<CompletenessScorer[] | null> {
   const goals = await db
     .select({
-      name: matchGoals.player,
+      name: matchGoals.sourceName,
       personId: matchGoals.personId,
-      playerName: players.name,
+      playerName: players.sourceName,
       playerPersonId: players.personId,
     })
     .from(matchGoals)

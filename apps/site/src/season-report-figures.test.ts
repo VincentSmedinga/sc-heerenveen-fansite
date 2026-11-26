@@ -50,7 +50,7 @@ beforeEach(async () => {
 async function appearance(matchId: number, name: string, playerId: number, starter = true) {
   const [inserted] = await database.db
     .insert(matchAppearances)
-    .values({ matchId, name, ours: true, playerId, shirtNumber: playerId + 20, starter })
+    .values({ matchId, ours: true, playerId, shirtNumber: playerId + 20, sourceName: name, starter })
     .$returningId()
 
   return inserted!.id
@@ -96,7 +96,7 @@ async function aSeason() {
     .values({ appearanceId: b1, kind: 'geel', matchId: first, minute: 70, ours: true })
   await database.db
     .insert(matchGoals)
-    .values({ appearanceId: o1, assistAppearanceId: v1, matchId: first, minute: 12, ours: true, player: 'Oyen' })
+    .values({ appearanceId: o1, assistAppearanceId: v1, matchId: first, minute: 12, ours: true, sourceName: 'Oyen' })
 
   const o2 = await appearance(second, 'Luca Oyen', oyen)
 
@@ -109,7 +109,7 @@ async function aSeason() {
 
   await database.db
     .insert(matchGoals)
-    .values({ appearanceId: o3, matchId: third, minute: 5, ours: true, player: 'Oyen' })
+    .values({ appearanceId: o3, matchId: third, minute: 5, ours: true, sourceName: 'Oyen' })
 
   return { bank, fourth, oyen, reserve, vos }
 }
@@ -138,7 +138,7 @@ async function match(values: Partial<NewMatch>) {
 async function player(name: string, shirtNumber: number) {
   const [inserted] = await database.db
     .insert(players)
-    .values({ name, searchTerm: name, season, shirtNumber, source: 'selectie' })
+    .values({ searchTerm: name, season, shirtNumber, source: 'selectie', sourceName: name })
     .$returningId()
 
   return inserted!.id

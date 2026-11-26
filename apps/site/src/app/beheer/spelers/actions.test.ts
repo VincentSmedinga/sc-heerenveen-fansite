@@ -150,7 +150,7 @@ describe('submitAddPlayer', () => {
     expect(await add(form())).toEqual({ redirect: '/beheer/spelers?seizoen=2019-20&gedaan=toegevoegd' })
 
     expect(await stored()).toMatchObject([
-      { name: 'Pelle van Amersfoort', position: 'middenvelder', season, shirtNumber: 14, source: 'redactie' },
+      { position: 'middenvelder', season, shirtNumber: 14, source: 'redactie', sourceName: 'Pelle van Amersfoort' },
     ])
     expect(await database.db.select().from(persons)).toMatchObject([{ nameSource: 'redactie', wikipediaPage: null }])
     expect(await log()).toMatchObject([{ action: 'player.add', itemId: await firstId(), userId }])
@@ -160,7 +160,7 @@ describe('submitAddPlayer', () => {
     expect(await add(form(), season, matchId)).toEqual({
       redirect: `/beheer/wedstrijden/${matchId}?gedaan=speler-toegevoegd`,
     })
-    expect(await stored()).toMatchObject([{ name: 'Pelle van Amersfoort', season }])
+    expect(await stored()).toMatchObject([{ season, sourceName: 'Pelle van Amersfoort' }])
   })
 
   it('ends on the part Doelpunten of the match when the editor came from there (#1162)', async () => {
@@ -201,7 +201,7 @@ describe('submitAddPlayer', () => {
     expect(
       await add(form({ achternaam: '', persoon: String(insertId), tussenvoegsel: '', voornaam: '' })),
     ).toMatchObject({ redirect: expect.stringContaining('gedaan=toegevoegd') })
-    expect(await stored()).toMatchObject([{ name: 'Luca Oyen', personId: insertId, wikipediaPage: 'Luca Oyen' }])
+    expect(await stored()).toMatchObject([{ personId: insertId, sourceName: 'Luca Oyen', wikipediaPage: 'Luca Oyen' }])
     expect(await database.db.select().from(persons)).toHaveLength(1)
   })
 
@@ -300,7 +300,7 @@ describe('submitPlayer', () => {
     await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
     await database.db
       .insert(matchAppearances)
-      .values({ matchId, name: 'Pelle van Amersfoort', ours: true, playerId: id, shirtNumber: 14, starter: true })
+      .values({ matchId, ours: true, playerId: id, shirtNumber: 14, sourceName: 'Pelle van Amersfoort', starter: true })
 
     expect(await edit(id, form({ rugnummer: '9' }))).toMatchObject({
       errors: { rugnummervanaf: expect.stringContaining('Vul in vanaf welke dag') as string },
@@ -351,7 +351,7 @@ describe('submitRemovePlayer', () => {
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 12, ours: true, player: 'Van Amersfoort', playerId: id })
+      .values({ matchId, minute: 12, ours: true, playerId: id, sourceName: 'Van Amersfoort' })
 
     expect(await remove(id)).toEqual({ redirect: `/beheer/spelers/${id}?gedaan=blijft` })
     expect(await stored()).toMatchObject([{ inSquad: true }])
@@ -387,10 +387,10 @@ describe('submitMergePersons', () => {
       .values({ name: 'Nieuwe Naam', wikipediaPage: 'Nieuwe Naam' })
     const [{ insertId: first }] = await database.db
       .insert(players)
-      .values({ name: 'Oude Naam', personId: old, searchTerm: 'Naam', season: '2018/19' })
+      .values({ personId: old, searchTerm: 'Naam', season: '2018/19', sourceName: 'Oude Naam' })
     const [{ insertId: later }] = await database.db
       .insert(players)
-      .values({ name: 'Nieuwe Naam', personId: renamed, searchTerm: 'Naam', season })
+      .values({ personId: renamed, searchTerm: 'Naam', season, sourceName: 'Nieuwe Naam' })
 
     return { first, later, old, renamed }
   }
@@ -413,7 +413,7 @@ describe('submitMergePersons', () => {
     const { later, old, renamed } = await twoPersons()
     const [{ insertId: double }] = await database.db
       .insert(players)
-      .values({ name: 'Oude Naam', personId: old, searchTerm: 'Naam', season, source: 'doelpunten' })
+      .values({ personId: old, searchTerm: 'Naam', season, source: 'doelpunten', sourceName: 'Oude Naam' })
 
     expect(await merge(old, renamed, double)).toEqual({ redirect: `/beheer/spelers/${later}?gedaan=samengevoegd` })
     expect(await database.db.select().from(players).where(eq(players.id, double))).toEqual([])
@@ -524,7 +524,7 @@ describe('submitMarkSquad and submitUnmarkSquad (#1675)', () => {
         },
       ]),
     )
-    await database.db.insert(players).values({ name: 'Nu', searchTerm: 'Nu', season: seasonOf(new Date()) })
+    await database.db.insert(players).values({ searchTerm: 'Nu', season: seasonOf(new Date()), sourceName: 'Nu' })
 
     expect(await mark(refused)).toEqual({ redirect: '/beheer/spelers?fout=markeren' })
     expect(await marks()).toEqual([])

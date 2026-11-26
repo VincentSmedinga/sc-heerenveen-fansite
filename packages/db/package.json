@@ -32,6 +32,7 @@
     "./rating-window": "./src/rating-window.ts",
     "./prepare": "./src/prepare.ts",
     "./send-reminders": "./src/send-reminders.ts",
+    "./shown-name": "./src/shown-name.ts",
     "./club-merge": "./src/club-merge.ts",
     "./person-merge": "./src/person-merge.ts",
     "./person-slugs": "./src/person-slugs.ts",

@@ -43,10 +43,10 @@ function fake(answers: Record<string, TitleAnswer>): { asked: string[]; lookup: 
 
 const row = (season: string, name: string, extra: Partial<typeof players.$inferInsert> = {}) => ({
   inSquad: true,
-  name,
   searchTerm: name.split(' ').at(-1)!,
   season,
   source: 'verslag' as const,
+  sourceName: name,
   ...extra,
 })
 

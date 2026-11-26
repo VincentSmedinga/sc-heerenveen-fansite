@@ -51,7 +51,7 @@ const later = new Date('2026-11-10T10:00:00Z')
 async function player(name: string, shirtNumber: number) {
   const [inserted] = await database.db
     .insert(players)
-    .values({ name, searchTerm: name, season, shirtNumber, source: 'selectie' })
+    .values({ searchTerm: name, season, shirtNumber, source: 'selectie', sourceName: name })
     .$returningId()
 
   return inserted!.id
@@ -84,7 +84,7 @@ async function match(playerId: number, goals: number) {
   for (let minute = 1; minute <= goals; minute++) {
     await database.db
       .insert(matchGoals)
-      .values({ matchId: inserted!.id, minute, ours: true, player: 'Speler', playerId })
+      .values({ matchId: inserted!.id, minute, ours: true, playerId, sourceName: 'Speler' })
   }
 }
 

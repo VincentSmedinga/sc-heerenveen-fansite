@@ -56,7 +56,7 @@ async function match(day: number, status: 'bezig' | 'klaar' = 'klaar') {
 const appearance = async (matchId: number, values: Partial<typeof matchAppearances.$inferInsert> = {}) => {
   const [added] = await database.db
     .insert(matchAppearances)
-    .values({ matchId, name: 'De Vries', ours: false, personId, shirtNumber: 9, starter: true, ...values })
+    .values({ matchId, ours: false, personId, shirtNumber: 9, sourceName: 'De Vries', starter: true, ...values })
     .$returningId()
 
   return added?.id ?? 0
@@ -68,9 +68,9 @@ describe('readAgainstMatches (#1545)', () => {
     const row = await appearance(id)
 
     await database.db.insert(matchGoals).values([
-      { appearanceId: row, matchId: id, minute: 10, ours: false, player: 'De Vries' },
-      { appearanceId: row, matchId: id, minute: 20, ours: false, player: 'De Vries' },
-      { appearanceId: row, matchId: id, minute: 30, ours: true, ownGoal: true, player: 'De Vries' },
+      { appearanceId: row, matchId: id, minute: 10, ours: false, sourceName: 'De Vries' },
+      { appearanceId: row, matchId: id, minute: 20, ours: false, sourceName: 'De Vries' },
+      { appearanceId: row, matchId: id, minute: 30, ours: true, ownGoal: true, sourceName: 'De Vries' },
     ])
 
     expect(await readAgainstMatches(personId)).toMatchObject([

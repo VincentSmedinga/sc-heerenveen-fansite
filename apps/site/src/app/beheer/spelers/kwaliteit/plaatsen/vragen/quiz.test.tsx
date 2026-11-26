@@ -73,16 +73,16 @@ const eleven = (swap: Record<number, string> = {}) =>
 async function addMatch(starters: string[]) {
   const [row] = await withClubs(database.db, [{ ...base, round: String(++rounds) }])
   const [{ insertId }] = await database.db.insert(matches).values(row!)
-  const found = await database.db.select({ id: players.id, name: players.name }).from(players)
+  const found = await database.db.select({ id: players.id, name: players.sourceName }).from(players)
   const idOf = new Map(found.map((one) => [one.name, one.id]))
 
   await database.db.insert(matchReports).values({ formationOurs: '4-3-3', matchId: insertId, status: 'klaar' })
   await database.db.insert(matchAppearances).values(
     starters.map((name) => ({
       matchId: insertId,
-      name,
       ours: true,
       playerId: idOf.get(name) ?? null,
+      sourceName: name,
       starter: true,
     })),
   )
@@ -112,7 +112,7 @@ beforeEach(async () => {
     personIds[name] = insertId
     await database.db
       .insert(players)
-      .values({ name, personId: insertId, searchTerm: name, season: '2005/06', wikipediaPage: null })
+      .values({ personId: insertId, searchTerm: name, season: '2005/06', sourceName: name, wikipediaPage: null })
   }
 
   // Ten matches of the same line-up, one with players 2 and 3 swapped: everybody has ten
@@ -163,7 +163,9 @@ describe('the next question', () => {
       .from(players)
       .where(eq(players.id, playerId))) as [{ personId: number }]
 
-    await database.db.insert(players).values([{ name: 'Later', personId, searchTerm: 'Later', season: '2006/07' }])
+    await database.db
+      .insert(players)
+      .values([{ personId, searchTerm: 'Later', season: '2006/07', sourceName: 'Later' }])
 
     const next = await readNextQuestion(
       database.db,

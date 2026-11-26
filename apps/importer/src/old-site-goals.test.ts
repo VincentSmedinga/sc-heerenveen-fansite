@@ -348,7 +348,7 @@ describe('the steps spelers and doelpunten', () => {
     return { goals: goalsReport, players: playersReport }
   }
 
-  const playerRows = () => database.db.select().from(players).orderBy(asc(players.name))
+  const playerRows = () => database.db.select().from(players).orderBy(asc(players.sourceName))
 
   it('makes the players of ours with the source verslag, and nothing but a name', async () => {
     const { players: playersReport } = await run([oldMatch({ events: winGoals })])
@@ -356,8 +356,8 @@ describe('the steps spelers and doelpunten', () => {
 
     expect(playersReport).toMatchObject({ changed: 0, created: 2, skipped: 0, unchanged: 0 })
     expect(rows).toMatchObject([
-      { name: 'Jan Janssen', searchTerm: 'Janssen', season: '2001/02', source: 'verslag' },
-      { name: 'Joost van Aken', searchTerm: 'van Aken', season: '2001/02', source: 'verslag' },
+      { searchTerm: 'Janssen', season: '2001/02', source: 'verslag', sourceName: 'Jan Janssen' },
+      { searchTerm: 'van Aken', season: '2001/02', source: 'verslag', sourceName: 'Joost van Aken' },
     ])
     for (const row of rows) {
       expect(row).toMatchObject({
@@ -373,12 +373,12 @@ describe('the steps spelers and doelpunten', () => {
 
   it('uses a player that exists for the season and the name, from any source, and changes nothing of him', async () => {
     await database.db.insert(players).values({
-      name: 'Rene Hake',
       position: 'doelman',
       searchTerm: 'Hake',
       season: '2001/02',
       shirtNumber: 1,
       source: 'selectie',
+      sourceName: 'Rene Hake',
       wikipediaPage: 'René Hake',
     })
 
@@ -388,12 +388,12 @@ describe('the steps spelers and doelpunten', () => {
 
     expect(playersReport).toMatchObject({ created: 0, unchanged: 1 })
     expect(await playerRows()).toMatchObject([
-      { name: 'Rene Hake', position: 'doelman', shirtNumber: 1, source: 'selectie', wikipediaPage: 'René Hake' },
+      { position: 'doelman', shirtNumber: 1, source: 'selectie', sourceName: 'Rene Hake', wikipediaPage: 'René Hake' },
     ])
   })
 
   it('makes a player of a season he is not in yet, and puts a code without a row in the log', async () => {
-    await database.db.insert(players).values({ name: 'Jan Janssen', searchTerm: 'Janssen', season: '2000/01' })
+    await database.db.insert(players).values({ searchTerm: 'Janssen', season: '2000/01', sourceName: 'Jan Janssen' })
 
     const { players: playersReport } = await run([
       oldMatch({
@@ -403,7 +403,7 @@ describe('the steps spelers and doelpunten', () => {
       }),
     ])
 
-    expect((await playerRows()).map((row) => `${row.season} ${row.name}`)).toEqual([
+    expect((await playerRows()).map((row) => `${row.season} ${row.sourceName}`)).toEqual([
       '2001/02 Ivo Visser',
       '2000/01 Jan Janssen',
       '2001/02 Jan Janssen',
@@ -424,7 +424,7 @@ describe('the steps spelers and doelpunten', () => {
       }),
     ])
 
-    expect((await playerRows()).map((row) => row.name)).toEqual(['Jan Janssen'])
+    expect((await playerRows()).map((row) => row.sourceName)).toEqual(['Jan Janssen'])
   })
 
   it('makes the goals with the scorer of ours, and none for the opponent', async () => {
@@ -434,14 +434,14 @@ describe('the steps spelers and doelpunten', () => {
         result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 3, homeHalfTime: 1, note: null },
       }),
     ])
-    const ids = new Map((await playerRows()).map((row) => [row.name, row.id]))
+    const ids = new Map((await playerRows()).map((row) => [row.sourceName, row.id]))
 
     expect(goals).toMatchObject({ changed: 0, created: 4, skipped: 0, unchanged: 0 })
     expect(await goalRows()).toMatchObject([
-      { minute: 10, ours: true, ownGoal: false, player: 'Jan Janssen', playerId: ids.get('Jan Janssen') },
-      { minute: 30, ours: false, player: 'Piet Pietersen', playerId: null },
-      { minute: 80, ours: true, player: 'Joost van Aken', playerId: ids.get('Joost van Aken') },
-      { minute: 85, ours: true, ownGoal: true, player: 'Piet Pietersen', playerId: null },
+      { minute: 10, ours: true, ownGoal: false, playerId: ids.get('Jan Janssen'), sourceName: 'Jan Janssen' },
+      { minute: 30, ours: false, playerId: null, sourceName: 'Piet Pietersen' },
+      { minute: 80, ours: true, playerId: ids.get('Joost van Aken'), sourceName: 'Joost van Aken' },
+      { minute: 85, ours: true, ownGoal: true, playerId: null, sourceName: 'Piet Pietersen' },
     ])
     for (const row of await goalRows()) {
       expect(row).toMatchObject({ appearanceId: null, personId: null, stoppageMinutes: null, wikipediaPage: null })
@@ -457,7 +457,7 @@ describe('the steps spelers and doelpunten', () => {
 
     await database.db
       .insert(players)
-      .values({ name: 'Ronny Venema', searchTerm: 'Venema', season: '2001/02', source: 'selectie' })
+      .values({ searchTerm: 'Venema', season: '2001/02', source: 'selectie', sourceName: 'Ronny Venema' })
     await importOldSiteClubs(database.db, oldClubs)
     await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
 
@@ -466,7 +466,7 @@ describe('the steps spelers and doelpunten', () => {
 
     expect(report).toMatchObject({ created: 0, unchanged: 1 })
     expect(rows).toHaveLength(1)
-    expect(rows[0]).toMatchObject({ name: 'Ronny Venema', source: 'selectie' })
+    expect(rows[0]).toMatchObject({ source: 'selectie', sourceName: 'Ronny Venema' })
 
     await importOldSiteGoals(database.db, [match], list)
     expect((await goalRows()).filter((row) => row.ours).map((row) => row.playerId)).toEqual([rows[0]!.id, rows[0]!.id])
@@ -480,11 +480,11 @@ describe('the steps spelers and doelpunten', () => {
     })
     const ofEditors = {
       editorsFields: ['name', 'shirt_number'] as ('name' | 'shirt_number')[],
-      name: 'Ronny Venema',
       searchTerm: 'Venema',
       season: '2001/02',
       shirtNumber: 9,
       source: 'redactie' as const,
+      sourceName: 'Ronny Venema',
     }
 
     await database.db.insert(players).values(ofEditors)
@@ -532,23 +532,23 @@ describe('the steps spelers and doelpunten', () => {
     // The stale rows of an earlier run, next to the player of the squad. Hennie Meijer is a row
     // of the squad itself, so it is not stale, whatever its name.
     await database.db.insert(players).values([
-      { name: 'Ronnie Venema', searchTerm: 'Venema', season, source: 'verslag' },
-      { name: 'Ronny Venema', searchTerm: 'Venema', season, source: 'selectie' },
-      { name: 'Hennie Meijer', searchTerm: 'Meijer', season, source: 'selectie' },
-      { name: 'Henny Meijer', searchTerm: 'Meijer', season, source: 'verslag' },
-      { name: 'Ronnie Venema', searchTerm: 'Venema', season: '2002/03', source: 'verslag' },
+      { searchTerm: 'Venema', season, source: 'verslag', sourceName: 'Ronnie Venema' },
+      { searchTerm: 'Venema', season, source: 'selectie', sourceName: 'Ronny Venema' },
+      { searchTerm: 'Meijer', season, source: 'selectie', sourceName: 'Hennie Meijer' },
+      { searchTerm: 'Meijer', season, source: 'verslag', sourceName: 'Henny Meijer' },
+      { searchTerm: 'Venema', season: '2002/03', source: 'verslag', sourceName: 'Ronnie Venema' },
     ])
     await importOldSiteClubs(database.db, oldClubs)
     await importOldSiteMatches(database.db, both, oldClubs, await oldSiteClubIds(database.db, oldClubs))
 
-    const [stale] = await database.db.select().from(players).where(eq(players.name, 'Ronnie Venema'))
-    const [target] = await database.db.select().from(players).where(eq(players.name, 'Ronny Venema'))
+    const [stale] = await database.db.select().from(players).where(eq(players.sourceName, 'Ronnie Venema'))
+    const [target] = await database.db.select().from(players).where(eq(players.sourceName, 'Ronny Venema'))
     const [row, other] = await database.db.select().from(matches).orderBy(asc(matches.matchDate))
-    const ours = { name: 'Ronnie Venema', ours: true, starter: true }
+    const ours = { ours: true, sourceName: 'Ronnie Venema', starter: true }
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId: row!.id, minute: 10, ours: true, player: 'Ronnie Venema', playerId: stale!.id })
+      .values({ matchId: row!.id, minute: 10, ours: true, playerId: stale!.id, sourceName: 'Ronnie Venema' })
     await database.db.insert(matchReports).values([
       { matchId: row!.id, status: 'klaar' },
       { matchId: other!.id, status: 'klaar' },
@@ -558,7 +558,7 @@ describe('the steps spelers and doelpunten', () => {
     await database.db.insert(matchAppearances).values([
       { ...ours, matchId: row!.id, playerId: stale!.id },
       { ...ours, matchId: other!.id, playerId: stale!.id },
-      { ...ours, matchId: other!.id, name: 'Ronny Venema', playerId: target!.id },
+      { ...ours, matchId: other!.id, playerId: target!.id, sourceName: 'Ronny Venema' },
     ])
     // Eredivisie is in both rows, and the other row keeps its own numbers. The cup is in the
     // stale row only.
@@ -569,7 +569,7 @@ describe('the steps spelers and doelpunten', () => {
     ])
 
     const first = await importOldSitePlayers(database.db, both, list)
-    const names = (await playerRows()).map((one) => `${one.season} ${one.name} ${one.source}`)
+    const names = (await playerRows()).map((one) => `${one.season} ${one.sourceName} ${one.source}`)
 
     expect(first).toMatchObject({ changed: 1, created: 0 })
     expect(first.lines).toContain('Ronnie Venema (2001/02) is merged into Ronny Venema')
@@ -604,7 +604,7 @@ describe('the steps spelers and doelpunten', () => {
     const again = await importOldSitePlayers(database.db, both, list)
 
     expect(again).toMatchObject({ changed: 0, created: 0 })
-    expect((await playerRows()).map((one) => one.name)).toHaveLength(4)
+    expect((await playerRows()).map((one) => one.sourceName)).toHaveLength(4)
   })
 
   describe('one row for each person and season (#1639)', () => {
@@ -637,8 +637,14 @@ describe('the steps spelers and doelpunten', () => {
 
       // The season has the short name, another season has the spelling of the old fansite.
       await database.db.insert(players).values([
-        { name: 'Ken Ilsø', personId: id, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken' },
-        { name: 'Ken Ilsø Larsen', personId: id, searchTerm: 'Ilsø Larsen', season: '2002/03', source: 'transfers' },
+        { personId: id, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken', sourceName: 'Ken Ilsø' },
+        {
+          personId: id,
+          searchTerm: 'Ilsø Larsen',
+          season: '2002/03',
+          source: 'transfers',
+          sourceName: 'Ken Ilsø Larsen',
+        },
       ])
       await prepare()
 
@@ -647,7 +653,7 @@ describe('the steps spelers and doelpunten', () => {
 
       expect(first).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
       expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
-      expect((await playerRows()).map((row) => `${row.season} ${row.name}`)).toEqual([
+      expect((await playerRows()).map((row) => `${row.season} ${row.sourceName}`)).toEqual([
         '2001/02 Ken Ilsø',
         '2002/03 Ken Ilsø Larsen',
       ])
@@ -662,7 +668,7 @@ describe('the steps spelers and doelpunten', () => {
     it('finds the row under the spelling the owner chose, for a person without a name of that spelling', async () => {
       await database.db
         .insert(players)
-        .values({ name: 'Ger Schaap', searchTerm: 'Schaap', season: '2001/02', source: 'statistieken' })
+        .values({ searchTerm: 'Schaap', season: '2001/02', source: 'statistieken', sourceName: 'Ger Schaap' })
       await prepare()
 
       const schaap = {
@@ -683,8 +689,14 @@ describe('the steps spelers and doelpunten', () => {
       const made = await person('Ken Ilso Larsen', null)
 
       await database.db.insert(players).values([
-        { name: 'Ken Ilsø', personId: kept, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken' },
-        { name: 'Ken Ilso Larsen', personId: made, searchTerm: 'Ilso Larsen', season: '2001/02', source: 'verslag' },
+        { personId: kept, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken', sourceName: 'Ken Ilsø' },
+        {
+          personId: made,
+          searchTerm: 'Ilso Larsen',
+          season: '2001/02',
+          source: 'verslag',
+          sourceName: 'Ken Ilso Larsen',
+        },
       ])
       await prepare()
 
@@ -693,7 +705,7 @@ describe('the steps spelers and doelpunten', () => {
 
       expect(first.lines).toContain('Ken Ilso Larsen (2001/02) is merged into Ken Ilsø')
       expect(second).toMatchObject({ changed: 0, created: 0 })
-      expect(await playerRows()).toMatchObject([{ name: 'Ken Ilsø', personId: kept }])
+      expect(await playerRows()).toMatchObject([{ personId: kept, sourceName: 'Ken Ilsø' }])
       expect((await database.db.select().from(persons)).map((row) => row.id)).toEqual([kept])
     })
 
@@ -702,8 +714,14 @@ describe('the steps spelers and doelpunten', () => {
       const other = await person('Ken Ilso Larsen', 'Ken Ilso Larsen')
 
       await database.db.insert(players).values([
-        { name: 'Ken Ilsø', personId: kept, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken' },
-        { name: 'Ken Ilso Larsen', personId: other, searchTerm: 'Ilso Larsen', season: '2001/02', source: 'verslag' },
+        { personId: kept, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken', sourceName: 'Ken Ilsø' },
+        {
+          personId: other,
+          searchTerm: 'Ilso Larsen',
+          season: '2001/02',
+          source: 'verslag',
+          sourceName: 'Ken Ilso Larsen',
+        },
       ])
       await prepare()
       await importOldSitePlayers(database.db, [match()], [larsen])
@@ -742,26 +760,26 @@ describe('the steps spelers and doelpunten', () => {
     // run no longer makes a row of the chosen spelling to merge them into. Robert van
     // den Berg is in the squad of Wikipedia already, and the row of the squad stays.
     await database.db.insert(players).values([
-      { name: 'Radoslav Samardzic', searchTerm: 'Samardzic', season, source: 'verslag' },
-      { name: 'Ugur Yildirim', searchTerm: 'Yildirim', season, source: 'verslag' },
-      { name: 'Jan-Harm Schippers', searchTerm: 'Schippers', season, source: 'verslag' },
-      { name: 'Robert van der Berg', searchTerm: 'van der Berg', season, source: 'verslag' },
-      { name: 'Robert van den Berg', searchTerm: 'van den Berg', season, source: 'selectie' },
+      { searchTerm: 'Samardzic', season, source: 'verslag', sourceName: 'Radoslav Samardzic' },
+      { searchTerm: 'Yildirim', season, source: 'verslag', sourceName: 'Ugur Yildirim' },
+      { searchTerm: 'Schippers', season, source: 'verslag', sourceName: 'Jan-Harm Schippers' },
+      { searchTerm: 'van der Berg', season, source: 'verslag', sourceName: 'Robert van der Berg' },
+      { searchTerm: 'van den Berg', season, source: 'selectie', sourceName: 'Robert van den Berg' },
     ])
     await importOldSiteClubs(database.db, oldClubs)
     await importOldSiteMatches(database.db, [match], oldClubs, await oldSiteClubIds(database.db, oldClubs))
 
     const [row] = await database.db.select().from(matches)
     const before = await playerRows()
-    const idOf = (name: string) => before.find((one) => one.name === name)!.id
+    const idOf = (name: string) => before.find((one) => one.sourceName === name)!.id
 
     await database.db.insert(matchGoals).values(
       ['Radoslav Samardzic', 'Ugur Yildirim', 'Jan-Harm Schippers', 'Robert van der Berg'].map((player, index) => ({
         matchId: row!.id,
         minute: 10 + index,
         ours: true,
-        player,
         playerId: idOf(player),
+        sourceName: player,
       })),
     )
 
@@ -775,15 +793,15 @@ describe('the steps spelers and doelpunten', () => {
       'Jan-Harm Schippers (2001/02) is now Jan Harm Schippers',
       'Robert van der Berg (2001/02) is merged into Robert van den Berg',
     ])
-    expect(after.map((one) => `${one.name} | ${one.searchTerm} | ${one.source}`)).toEqual([
+    expect(after.map((one) => `${one.sourceName} | ${one.searchTerm} | ${one.source}`)).toEqual([
       'Jan Harm Schippers | Schippers | verslag',
       'Radoslav Samardžić | Samardžić | verslag',
       'Robert van den Berg | van den Berg | selectie',
       'Uğur Yıldırım | Yıldırım | verslag',
     ])
     // The renamed row keeps its `id`, and every goal has a player still.
-    expect(after.find((one) => one.name === 'Radoslav Samardžić')!.id).toBe(idOf('Radoslav Samardzic'))
-    expect((await goalRows()).map((one) => after.find((player) => player.id === one.playerId)?.name)).toEqual([
+    expect(after.find((one) => one.sourceName === 'Radoslav Samardžić')!.id).toBe(idOf('Radoslav Samardzic'))
+    expect((await goalRows()).map((one) => after.find((player) => player.id === one.playerId)?.sourceName)).toEqual([
       'Radoslav Samardžić',
       'Uğur Yıldırım',
       'Jan Harm Schippers',
@@ -811,7 +829,7 @@ describe('the steps spelers and doelpunten', () => {
 
     const [own] = await goalRows()
 
-    expect(own).toMatchObject({ ours: false, ownGoal: true, penalty: false, player: 'Jan Janssen' })
+    expect(own).toMatchObject({ ours: false, ownGoal: true, penalty: false, sourceName: 'Jan Janssen' })
     expect(own?.playerId).not.toBeNull()
   })
 
@@ -850,12 +868,12 @@ describe('the steps spelers and doelpunten', () => {
       ours: true,
       ownGoal: false,
       penalty: false,
-      player: 'Iemand Anders',
+      sourceName: 'Iemand Anders',
     })
 
     const { lines } = await importOldSiteGoals(database.db, [empty], oldPlayers)
 
-    expect((await goalRows()).map((row) => row.player)).toEqual(['Iemand Anders'])
+    expect((await goalRows()).map((row) => row.sourceName)).toEqual(['Iemand Anders'])
     expect(await changeRows()).toHaveLength(0)
     expect(lines.join('\n')).not.toContain('goals removed')
   })
@@ -940,7 +958,7 @@ describe('the steps spelers and doelpunten', () => {
     const { goals } = await run(list)
     const kept = await changeRows()
     const line = "10' Jan Janssen, 30' Piet Pietersen (tegenstander), 80' Joost van Aken"
-    const fields = before.map((goal) => ({ minute: goal.minute, player: goal.player, playerId: goal.playerId }))
+    const fields = before.map((goal) => ({ minute: goal.minute, player: goal.sourceName, playerId: goal.playerId }))
 
     expect(await goalRows()).toHaveLength(0)
     expect(goals.lines).toEqual([
@@ -1005,7 +1023,7 @@ describe('the steps spelers and doelpunten', () => {
 
     await run(list)
     await database.db.update(matchChanges).set({ resolution: 'person', status: 'rejected' })
-    await database.db.insert(matchGoals).values({ matchId, minute: 10, ours: true, player: 'Jan Janssen' })
+    await database.db.insert(matchGoals).values({ matchId, minute: 10, ours: true, sourceName: 'Jan Janssen' })
     await run(list)
 
     expect((await changeRows()).map((change) => change.status)).toEqual(['rejected', 'pending'])
@@ -1118,13 +1136,13 @@ describe('the steps spelers and doelpunten', () => {
     })
     await database.db.insert(matchReports).values({ matchId: reported!.id, savedBy: adminId, status: 'bezig' })
     await database.db.update(matches).set({ dataSource: 'wikipedia' }).where(eq(matches.id, other!.id))
-    await database.db.insert(matchGoals).values({ matchId: edited!.id, minute: 1, ours: true, player: 'Handmatig' })
+    await database.db.insert(matchGoals).values({ matchId: edited!.id, minute: 1, ours: true, sourceName: 'Handmatig' })
     await importOldSitePlayers(database.db, list, oldPlayers)
 
     const report = await importOldSiteGoals(database.db, list, oldPlayers)
 
     expect(report).toMatchObject({ changed: 0, created: 0, skipped: 3 })
-    expect(await goalRows()).toMatchObject([{ matchId: edited!.id, player: 'Handmatig' }])
+    expect(await goalRows()).toMatchObject([{ matchId: edited!.id, sourceName: 'Handmatig' }])
   })
 
   it('makes a goal list for a match with a report that has no editor yet', async () => {

@@ -5,12 +5,12 @@ import type { LinkableGoal, LinkablePlayer } from './link-players.ts'
 import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 
 const squad: LinkablePlayer[] = [
-  { id: 1, name: 'Luca Oyen', wikipediaPage: 'Luca Oyen' },
-  { id: 2, name: 'Jacob Trenskow', wikipediaPage: 'Jacob Trenskow' },
-  { id: 3, name: 'Jan Paul van Hecke', wikipediaPage: 'Jan Paul van Hecke' },
-  { id: 4, name: 'Roberts Uldrikis', wikipediaPage: 'Roberts Uldriķis' },
-  { id: 5, name: 'Pim Verbeek', wikipediaPage: 'Pim Verbeek (voetballer, 1999)' },
-  { id: 6, name: 'Dinho', wikipediaPage: null },
+  { id: 1, sourceName: 'Luca Oyen', wikipediaPage: 'Luca Oyen' },
+  { id: 2, sourceName: 'Jacob Trenskow', wikipediaPage: 'Jacob Trenskow' },
+  { id: 3, sourceName: 'Jan Paul van Hecke', wikipediaPage: 'Jan Paul van Hecke' },
+  { id: 4, sourceName: 'Roberts Uldrikis', wikipediaPage: 'Roberts Uldriķis' },
+  { id: 5, sourceName: 'Pim Verbeek', wikipediaPage: 'Pim Verbeek (voetballer, 1999)' },
+  { id: 6, sourceName: 'Dinho', wikipediaPage: null },
 ]
 
 const goal = (player: string, playerPage: null | string = null, rest: Partial<LinkableGoal> = {}): LinkableGoal => ({
@@ -19,6 +19,19 @@ const goal = (player: string, playerPage: null | string = null, rest: Partial<Li
   player,
   playerPage,
   ...rest,
+})
+
+describe('a player whose person has another name (#1697)', () => {
+  const link = playerLinker([
+    { id: 1, name: 'Jan Nieuwman', sourceName: 'Jan Oudman', wikipediaPage: null },
+    { id: 2, name: 'Piet Proef', sourceName: 'Piet Proef', wikipediaPage: null },
+  ])
+  const goal = (player: string) => ({ ours: true, ownGoal: false, player, playerPage: null })
+
+  it('is found by the name of the source and by the name of the person, whole or surname', () => {
+    expect(['Jan Oudman', 'Oudman', 'Jan Nieuwman', 'Nieuwman'].map((name) => link(goal(name)))).toEqual([1, 1, 1, 1])
+    expect(link(goal('Proef'))).toBe(2)
+  })
 })
 
 describe('the goals of our players', () => {
@@ -37,10 +50,10 @@ describe('linking a goal to a player', () => {
 
   describe('0. by the person of the link', () => {
     const withPersons = playerLinker([
-      { id: 1, name: 'Alfreð Finnbogason', personId: 10, wikipediaPage: 'Alfreð Finnbogason' },
-      { id: 2, name: 'Filip Đuričić', personId: 20, wikipediaPage: 'Filip Đuričić' },
-      { id: 3, name: 'Bram Jansen', personId: 30, wikipediaPage: 'Bram Jansen' },
-      { id: 4, name: 'Bram Jansen Junior', personId: 30, wikipediaPage: 'Bram Jansen (2)' },
+      { id: 1, personId: 10, sourceName: 'Alfreð Finnbogason', wikipediaPage: 'Alfreð Finnbogason' },
+      { id: 2, personId: 20, sourceName: 'Filip Đuričić', wikipediaPage: 'Filip Đuričić' },
+      { id: 3, personId: 30, sourceName: 'Bram Jansen', wikipediaPage: 'Bram Jansen' },
+      { id: 4, personId: 30, sourceName: 'Bram Jansen Junior', wikipediaPage: 'Bram Jansen (2)' },
     ])
 
     it('finds the player whose person the goal has, when the title is a redirect to his page', () => {
@@ -127,8 +140,8 @@ describe('linking a goal to a player', () => {
     it('does not guess when two players have the surname, not even when one has left the squad', () => {
       const twins = playerLinker([
         ...squad,
-        { id: 7, name: 'Bram Jansen', wikipediaPage: 'Bram Jansen' },
-        { id: 8, name: 'Kees Jansen', wikipediaPage: null },
+        { id: 7, sourceName: 'Bram Jansen', wikipediaPage: 'Bram Jansen' },
+        { id: 8, sourceName: 'Kees Jansen', wikipediaPage: null },
       ])
 
       expect(twins(goal('Jansen'))).toBeNull()
@@ -137,8 +150,8 @@ describe('linking a goal to a player', () => {
 
     it('still links two players with the same surname by their pages or their full names', () => {
       const twins = playerLinker([
-        { id: 7, name: 'Bram Jansen', wikipediaPage: 'Bram Jansen' },
-        { id: 8, name: 'Kees Jansen', wikipediaPage: 'Kees Jansen' },
+        { id: 7, sourceName: 'Bram Jansen', wikipediaPage: 'Bram Jansen' },
+        { id: 8, sourceName: 'Kees Jansen', wikipediaPage: 'Kees Jansen' },
       ])
 
       expect(twins(goal('Jansen', 'Bram Jansen'))).toBe(7)

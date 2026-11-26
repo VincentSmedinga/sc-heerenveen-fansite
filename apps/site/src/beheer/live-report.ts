@@ -3,7 +3,7 @@ import type { StoredMatchReport } from '@fansite/db/match-reports'
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
 import { recordAction } from '@fansite/db/audit-log'
-import { mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
+import { mayHaveReport, readMatchReport, type ReportGoal, selectReportGoals } from '@fansite/db/match-reports'
 import { matchCards, matches, matchGoals, matchReports, matchSubstitutions } from '@fansite/db/schema'
 import { storeCompleteness } from '@fansite/db/store-completeness'
 import { asc, eq } from 'drizzle-orm'
@@ -228,9 +228,9 @@ export async function addLiveEvent(
           ownGoal: row.soort === 'eigen',
           penalty: row.soort === 'strafschop',
           personId: squadRow?.personId ?? null,
-          player: scorer?.name ?? row.naam ?? '',
           // Only a player of ours has a row in `players`.
           playerId: scorer?.ours === true ? scorer.playerId : null,
+          sourceName: scorer?.sourceName ?? row.naam ?? '',
           stoppageMinutes: clock.stoppageMinutes,
           wikipediaPage: squadRow?.wikipediaPage ?? null,
         })
@@ -319,7 +319,7 @@ export async function removeLiveEvent(
         }
 
         await transaction.delete(matchGoals).where(eq(matchGoals.id, eventId))
-        described = describeEvent('doelpunt', clockOf(goal), goal.player, goal.ownGoal ? 'eigen doelpunt' : undefined)
+        described = describeEvent('doelpunt', clockOf(goal), goal.name, goal.ownGoal ? 'eigen doelpunt' : undefined)
       } else if (kind === 'kaart') {
         const card = stored.cards.find((candidate) => candidate.id === eventId)
 
@@ -421,7 +421,7 @@ export function describeMinute(moment: { minute: null | number; stoppageMinutes:
  * The players for the lists and the events for the overview, the last event first. A goal
  * counts for the team that scored it, an own goal for the other one included.
  */
-export function liveViewOf(stored: StoredMatchReport, goals: readonly MatchGoal[]): LiveView {
+export function liveViewOf(stored: StoredMatchReport, goals: readonly ReportGoal[]): LiveView {
   const cameOn = new Set(stored.substitutions.map((substitution) => substitution.appearanceInId))
   const wentOff = new Set(stored.substitutions.map((substitution) => substitution.appearanceOutId))
   const nameOf = (id: null | number) => stored.appearances.find((appearance) => appearance.id === id)?.name ?? ''
@@ -435,7 +435,7 @@ export function liveViewOf(stored: StoredMatchReport, goals: readonly MatchGoal[
       row: {
         id: goal.id,
         kind: 'doelpunt',
-        text: describeEvent('doelpunt', goal, goal.player, goal.ownGoal ? 'eigen doelpunt' : undefined),
+        text: describeEvent('doelpunt', goal, goal.name, goal.ownGoal ? 'eigen doelpunt' : undefined),
       },
     })
   }
@@ -542,8 +542,8 @@ function liveErrorsOf(errors: ReportErrors, kind: LiveKind, side: Side, number: 
 }
 
 /** The goals of a match in the order of the table, as the report screen has them. */
-async function readGoals(db: Pick<Database, 'select'>, matchId: number): Promise<MatchGoal[]> {
-  return db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId)).orderBy(asc(matchGoals.id))
+async function readGoals(db: Pick<Database, 'select'>, matchId: number): Promise<ReportGoal[]> {
+  return selectReportGoals(db).where(eq(matchGoals.matchId, matchId)).orderBy(asc(matchGoals.id))
 }
 
 /**

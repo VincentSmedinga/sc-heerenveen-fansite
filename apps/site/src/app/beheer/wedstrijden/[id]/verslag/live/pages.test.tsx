@@ -67,13 +67,13 @@ beforeEach(async () => {
 async function addReport() {
   await database.db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'bezig' })
   await database.db.insert(matchAppearances).values([
-    { captain: false, matchId, name: 'Speler 9', ours: true, shirtNumber: 9, starter: true },
-    { captain: false, matchId, name: 'Speler 12', ours: true, shirtNumber: 12, starter: false },
-    { captain: false, matchId, name: 'Sibbing', ours: false, shirtNumber: 7, starter: true },
+    { captain: false, matchId, ours: true, shirtNumber: 9, sourceName: 'Speler 9', starter: true },
+    { captain: false, matchId, ours: true, shirtNumber: 12, sourceName: 'Speler 12', starter: false },
+    { captain: false, matchId, ours: false, shirtNumber: 7, sourceName: 'Sibbing', starter: true },
   ])
   await database.db.insert(matchGoals).values([
-    { matchId, minute: 12, ours: true, player: 'Speler 9' },
-    { matchId, minute: 40, ours: false, player: 'Sibbing' },
+    { matchId, minute: 12, ours: true, sourceName: 'Speler 9' },
+    { matchId, minute: 40, ours: false, sourceName: 'Sibbing' },
   ])
 }
 

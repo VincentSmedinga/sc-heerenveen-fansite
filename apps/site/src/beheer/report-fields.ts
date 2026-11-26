@@ -91,6 +91,11 @@ export type ReportSquadPlayer = {
   /** The surname the search page looks for (`players.search_term`), such as `van Aken`. */
   searchTerm?: string
   shirtNumber: null | number
+  /**
+   * The name of the source on his row, which a typed or pasted name may use too. Left out
+   * where it is not known, such as in a test.
+   */
+  sourceName?: string
 }
 
 /** What an editor filled in for a report, as text. */

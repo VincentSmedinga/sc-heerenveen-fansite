@@ -3,6 +3,7 @@ import { and, asc, eq } from 'drizzle-orm'
 import type { Database } from './client.ts'
 
 import { clubSquadPlayers, matchAppearances, matches } from './schema.ts'
+import { shownAppearanceName, shownClubPlayerName } from './shown-name.ts'
 
 /**
  * The names a form offers for a player of this club (#1542): first the squad of the club
@@ -13,17 +14,16 @@ import { clubSquadPlayers, matchAppearances, matches } from './schema.ts'
  */
 export async function readOpponentNames(db: Pick<Database, 'select'>, clubId: number): Promise<string[]> {
   const squad = await db
-    .select({ name: clubSquadPlayers.name })
+    .select({ name: shownClubPlayerName() })
     .from(clubSquadPlayers)
     .where(eq(clubSquadPlayers.clubId, clubId))
-    .orderBy(asc(clubSquadPlayers.shirtNumber), asc(clubSquadPlayers.name))
+    .orderBy(asc(clubSquadPlayers.shirtNumber), asc(shownClubPlayerName()))
   const earlier = await db
-    .select({ name: matchAppearances.name })
+    .select({ name: shownAppearanceName() })
     .from(matchAppearances)
     .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
     .where(and(eq(matches.clubId, clubId), eq(matchAppearances.ours, false)))
-    .groupBy(matchAppearances.name)
-    .orderBy(asc(matchAppearances.name))
+    .orderBy(asc(shownAppearanceName()))
   const seen = new Set<string>()
   const names: string[] = []
 

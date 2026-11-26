@@ -120,7 +120,7 @@ describe('the squad of a club we meet', () => {
 
     const rows = await database.db
       .select({
-        name: clubSquadPlayers.name,
+        name: clubSquadPlayers.sourceName,
         person: clubSquadPlayers.personId,
         position: clubSquadPlayers.position,
         readAt: clubSquadPlayers.readAt,
@@ -196,7 +196,7 @@ describe('the squad of a club we meet', () => {
       .where(eq(clubSquadPlayers.clubId, clubId))
       .orderBy(asc(clubSquadPlayers.id))
 
-    expect(rows.map((row) => [row.name, row.shirtNumber])).toEqual([
+    expect(rows.map((row) => [row.sourceName, row.shirtNumber])).toEqual([
       ['Karel Doelman', 1],
       ['Jonas Stopper', 5],
       ['Max Zonderartikel', 8],

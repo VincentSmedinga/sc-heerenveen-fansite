@@ -32,8 +32,9 @@ import {
   playerSeasonStats,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { type NamedPlayer, readNamedPlayers, shownPlayerName, shownSearchTerm } from '@fansite/db/shown-name'
 import { storeCompleteness } from '@fansite/db/store-completeness'
-import { and, asc, count, eq, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
+import { and, asc, count, eq, getTableColumns, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
 import { splitPersonName } from '../player-name'
 import { adminFailure } from './failure'
@@ -70,11 +71,13 @@ export type AdminPlayer = {
         | 'wikipediaPage'
       >
     | undefined
-  player: Player
+  /** The row, with the name we show for it (`name`, the name of the person). */
+  player: NamedPlayer
 }
 
 /** A player as the list of a season shows him. */
-export type AdminPlayerRow = Pick<Player, 'id' | 'inSquad' | 'name' | 'position' | 'shirtNumber' | 'source'> & {
+export type AdminPlayerRow = Pick<Player, 'id' | 'inSquad' | 'position' | 'shirtNumber' | 'source'> & {
+  name: string
   /** The line of his person, shown when the season has no position. Null for none. */
   personLine: null | PlayerPosition
 }
@@ -180,7 +183,7 @@ export function doubleShirtNumbers(
 
 /** The player with this number, with his person and what holds him in the squad. */
 export async function findAdminPlayer(db: Pick<Database, 'select'>, id: number): Promise<AdminPlayer | undefined> {
-  const [player] = await db.select().from(players).where(eq(players.id, id))
+  const [player] = await readNamedPlayers(db, eq(players.id, id))
 
   if (player === undefined) {
     return undefined
@@ -200,7 +203,7 @@ export async function listAdminPlayers(db: Pick<Database, 'select'>, season: str
     .select({
       id: players.id,
       inSquad: players.inSquad,
-      name: players.name,
+      name: shownPlayerName(),
       personLine: persons.line,
       position: players.position,
       shirtNumber: players.shirtNumber,
@@ -212,8 +215,8 @@ export async function listAdminPlayers(db: Pick<Database, 'select'>, season: str
     .orderBy(
       asc(sql`${players.shirtNumber} is null`),
       asc(players.shirtNumber),
-      asc(players.searchTerm),
-      asc(players.name),
+      asc(shownSearchTerm()),
+      asc(shownPlayerName()),
     )
 }
 
@@ -232,7 +235,7 @@ export async function listPlayerSeasons(db: Database, now = new Date()): Promise
  * The words of the surname that start with a small letter (`van der`) are the prefix.
  */
 export function nameValuesOf(
-  player: Pick<Player, 'name'>,
+  player: { name: string },
   person: Pick<Person, 'familyName' | 'familyNamePrefix' | 'givenName'> | undefined,
 ): Pick<PlayerValues, 'achternaam' | 'tussenvoegsel' | 'voornaam'> {
   if (person !== undefined && person.familyName !== null) {
@@ -292,8 +295,10 @@ export function readPlayerValues(formData: FormData): PlayerValues {
 }
 
 /**
- * The persons that fit the search, which is a part of the name or of the title of the article:
- * capitals and accents make no difference, and the words may be anywhere. At most
+ * The persons that fit the search, which is a part of the name, of the title of the article or
+ * of a name a source wrote on a row of his (in a squad, a line-up or a goal, such as an old
+ * spelling): capitals and accents make no difference, and the words may be anywhere in the name
+ * and title, or all in one name of a source. A result shows the name of the person. At most
  * `mostPersonChoices`, by name. Each says in which seasons the person is a player and, when it
  * differs from the name, the title of the article, so two persons of one name can be told
  * apart. An empty search finds nobody. With `forSeason`, the season a player is added to, each
@@ -301,7 +306,7 @@ export function readPlayerValues(formData: FormData): PlayerValues {
  * is still in the squad of `forSeason` has that number (issue 1076).
  */
 export async function searchPersons(
-  db: Pick<Database, 'select'>,
+  db: Pick<Database, 'select' | 'selectDistinct'>,
   search: string,
   forSeason?: string,
 ): Promise<PersonChoice[]> {
@@ -312,9 +317,14 @@ export async function searchPersons(
   }
 
   const all = await db.select({ id: persons.id, name: persons.name, page: persons.wikipediaPage }).from(persons)
+  const written = await sourceNamesByPerson(db)
   const found = all
     .map((person) => ({ ...person, shown: person.name ?? person.page ?? '' }))
-    .filter((person) => words.every((word) => plain(`${person.name ?? ''} ${person.page ?? ''}`).includes(word)))
+    .filter((person) =>
+      [`${person.name ?? ''} ${person.page ?? ''}`, ...(written.get(person.id) ?? [])].some((text) =>
+        words.every((word) => plain(text).includes(word)),
+      ),
+    )
     .sort((a, b) => a.shown.localeCompare(b.shown, 'nl') || a.id - b.id)
     .slice(0, mostPersonChoices)
 
@@ -464,7 +474,7 @@ export function validatePlayer(
 
 /** The sentence for a person, a name or a title that the season already has. */
 function alreadyThere(
-  same: Pick<Player, 'name' | 'personId' | 'wikipediaPage'>,
+  same: Pick<NamedPlayer, 'name' | 'personId' | 'wikipediaPage'>,
   wanted: { name: string; page: null | string; personId: null | number },
   season: string,
 ) {
@@ -475,7 +485,10 @@ function alreadyThere(
     return `Het seizoen ${season} heeft al een speler met deze Wikipedia-pagina: ${same.name}. Pas die speler aan.`
   }
 
-  return `Het seizoen ${season} heeft al een speler met de naam ${same.name}. Pas die speler aan, of geef deze een andere naam.`
+  // The name of the source on that row may differ from the name we show for it.
+  const now = same.name.toLocaleLowerCase('nl') === wanted.name.toLocaleLowerCase('nl') ? '' : `, nu ${same.name}`
+
+  return `Het seizoen ${season} heeft al een speler met de naam ${wanted.name}${now}. Pas die speler aan, of geef deze een andere naam.`
 }
 
 async function findPerson(db: Pick<Database, 'select'>, id: number) {
@@ -558,6 +571,15 @@ async function personOfNewPage(
   return person.id
 }
 
+/** The row of a player with the name we show, locked until the transaction ends. */
+function readForUpdate(transaction: Transaction, id: number): Promise<NamedPlayer[]> {
+  return transaction
+    .select({ ...getTableColumns(players), name: shownPlayerName() })
+    .from(players)
+    .where(eq(players.id, id))
+    .for('update')
+}
+
 /** The season before a season: `2026/27` is preceded by `2025/26`. */
 function seasonBefore(season: string) {
   const year = Number(season.slice(0, 4)) - 1
@@ -565,12 +587,42 @@ function seasonBefore(season: string) {
   return `${year}/${String(year + 1).slice(2)}`
 }
 
+/** The names the sources wrote on the rows of each person: squads, line-ups and goals. */
+async function sourceNamesByPerson(db: Pick<Database, 'select' | 'selectDistinct'>): Promise<Map<number, string[]>> {
+  const rows = await Promise.all([
+    db.select({ name: players.sourceName, personId: players.personId }).from(players),
+    db
+      .selectDistinct({
+        name: matchAppearances.sourceName,
+        personId: sql<null | number>`coalesce(${players.personId}, ${matchAppearances.personId})`,
+      })
+      .from(matchAppearances)
+      .leftJoin(players, eq(players.id, matchAppearances.playerId)),
+    db
+      .selectDistinct({
+        name: matchGoals.sourceName,
+        personId: sql<null | number>`coalesce(${matchGoals.personId}, ${players.personId})`,
+      })
+      .from(matchGoals)
+      .leftJoin(players, eq(players.id, matchGoals.playerId)),
+  ])
+  const names = new Map<number, string[]>()
+
+  for (const { name, personId } of rows.flat()) {
+    if (personId !== null) {
+      names.set(Number(personId), [...(names.get(Number(personId)) ?? []), name])
+    }
+  }
+
+  return names
+}
+
 /**
  * Adds a player to the squad of a season, with the source `redactie`. The person is the one
  * the editor chose, or the person of the title, or a new one (`findOrAddEditorsPerson`). A
  * person, a name or a title the season already has is refused. Writes `player.add`, so there is
- * no player without a row and no row without a player. The name and every field the editor
- * filled in are the editors' from then on (`players.editors_fields`, issue 1022): the importer
+ * no player without a row and no row without a player. Every field the editor filled
+ * in is the editors' from then on (`players.editors_fields`, issue 1022): the importer
  * leaves them alone and fills in the rest. A line or a country the editor chose goes to the
  * person, with the source `manual` (#1051); an empty one leaves the person as he is, because
  * the form does not show what a person we know has.
@@ -613,14 +665,14 @@ async function storePlayer(
 
       const page = person.wikipediaPage
       const [same] = await transaction
-        .select({ name: players.name, personId: players.personId, wikipediaPage: players.wikipediaPage })
+        .select({ name: shownPlayerName(), personId: players.personId, wikipediaPage: players.wikipediaPage })
         .from(players)
         .where(
           and(
             eq(players.season, season),
             or(
               eq(players.personId, personId),
-              eq(players.name, name),
+              eq(players.sourceName, name),
               page === null ? undefined : eq(players.wikipediaPage, page),
             ),
           ),
@@ -638,12 +690,10 @@ async function storePlayer(
 
       const [{ insertId }] = await transaction.insert(players).values({
         editorsFields: [
-          'name',
           ...(entry.shirtNumber === null ? [] : (['shirt_number'] as const)),
           ...(entry.position === null ? [] : (['position'] as const)),
           ...(page === null ? [] : (['wikipedia_page'] as const)),
         ],
-        name,
         personId,
         position: entry.position,
         previousShirtNumber: entry.previousShirtNumber,
@@ -652,6 +702,7 @@ async function storePlayer(
         shirtNumber: entry.shirtNumber,
         shirtNumberFrom: entry.shirtNumberFrom,
         source: 'redactie',
+        sourceName: name,
         wikipediaPage: page,
       })
 
@@ -701,17 +752,18 @@ async function storePlayer(
 
 /**
  * Changes a player: the name, the shirt number, the line and the title. A name the editor
- * changed goes to the person too, with the source `redactie`, so it changes in every season. A
- * new title gives a person without one his title, and gives a player without a person the
- * person of the title; a title that belongs to another person is refused, and the outcome names
- * the two persons, because joining them is done on a page of its own (issue 977). The goals of
- * a player who gets a person get it too. Writes `player.edit` with what changed, and nothing
- * for a save that changes nothing. Each field that changed is the editors' from then on
- * (`players.editors_fields`, issue 1022), so the importer leaves it alone. A line or a country
- * that differs from what his person has goes to the person (#1051): a value with the source
- * `manual`, and an empty one takes it away, so the importer fills it in again. That is so only
- * for the person the form showed: a player without a person, or one who gets another person in
- * this save, keeps what that person has.
+ * changed goes to the person only, with the source `redactie`, so it changes in every season
+ * and every line-up; the rows keep the name of their source (#1697). A player without a person
+ * gets one for it. A new title gives a person without one his title, and gives a player
+ * without a person the person of the title; a title that belongs to another person is refused,
+ * and the outcome names the two persons, because joining them is done on a page of its own
+ * (issue 977). The goals of a player who gets a person get it too. Writes `player.edit` with
+ * what changed, and nothing for a save that changes nothing. Each field that changed is the
+ * editors' from then on (`players.editors_fields`, issue 1022), so the importer leaves it
+ * alone. A line or a country that differs from what his person has goes to the person (#1051):
+ * a value with the source `manual`, and an empty one takes it away, so the importer fills it
+ * in again. That is so only for the person the form showed: a player without a person, or one
+ * who gets another person in this save, keeps what that person has.
  */
 async function storePlayerEdit(
   db: Database,
@@ -722,7 +774,7 @@ async function storePlayerEdit(
 ): Promise<EditPlayerOutcome> {
   try {
     return await db.transaction(async (transaction) => {
-      const [player] = await transaction.select().from(players).where(eq(players.id, id)).for('update')
+      const [player] = await readForUpdate(transaction, id)
 
       if (player === undefined) {
         return { status: 'missing' } as const
@@ -747,29 +799,26 @@ async function storePlayerEdit(
         })
       }
 
-      const [same] = await transaction
-        .select({ name: players.name, personId: players.personId, wikipediaPage: players.wikipediaPage })
-        .from(players)
-        .where(
-          and(
-            eq(players.season, player.season),
-            ne(players.id, id),
-            or(
-              eq(players.name, name),
-              entry.page === null ? undefined : eq(players.wikipediaPage, entry.page),
-              personId === null || personId === player.personId ? undefined : eq(players.personId, personId),
-            ),
-          ),
-        )
+      // A name is no reason to refuse: it is the person's, and the rows keep their own.
+      const taken = [
+        entry.page === null ? undefined : eq(players.wikipediaPage, entry.page),
+        personId === null || personId === player.personId ? undefined : eq(players.personId, personId),
+      ].filter((condition) => condition !== undefined)
+      const [same] =
+        taken.length === 0
+          ? []
+          : await transaction
+              .select({ name: shownPlayerName(), personId: players.personId, wikipediaPage: players.wikipediaPage })
+              .from(players)
+              .where(and(eq(players.season, player.season), ne(players.id, id), or(...taken)))
 
       if (same !== undefined) {
-        throw new Refusal({
-          [same.name.toLowerCase() === name.toLowerCase() ? 'achternaam' : 'wikipedia']: alreadyThere(
-            same,
-            { name, page: entry.page, personId },
-            player.season,
-          ),
-        })
+        throw new Refusal({ wikipedia: alreadyThere(same, { name, page: entry.page, personId }, player.season) })
+      }
+
+      // A player without a person who gets another name gets a person, who holds the name.
+      if (renamed && personId === null) {
+        personId = (await findOrAddEditorsPerson(transaction, { name: entry.name, page: entry.page })).id
       }
 
       // A number that changes for a player who is in a saved line-up with his old number: the
@@ -808,13 +857,12 @@ async function storePlayerEdit(
             }
 
       const edited: PlayerField[] = [
-        ...(renamed || name !== player.name ? (['name'] as const) : []),
         ...(entry.shirtNumber === player.shirtNumber ? [] : (['shirt_number'] as const)),
         ...(entry.position === player.position ? [] : (['position'] as const)),
         ...(entry.page === player.wikipediaPage ? [] : (['wikipedia_page'] as const)),
       ]
       const changes = [
-        name === player.name ? undefined : `naam: ${player.name} → ${name}`,
+        renamed && name !== player.name ? `naam: ${player.name} → ${name}` : undefined,
         entry.shirtNumber === player.shirtNumber
           ? undefined
           : `rugnummer: ${player.shirtNumber ?? 'geen'} → ${entry.shirtNumber ?? 'geen'}`,
@@ -844,8 +892,8 @@ async function storePlayerEdit(
       if (changes.length === 0) {
         return { status: 'unchanged' } as const
       }
-      if (renamed && person !== undefined) {
-        await setEditorsName(transaction, person.id, entry.name)
+      if (renamed && personId !== null) {
+        await setEditorsName(transaction, personId, entry.name)
       }
       if (shown !== undefined) {
         await setEditorsPersonFacts(transaction, shown.id, facts)
@@ -855,11 +903,9 @@ async function storePlayerEdit(
         .update(players)
         .set({
           editorsFields: [...new Set([...player.editorsFields, ...edited])],
-          name,
           personId,
           position: entry.position,
           previousShirtNumber: entry.previousShirtNumber,
-          searchTerm: renamed ? searchTermOf(entry.name, name) : player.searchTerm,
           shirtNumber: entry.shirtNumber,
           shirtNumberFrom: entry.shirtNumberFrom,
           wikipediaPage: entry.page,
@@ -912,7 +958,7 @@ async function storePlayerRemoval(
   now = new Date(),
 ): Promise<RemovePlayerOutcome> {
   return db.transaction(async (transaction) => {
-    const [player] = await transaction.select().from(players).where(eq(players.id, id)).for('update')
+    const [player] = await readForUpdate(transaction, id)
 
     if (player === undefined) {
       return 'missing'

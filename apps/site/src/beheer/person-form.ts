@@ -1,9 +1,9 @@
 // The form of a person in the admin (issue 1164): the name and the Wikipedia page, the birth
 // date and the year of death, the country and the line. A person has no season: a name the
-// editors change goes to the person and to his player in every season, as the decision of 10
-// November 2026 says (_Het formulier van een speler zoekt eerst een persoon_). The checks are
-// those of the form of a player (`person-checks.ts`). A change and its row in the log are one
-// transaction.
+// editors change goes to the person only, and every season and line-up shows it, as the
+// decision of 26 November 2026 says (_De naam van een speler hoort alleen bij de persoon_).
+// The checks are those of the form of a player (`person-checks.ts`). A change and its row in
+// the log are one transaction.
 import type { Database } from '@fansite/db/client'
 
 import { recordAction } from '@fansite/db/audit-log'
@@ -17,6 +17,7 @@ import {
   type PlayerSide,
   type UnavailableField,
 } from '@fansite/db/schema'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import { clearFilledMarks, markUnavailable, readPersonMarks, unmark } from '@fansite/db/unavailable-marks'
 import { and, asc, eq, isNull, ne, or } from 'drizzle-orm'
 
@@ -34,7 +35,7 @@ import {
 } from './person-checks'
 import { type PersonErrors, personFieldNames, type PersonPart, type PersonValues } from './person-fields'
 import { personLabels } from './person-labels'
-import { type MergeOffer, nameValuesOf, refreshCompleteness, refreshPlayerAddresses, searchTermOf } from './players'
+import { type MergeOffer, nameValuesOf, refreshCompleteness, refreshPlayerAddresses } from './players'
 
 /** The person an editor opens, with his player in each season, the oldest season first. */
 export type AdminPerson = {
@@ -264,7 +265,7 @@ async function givePage(transaction: Transaction, person: AdminPerson['person'],
   }
 
   const [taken] = await transaction
-    .select({ name: players.name, season: players.season })
+    .select({ name: shownPlayerName(), season: players.season })
     .from(players)
     .where(and(eq(players.wikipediaPage, page), or(isNull(players.personId), ne(players.personId, person.id))))
 
@@ -285,45 +286,6 @@ async function givePage(transaction: Transaction, person: AdminPerson['person'],
     await transaction
       .update(players)
       .set({ editorsFields: [...new Set([...row.editorsFields, 'wikipedia_page' as const])], wikipediaPage: page })
-      .where(eq(players.id, row.id))
-  }
-}
-
-/**
- * Gives a person the name the editors filled in, and his player in every season too. A season
- * with another player of that name refuses it.
- */
-async function rename(transaction: Transaction, personId: number, name: NonNullable<PersonEntry['name']>) {
-  const whole = joinNameParts(name)
-  const rows = await transaction
-    .select({ editorsFields: players.editorsFields, id: players.id, season: players.season })
-    .from(players)
-    .where(eq(players.personId, personId))
-    .for('update')
-
-  for (const row of rows) {
-    const [same] = await transaction
-      .select({ name: players.name })
-      .from(players)
-      .where(and(eq(players.season, row.season), eq(players.name, whole), ne(players.id, row.id)))
-
-    if (same !== undefined) {
-      throw new Refusal({
-        achternaam: `Het seizoen ${row.season} heeft al een andere speler met de naam ${same.name}. Geef deze persoon een andere naam, of voeg de twee personen samen.`,
-      })
-    }
-  }
-
-  await setEditorsName(transaction, personId, name)
-
-  for (const row of rows) {
-    await transaction
-      .update(players)
-      .set({
-        editorsFields: [...new Set([...row.editorsFields, 'name' as const])],
-        name: whole,
-        searchTerm: searchTermOf(name, whole),
-      })
       .where(eq(players.id, row.id))
   }
 }
@@ -370,10 +332,9 @@ async function storeMarks(
 }
 
 /**
- * Changes what the editor filled in of a person. A new name goes to the person with the source
- * `redactie` and to his player in every season, where it is the editors' from then on
- * (`players.editors_fields`), so the importer leaves it alone; a season with another player of
- * that name refuses it. A page goes to a person without one, as on the form of a player; a page
+ * Changes what the editor filled in of a person. A new name goes to the person only, with the
+ * source `redactie`, so every season and line-up shows it; the rows keep the name of their
+ * source (#1697). A page goes to a person without one, as on the form of a player; a page
  * of another person is refused with the two persons to merge, and a person who has a page keeps
  * it. The boxes Niet beschikbaar (issue 1308) mark a gap that is still empty after the save, or
  * take the mark away, each with a row of its own in the log; a mark on a field that has a value
@@ -409,7 +370,8 @@ async function storePersonEdit(
           entry.name.familyName !== before.achternaam
 
         if (renamed) {
-          await rename(transaction, person.id, entry.name)
+          // Only the person: every row shows his name, and keeps that of its source (#1697).
+          await setEditorsName(transaction, person.id, entry.name)
           changes.push(`naam: ${shown} → ${joinNameParts(entry.name)}`)
         }
       }

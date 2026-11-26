@@ -57,8 +57,8 @@ async function addMatches(count: number) {
     await database.db.insert(matchAppearances).values(
       Array.from({ length: 11 }, (_nothing, index) => ({
         matchId: insertId,
-        name: `Speler ${index + 1}`,
         ours: true,
+        sourceName: `Speler ${index + 1}`,
         starter: true,
       })),
     )
@@ -76,9 +76,9 @@ async function addMatch(formation: string, starters: string[], playerIds: Record
   await database.db.insert(matchAppearances).values(
     starters.map((name) => ({
       matchId: insertId,
-      name,
       ours: true,
       playerId: playerIds[name] ?? null,
+      sourceName: name,
       starter: true,
     })),
   )
@@ -119,7 +119,7 @@ describe('the page Vaste plaatsen', () => {
   it('counts only a 4-3-3 and players with ten matches, shows a share under 100, and links a known player', async () => {
     const [{ insertId: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Speler 1', searchTerm: 'Speler 1', season: '2005/06' })
+      .values({ searchTerm: 'Speler 1', season: '2005/06', sourceName: 'Speler 1' })
 
     // Nine matches of the ordinary line-up with a ninth player, and one with players 2 and 3
     // swapped: players 1 to 10 have ten matches, player 2 in his usual slot in nine of them.

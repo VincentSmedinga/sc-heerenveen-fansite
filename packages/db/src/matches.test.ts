@@ -389,22 +389,30 @@ describe('the goals of a match', () => {
     const matchId = await insertMatch()
 
     await database.db.insert(matchGoals).values([
-      { matchId, minute: 34, ours: true, player: 'Trenskow' },
-      { matchId, minute: 45, ours: false, penalty: true, player: 'Vente', stoppageMinutes: 1 },
+      { matchId, minute: 34, ours: true, sourceName: 'Trenskow' },
+      { matchId, minute: 45, ours: false, penalty: true, sourceName: 'Vente', stoppageMinutes: 1 },
     ])
 
     const rows = await database.db.select().from(matchGoals).orderBy(matchGoals.id)
 
     expect(rows).toMatchObject([
-      { matchId, minute: 34, ours: true, ownGoal: false, penalty: false, player: 'Trenskow', stoppageMinutes: null },
-      { matchId, minute: 45, ours: false, ownGoal: false, penalty: true, player: 'Vente', stoppageMinutes: 1 },
+      {
+        matchId,
+        minute: 34,
+        ours: true,
+        ownGoal: false,
+        penalty: false,
+        sourceName: 'Trenskow',
+        stoppageMinutes: null,
+      },
+      { matchId, minute: 45, ours: false, ownGoal: false, penalty: true, sourceName: 'Vente', stoppageMinutes: 1 },
     ])
   })
 
   it('goes with its match', async () => {
     const matchId = await insertMatch()
 
-    await database.db.insert(matchGoals).values({ matchId, minute: 34, ours: true, player: 'Trenskow' })
+    await database.db.insert(matchGoals).values({ matchId, minute: 34, ours: true, sourceName: 'Trenskow' })
     await database.db.delete(matches)
 
     expect(await database.db.select().from(matchGoals)).toEqual([])
@@ -413,7 +421,7 @@ describe('the goals of a match', () => {
   it('has no goal without a match', async () => {
     const failure = await database.db
       .insert(matchGoals)
-      .values({ matchId: 999_999, minute: 34, ours: true, player: 'Trenskow' })
+      .values({ matchId: 999_999, minute: 34, ours: true, sourceName: 'Trenskow' })
       .then(
         () => undefined,
         (error: unknown) => error,
@@ -426,7 +434,7 @@ describe('the goals of a match', () => {
     const matchId = await insertMatch()
     const failure = await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 34, ours: true, ownGoal: true, penalty: true, player: 'Trenskow' })
+      .values({ matchId, minute: 34, ours: true, ownGoal: true, penalty: true, sourceName: 'Trenskow' })
       .then(
         () => undefined,
         (error: unknown) => error,

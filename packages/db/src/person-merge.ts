@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, notInArray, or } from 'drizzle-orm'
+import { and, asc, count, eq, getTableColumns, inArray, notInArray, or } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { PersonName } from './persons.ts'
@@ -22,9 +22,10 @@ import {
   playerStatDifferences,
   unavailableMarks,
 } from './schema.ts'
+import { shownPlayerName } from './shown-name.ts'
 
 /** A row of `players` as a plan of a merge names it. */
-export type MergedRow = Pick<Player, 'id' | 'name' | 'season'>
+export type MergedRow = Pick<Player, 'id' | 'season'> & { name: string }
 
 /**
  * What a merge of two persons does, worked out before it happens (`planPersonMerge`): the
@@ -266,7 +267,7 @@ export async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Pe
 
       if (dropped.length > 0) {
         warnings.push(
-          `Persons: '${double.name}' and '${stays.name}' (${season}) are one player now and had different numbers in ${dropped.join(', ')}; those of '${stays.name}' stay, check which are right`,
+          `Persons: '${double.sourceName}' and '${stays.sourceName}' (${season}) are one player now and had different numbers in ${dropped.join(', ')}; those of '${stays.sourceName}' stay, check which are right`,
         )
       }
     }
@@ -432,7 +433,7 @@ export async function planPersonMerge(
   }
 
   const all = await db
-    .select()
+    .select({ ...getTableColumns(players), name: shownPlayerName() })
     .from(players)
     .where(inArray(players.personId, [otherId, keptId]))
     .orderBy(asc(players.season), asc(players.id))
@@ -451,7 +452,7 @@ export async function planPersonMerge(
     db.select({ page: personPages.page }).from(personPages).where(eq(personPages.personId, otherId)),
   ])
   const result = mergedPersonValues(other, kept)
-  const named = ({ id, name, season }: Player): MergedRow => ({ id, name, season })
+  const named = ({ id, name, season }: MergedRow): MergedRow => ({ id, name, season })
 
   return {
     appearances: appearances?.n ?? 0,
@@ -499,7 +500,7 @@ function differences(other: Person, kept: Person): string[] {
  * The seasons in which the rows of one person hold more than one row, with the row that stays
  * (the lowest `rank`, then the oldest) and the rows that go into it.
  */
-function doubleRows(rows: readonly Player[], title: null | string) {
+function doubleRows<Row extends Player>(rows: readonly Row[], title: null | string) {
   return [...new Set(rows.map((row) => row.season))].flatMap((season) => {
     const [stays, ...doubles] = rows
       .filter((row) => row.season === season)

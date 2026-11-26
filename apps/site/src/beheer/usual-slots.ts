@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { matchAppearances, matchReports } from '@fansite/db/schema'
+import { shownAppearanceName } from '@fansite/db/shown-name'
 import { and, asc, eq } from 'drizzle-orm'
 
 import { playerQualityPath } from './quality'
@@ -42,7 +43,7 @@ export async function readLineUpsInCountedFormation(db: Pick<Database, 'select'>
   const found = await db
     .select({
       matchId: matchAppearances.matchId,
-      name: matchAppearances.name,
+      name: shownAppearanceName(),
       playerId: matchAppearances.playerId,
     })
     .from(matchAppearances)

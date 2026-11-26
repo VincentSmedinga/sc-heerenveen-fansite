@@ -40,6 +40,7 @@ import {
   describeEntryResult,
   type FactsFields,
   type GoalFields,
+  goalFieldsOf,
   type GoalSnapshot,
   type KickoffFields,
   markedParts,
@@ -120,10 +121,11 @@ export async function importEditedMatch(
     }
   }
   if (edit?.goalsEdited || hasReport) {
-    const verdict = judgeGoals(storedGoals, goalsOfWikipedia)
+    const stored = storedGoals.map(goalFieldsOf)
+    const verdict = judgeGoals(stored, goalsOfWikipedia)
 
     judged.goals = {
-      entry: describeEntryGoals(storedGoals),
+      entry: describeEntryGoals(stored),
       // The goals of a report never follow Wikipedia, so the same goals are no news either.
       verdict: hasReport && verdict === 'same' ? 'nothing' : verdict,
       wikipedia: describeEntryGoals(goalsOfWikipedia),

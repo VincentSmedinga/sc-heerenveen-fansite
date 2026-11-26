@@ -66,7 +66,7 @@ async function entered(parts: { goals?: boolean; kickoff?: boolean; result?: boo
       status: 'played',
     })
     .where(eq(matches.id, id))
-  await database.db.insert(matchGoals).values({ matchId: id, minute: 12, ours: true, player: 'Oyen' })
+  await database.db.insert(matchGoals).values({ matchId: id, minute: 12, ours: true, sourceName: 'Oyen' })
   await database.db.insert(matchEdits).values({
     beforeGoals: encodeGoals([]),
     beforeMatch: encodeMatch(before!),
@@ -203,7 +203,7 @@ describe('removeEntry', () => {
     const [values] = await withClubs(database.db, [scheduled])
     const [{ id: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season: '2026/27' })
+      .values({ position: 'aanvaller', searchTerm: 'oyen', season: '2026/27', sourceName: 'Luca Oyen' })
       .$returningId()
       .then((rows) => rows as [{ id: number }])
     const [inserted] = await database.db
@@ -212,7 +212,7 @@ describe('removeEntry', () => {
       .$returningId()
     const id = inserted?.id ?? 0
 
-    await database.db.insert(matchGoals).values({ matchId: id, minute: 5, ours: true, player: 'Oyen', playerId })
+    await database.db.insert(matchGoals).values({ matchId: id, minute: 5, ours: true, playerId, sourceName: 'Oyen' })
 
     const [match] = await database.db.select().from(matches).where(eq(matches.id, id))
     const goals = await database.db.select().from(matchGoals)
@@ -233,7 +233,9 @@ describe('removeEntry', () => {
 
     await removeEntry(database.db, edit!)
 
-    expect(await database.db.select().from(matchGoals)).toMatchObject([{ minute: 5, player: 'Oyen', playerId: null }])
+    expect(await database.db.select().from(matchGoals)).toMatchObject([
+      { minute: 5, playerId: null, sourceName: 'Oyen' },
+    ])
   })
 
   it('brings back a goal without a minute as it was, without a minute', async () => {
@@ -244,7 +246,7 @@ describe('removeEntry', () => {
       .$returningId()
     const id = inserted?.id ?? 0
 
-    await database.db.insert(matchGoals).values({ matchId: id, minute: null, ours: true, player: 'Oyen' })
+    await database.db.insert(matchGoals).values({ matchId: id, minute: null, ours: true, sourceName: 'Oyen' })
 
     const [match] = await database.db.select().from(matches).where(eq(matches.id, id))
     const goals = await database.db.select().from(matchGoals)
@@ -265,7 +267,7 @@ describe('removeEntry', () => {
     await removeEntry(database.db, edit!)
 
     expect(await database.db.select().from(matchGoals)).toMatchObject([
-      { minute: null, player: 'Oyen', stoppageMinutes: null },
+      { minute: null, sourceName: 'Oyen', stoppageMinutes: null },
     ])
   })
 })

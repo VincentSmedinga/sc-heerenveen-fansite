@@ -77,7 +77,7 @@ const addPerson = async (name: string) => {
 const addAppearance = async (name: string, values: Partial<typeof matchAppearances.$inferInsert> = {}) => {
   const [added] = await database.db
     .insert(matchAppearances)
-    .values({ matchId, name, ours: false, starter: true, ...values })
+    .values({ matchId, ours: false, sourceName: name, starter: true, ...values })
     .$returningId()
 
   return added?.id ?? 0
@@ -96,7 +96,7 @@ describe('linkOpponentPersons (#1544)', () => {
       matchId,
       ours: false,
       personId: person,
-      player: 'De Vries',
+      sourceName: 'De Vries',
     })
 
     expect(await linkOpponentPersons(database.db)).toMatchObject({ goal: 1, name: 0 })
@@ -117,7 +117,7 @@ describe('linkOpponentPersons (#1544)', () => {
     await addPerson('Jan Jansen')
     await database.db
       .insert(clubSquadPlayers)
-      .values({ clubId, name: 'Jan Jansen', personId: wanted, readAt: new Date('2026-11-20T10:00:00Z') })
+      .values({ clubId, personId: wanted, readAt: new Date('2026-11-20T10:00:00Z'), sourceName: 'Jan Jansen' })
 
     const row = await addAppearance('Jan Jansen')
 
@@ -132,8 +132,8 @@ describe('linkOpponentPersons (#1544)', () => {
 
     await database.db
       .insert(clubSquadPlayers)
-      .values({ clubId: other?.id ?? 0, name: 'Jan Jansen', personId: person, readAt })
-    await database.db.insert(clubSquadPlayers).values({ clubId, name: 'Piet Bakker', personId: null, readAt })
+      .values({ clubId: other?.id ?? 0, personId: person, readAt, sourceName: 'Jan Jansen' })
+    await database.db.insert(clubSquadPlayers).values({ clubId, personId: null, readAt, sourceName: 'Piet Bakker' })
     await addPerson('Piet Bakker')
     await addPerson('Piet Bakker')
 
@@ -169,7 +169,7 @@ describe('linkOpponentPersons (#1544)', () => {
 
     const [player] = await database.db
       .insert(players)
-      .values({ name: 'Jan de Vries', searchTerm: 'jan de vries', season: '2026/27' })
+      .values({ searchTerm: 'jan de vries', season: '2026/27', sourceName: 'Jan de Vries' })
       .$returningId()
     const row = await addAppearance('Jan de Vries', { ours: true, playerId: player?.id ?? 0 })
 

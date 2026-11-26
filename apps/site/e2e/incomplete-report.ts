@@ -30,9 +30,9 @@ export async function addIncompleteReport() {
       await db.insert(matchReports).values({ matchId, opponentComplete: false, source, status: 'bezig' })
       await db.insert(matchAppearances).values(
         [
-          { name: 'Verzonnen Keeper', shirtNumber: 1 },
-          { name: 'Verzonnen Verdediger', shirtNumber: 4 },
-          { name: 'Verzonnen Spits', shirtNumber: 9 },
+          { shirtNumber: 1, sourceName: 'Verzonnen Keeper' },
+          { shirtNumber: 4, sourceName: 'Verzonnen Verdediger' },
+          { shirtNumber: 9, sourceName: 'Verzonnen Spits' },
         ].map((player) => ({ ...player, captain: false, matchId: row.id, ours: true, starter: true })),
       )
     }

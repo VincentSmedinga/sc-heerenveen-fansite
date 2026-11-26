@@ -572,7 +572,7 @@ describe('the step opstellingen', () => {
     expect(ours.every((row) => row.playerId !== null && !row.captain && row.shirtNumber === null)).toBe(true)
     expect(theirs.every((row) => row.playerId === null && !row.captain && row.shirtNumber === null)).toBe(true)
     expect(rows.filter((row) => row.starter)).toHaveLength(22)
-    expect(ours[0]).toMatchObject({ name: ourName(0) })
+    expect(ours[0]).toMatchObject({ sourceName: ourName(0) })
   })
 
   it('makes the substitutions and the cards', async () => {
@@ -589,7 +589,7 @@ describe('the step opstellingen', () => {
     ])
 
     const rows = await appearanceRows()
-    const nameOf = (id: number) => rows.find((row) => row.id === id)?.name
+    const nameOf = (id: number) => rows.find((row) => row.id === id)?.sourceName
     const subs = await database.db.select().from(matchSubstitutions)
     const cards = await database.db.select().from(matchCards).orderBy(asc(matchCards.id))
 
@@ -607,7 +607,7 @@ describe('the step opstellingen', () => {
     await run([oldMatch()])
 
     const rows = await appearanceRows()
-    const nameOf = (id: null | number) => rows.find((row) => row.id === id)?.name ?? null
+    const nameOf = (id: null | number) => rows.find((row) => row.id === id)?.sourceName ?? null
 
     expect((await goalRows()).map((goal) => [nameOf(goal.appearanceId), nameOf(goal.assistAppearanceId)])).toEqual([
       [ourName(8), null],
@@ -920,7 +920,7 @@ describe('the files of the old fansite', () => {
         appearances: apps.map((one) => ({
           captain: one.captain,
           id: one.id,
-          name: one.name,
+          name: one.sourceName,
           ours: one.ours,
           shirtNumber: one.shirtNumber,
           starter: one.starter,

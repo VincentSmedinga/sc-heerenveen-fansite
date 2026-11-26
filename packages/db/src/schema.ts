@@ -1896,7 +1896,7 @@ export const matchGoals = mysqlTable(
     ours: boolean('ours').notNull(),
     minute: int('minute', { unsigned: true }),
     stoppageMinutes: int('stoppage_minutes', { unsigned: true }),
-    player: varchar('player', { length: matchGoalPlayerMaxLength }).notNull(),
+    sourceName: varchar('player', { length: matchGoalPlayerMaxLength }).notNull(),
     playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
     personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
@@ -2511,7 +2511,7 @@ export const players = mysqlTable(
   {
     id: int('id', { unsigned: true }).autoincrement().primaryKey(),
     season: varchar('season', { length: matchLimits.season }).notNull(),
-    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    sourceName: varchar('name', { length: playerNameMaxLength }).notNull(),
     position: mysqlEnum('position', playerPositions),
     source: mysqlEnum('source', playerSources).notNull().default('selectie'),
     shirtNumber: int('shirt_number', { unsigned: true }),
@@ -2528,7 +2528,7 @@ export const players = mysqlTable(
       .default(sql`''`),
   },
   (table) => [
-    unique('players_season_name_unique').on(table.season, table.name),
+    unique('players_season_name_unique').on(table.season, table.sourceName),
     unique('players_season_wikipedia_page_unique').on(table.season, table.wikipediaPage),
     check('players_left_squad_at_only_when_gone', sql`${table.inSquad} = 0 or ${table.leftSquadAt} is null`),
     check('players_shirt_number_range', sql`${table.shirtNumber} is null or ${table.shirtNumber} between 1 and 99`),
@@ -2780,7 +2780,7 @@ export const matchAppearances = mysqlTable(
     // not allow a check on this column, since a deleted person sets it to empty, so
     // `linkOpponentPersons` only gives a person to a row that is not ours.
     personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
-    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    sourceName: varchar('name', { length: playerNameMaxLength }).notNull(),
     shirtNumber: int('shirt_number', { unsigned: true }),
     starter: boolean('starter').notNull(),
     captain: boolean('captain').notNull().default(false),
@@ -2793,7 +2793,7 @@ export const matchAppearances = mysqlTable(
     unique('match_appearances_id_match_side_unique').on(table.id, table.matchId, table.ours),
     index('match_appearances_player_id_idx').on(table.playerId),
     index('match_appearances_person_id_idx').on(table.personId),
-    check('match_appearances_name_not_empty', sql`char_length(${table.name}) > 0`),
+    check('match_appearances_name_not_empty', sql`char_length(${table.sourceName}) > 0`),
     check('match_appearances_shirt_number_range', sql`${table.shirtNumber} between 1 and 99`),
   ],
 )
@@ -3043,14 +3043,14 @@ export const clubSquadPlayers = mysqlTable(
     clubId: int('club_id', { unsigned: true })
       .notNull()
       .references(() => clubs.id, { onDelete: 'cascade' }),
-    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    sourceName: varchar('name', { length: playerNameMaxLength }).notNull(),
     personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
     shirtNumber: int('shirt_number', { unsigned: true }),
     position: mysqlEnum('position', playerPositions),
     readAt: datetime('read_at').notNull(),
   },
   (table) => [
-    unique('club_squad_players_club_name_unique').on(table.clubId, table.name),
+    unique('club_squad_players_club_name_unique').on(table.clubId, table.sourceName),
     index('club_squad_players_person_id_idx').on(table.personId),
   ],
 )

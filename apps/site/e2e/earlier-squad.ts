@@ -9,8 +9,8 @@ import { earlierSeason } from './earlier-season.ts'
 
 /** The made-up players of the season before who are not in the squad of this season. */
 const gone = [
-  { name: 'Teun Vertrekker', position: 'verdediger', searchTerm: 'Vertrekker' },
-  { name: 'Bram Oudgediende', position: 'aanvaller', searchTerm: 'Oudgediende' },
+  { position: 'verdediger', searchTerm: 'Vertrekker', sourceName: 'Teun Vertrekker' },
+  { position: 'aanvaller', searchTerm: 'Oudgediende', sourceName: 'Bram Oudgediende' },
 ] as const
 
 /** How many players of this season the made-up squad of the season before leaves out. */
@@ -39,13 +39,13 @@ export async function addEarlierSquad() {
 
     if (current.length > newThisSeason && player === undefined && level === undefined) {
       const rows = [
-        ...current.slice(newThisSeason).map(({ name, personId, position, searchTerm, shirtNumber }) => ({
-          name,
+        ...current.slice(newThisSeason).map(({ personId, position, searchTerm, shirtNumber, sourceName: name }) => ({
           personId,
           position,
           searchTerm,
           season,
           shirtNumber,
+          sourceName: name,
         })),
         ...gone.map((made) => ({ ...made, season })),
       ]
@@ -75,8 +75,8 @@ export async function addEarlierSquad() {
         .from(players)
         .where(
           inArray(
-            players.name,
-            gone.map(({ name }) => name),
+            players.sourceName,
+            gone.map(({ sourceName }) => sourceName),
           ),
         )
 

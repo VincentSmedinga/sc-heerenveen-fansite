@@ -1304,14 +1304,14 @@ describe('a date that changes (#1631)', () => {
       await database.db.insert(matchReports).values({ matchId: row.id, status: 'klaar' })
       await database.db
         .insert(matchAppearances)
-        .values({ matchId: row.id, name: `Speler ${row.id}`, ours: true, starter: true })
+        .values({ matchId: row.id, ours: true, sourceName: `Speler ${row.id}`, starter: true })
 
       const [appearance] = await database.db.select().from(matchAppearances).where(eq(matchAppearances.matchId, row.id))
 
       for (let goals = 0; goals < row.id % 3; goals++) {
         await database.db
           .insert(matchGoals)
-          .values({ matchId: row.id, minute: 10 + goals, ours: true, player: 'Speler' })
+          .values({ matchId: row.id, minute: 10 + goals, ours: true, sourceName: 'Speler' })
       }
       await database.db
         .insert(matchCards)

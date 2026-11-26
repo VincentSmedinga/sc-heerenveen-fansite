@@ -55,19 +55,21 @@ export async function addQualitySeason(db: Database) {
     number,
     number,
   ]
-  const [{ insertId: playerId }] = await db.insert(players).values({ name: 'Sanne Spits', searchTerm: 'Spits', season })
+  const [{ insertId: playerId }] = await db
+    .insert(players)
+    .values({ searchTerm: 'Spits', season, sourceName: 'Sanne Spits' })
 
   await db.insert(matchGoals).values([
-    { matchId: complete, ours: true, player: 'Sanne Spits', playerId },
-    { matchId: complete, ours: true, player: 'Sanne Spits', playerId },
-    { matchId: complete, ours: false, player: 'Een Tegenstander' },
+    { matchId: complete, ours: true, playerId, sourceName: 'Sanne Spits' },
+    { matchId: complete, ours: true, playerId, sourceName: 'Sanne Spits' },
+    { matchId: complete, ours: false, sourceName: 'Een Tegenstander' },
     // A goal of the opponent without a player, and an own goal of ours, are not ours to link.
-    { matchId: unfinished, ours: true, player: 'Sanne Spits', playerId },
-    { matchId: unfinished, ours: true, ownGoal: true, player: 'Eigen Doelpunt' },
-    { matchId: unlinked, ours: true, player: 'Onbekende Een' },
-    { matchId: unlinked, ours: false, ownGoal: true, player: 'Onbekende Twee' },
-    { matchId: unlinked, ours: false, player: 'Een Tegenstander' },
-    { matchId: waiting, ours: true, player: 'Sanne Spits', playerId },
+    { matchId: unfinished, ours: true, playerId, sourceName: 'Sanne Spits' },
+    { matchId: unfinished, ours: true, ownGoal: true, sourceName: 'Eigen Doelpunt' },
+    { matchId: unlinked, ours: true, sourceName: 'Onbekende Een' },
+    { matchId: unlinked, ours: false, ownGoal: true, sourceName: 'Onbekende Twee' },
+    { matchId: unlinked, ours: false, sourceName: 'Een Tegenstander' },
+    { matchId: waiting, ours: true, playerId, sourceName: 'Sanne Spits' },
   ])
   await db.insert(matchReports).values([
     { matchId: complete, status: 'klaar' },

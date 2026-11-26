@@ -2,6 +2,7 @@ import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { encodeProposal, type ReadMatch } from '@fansite/db/match-changes'
 import { encodePartProposal, sourceDifferenceReasons } from '@fansite/db/match-conflicts'
+import { goalFieldsOf } from '@fansite/db/match-edits'
 import { describeEntryFacts } from '@fansite/db/match-edits'
 import {
   matchChanges,
@@ -73,7 +74,7 @@ export async function addHeldChange() {
       // The goals stay as they are, so only the result differs.
       const goals = (
         await db.select().from(matchGoals).where(eq(matchGoals.matchId, match.id)).orderBy(asc(matchGoals.id))
-      ).map(({ wikipediaPage, ...goal }) => ({ ...goal, playerPage: wikipediaPage }))
+      ).map(({ wikipediaPage, ...goal }) => ({ ...goalFieldsOf(goal), playerPage: wikipediaPage }))
 
       await db.insert(matchChanges).values({
         changed: 'result',

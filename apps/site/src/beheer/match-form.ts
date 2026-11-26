@@ -1,5 +1,6 @@
 import type { Match, MatchGoal } from '@fansite/db/schema'
 
+import { type ReportGoal } from '@fansite/db/match-reports'
 import { competitions, hiddenReasonMaxLength, matchGoalPlayerMaxLength, matchLimits } from '@fansite/db/schema'
 import { amsterdamToUtc, utcToAmsterdam } from '@fansite/db/season'
 
@@ -38,7 +39,10 @@ const knockoutCompetitions: readonly Match['competition'][] = competitions.filte
 export const isKnockout = (competition: Match['competition']) => knockoutCompetitions.includes(competition)
 
 /** A goal as entered: a row of `match_goals` without its numbers. */
-export type EntryGoal = Omit<MatchGoal, 'appearanceId' | 'assistAppearanceId' | 'id' | 'matchId' | 'personId'> & {
+export type EntryGoal = Omit<
+  MatchGoal,
+  'appearanceId' | 'assistAppearanceId' | 'id' | 'matchId' | 'personId' | 'sourceName'
+> & {
   /**
    * What the import stored of the goal, and the players of its report; the form can not give
    * them.
@@ -46,6 +50,8 @@ export type EntryGoal = Omit<MatchGoal, 'appearanceId' | 'assistAppearanceId' | 
   appearanceId?: null | number
   assistAppearanceId?: null | number
   personId?: null | number
+  /** The name that is stored: the one of the source (`match_goals.player`). */
+  player: string
 }
 
 /** What the checks need to know about the match and the season. */
@@ -85,7 +91,14 @@ export type MatchEntry = {
  * A player of ours, as the form needs him. `personId` is his person, which a goal he is chosen
  * for gets too: a player the editors added may have no page to find the person by.
  */
-export type SquadPlayer = { id: number; name: string; personId: null | number; wikipediaPage: null | string }
+export type SquadPlayer = {
+  id: number
+  name: string
+  personId: null | number
+  /** The name of the source on his row, which a goal of his keeps. Left out in some tests. */
+  sourceName?: string
+  wikipediaPage: null | string
+}
 
 /** The statuses as the form words them, and as the database has them. */
 export const statusChoices = [
@@ -365,7 +378,7 @@ export function validate(
         errors[id('speler')] = `Kies bij doelpunt ${number} de speler uit de selectie.`
       } else {
         player = chosen
-        name = chosen.name
+        name = chosen.sourceName ?? chosen.name
       }
     } else if (goal.naam === '') {
       errors[id('naam')] = `Schrijf bij doelpunt ${number} de naam van de speler.`
@@ -457,7 +470,7 @@ export function validate(
  * with more goals than are stored gets empty goals for the rest, so the editor sees what is
  * missing.
  */
-export function valuesOf(match: Match, goals: MatchGoal[], stadiumChosen = false): MatchValues {
+export function valuesOf(match: Match, goals: ReportGoal[], stadiumChosen = false): MatchValues {
   const local = match.kickoffAt === null ? undefined : utcToAmsterdam(match.kickoffAt)
   const number = (value: null | number) => (value === null ? '' : String(value))
   const played = match.status === 'played'
@@ -467,7 +480,7 @@ export function valuesOf(match: Match, goals: MatchGoal[], stadiumChosen = false
       extra: number(goal.stoppageMinutes),
       kant: goal.ours ? 'wij' : 'zij',
       minuut: number(goal.minute),
-      naam: goal.playerId === null ? goal.player : '',
+      naam: goal.playerId === null ? goal.name : '',
       soort: goal.ownGoal ? 'eigen' : goal.penalty ? 'strafschop' : 'gewoon',
       speler: goal.playerId === null ? '' : String(goal.playerId),
     })),

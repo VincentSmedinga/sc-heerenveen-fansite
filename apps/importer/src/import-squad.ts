@@ -12,6 +12,7 @@ import {
 import { comparePlayerGoals } from '@fansite/db/player-stat-differences'
 import { players, playerSeasonStats, squadImports, wikipediaPages } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { type NamedPlayer, readNamedPlayers, rowsByName } from '@fansite/db/shown-name'
 import { and, eq, notInArray, sql } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
@@ -78,8 +79,8 @@ export type SquadReport =
  * a player by his person too, so a list that names him under another title or name makes no
  * second row. A person with two such rows is left out: nothing says which row is meant.
  */
-export function editorsByPerson(rows: readonly Player[]): Map<number, Player> {
-  const found = new Map<number, Player>()
+export function editorsByPerson<Row extends Player>(rows: readonly Row[]): Map<number, Row> {
+  const found = new Map<number, Row>()
   const twice = new Set<number>()
 
   for (const row of rows) {
@@ -190,8 +191,8 @@ export async function importSquad(
  * The players the import of the matches made of a scorer (the source `doelpunten`), by their
  * person. A person with two such rows is left out: nothing says which row is meant.
  */
-export function scorersByPerson(rows: readonly Player[]): Map<number, Player> {
-  const found = new Map<number, Player>()
+export function scorersByPerson<Row extends Player>(rows: readonly Row[]): Map<number, Row> {
+  const found = new Map<number, Row>()
   const twice = new Set<number>()
 
   for (const row of rows) {
@@ -219,9 +220,10 @@ export function scorersByPerson(rows: readonly Player[]): Map<number, Player> {
  * into it (`mergePlayerInto`). The search term follows when it was the surname of the old
  * name. Returns how many rows changed: a second run finds none. Use the transaction.
  *
- * A name or a page the editors set stays as they wrote it (issue 1022): only the other of the
- * two changes. A row of the editors is still merged with the row in the spelling that stays,
- * and then the row of the editors is the one that stays, with what the other had and it lacked.
+ * A page the editors set stays as they wrote it (issue 1022); the name of the source changes,
+ * since the name the editors gave is that of the person (#1697). A row of the editors is still
+ * merged with the row in the spelling that stays, and then the row of the editors is the one
+ * that stays, with what the other had and it lacked.
  */
 export async function storeChosenSpellings(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
@@ -236,22 +238,22 @@ export async function storeChosenSpellings(
       continue
     }
 
-    const spelling = chosenSpelling(row.name, row.wikipediaPage)
+    const spelling = chosenSpelling(row.sourceName, row.wikipediaPage)
 
-    if (spelling.name === row.name && spelling.page === row.wikipediaPage) {
+    if (spelling.name === row.sourceName && spelling.page === row.wikipediaPage) {
       continue
     }
 
-    // What the editors set stays as they wrote it.
+    // A page the editors set stays as they wrote it.
     const chosen = {
-      name: row.editorsFields.includes('name') ? row.name : spelling.name,
+      name: spelling.name,
       page: row.editorsFields.includes('wikipedia_page') ? row.wikipediaPage : spelling.page,
     }
     const stays = rows.find(
       (one) =>
         one.id !== row.id &&
         !gone.has(one.id) &&
-        (nameKey(one.name) === nameKey(spelling.name) ||
+        (nameKey(one.sourceName) === nameKey(spelling.name) ||
           (spelling.page !== null &&
             one.wikipediaPage !== null &&
             nameKey(one.wikipediaPage) === nameKey(spelling.page))),
@@ -270,16 +272,16 @@ export async function storeChosenSpellings(
       await fillPlayerFrom(db, row, stays)
       gone.add(stays.id)
     }
-    if (chosen.name !== row.name || chosen.page !== row.wikipediaPage) {
+    if (chosen.name !== row.sourceName || chosen.page !== row.wikipediaPage) {
       const term = renamedSearchTerm(row, chosen.name)
       // A page the row got from the one that went stays when the spelling names none.
       const page = chosen.page ?? row.wikipediaPage
 
       await db
         .update(players)
-        .set({ name: chosen.name, searchTerm: term, wikipediaPage: page })
+        .set({ searchTerm: term, sourceName: chosen.name, wikipediaPage: page })
         .where(eq(players.id, row.id))
-      row.name = chosen.name
+      row.sourceName = chosen.name
       row.wikipediaPage = page
     } else if (stays === undefined) {
       continue
@@ -464,15 +466,13 @@ async function storePlayers(
   now: Date,
   personBook: { resolve: (title: string) => Promise<null | number> },
 ) {
-  const rows = await db.select().from(players).where(eq(players.season, season))
-  const byPage = new Map<string, Player>()
-  const byName = new Map<string, Player>()
+  const rows = await readNamedPlayers(db, eq(players.season, season))
+  const byPage = new Map<string, NamedPlayer>()
+  const byName = rowsByName(rows, nameKey)
   const scorerOfPerson = scorersByPerson(rows)
   const editorsOfPerson = editorsByPerson(rows)
 
   for (const row of rows) {
-    byName.set(nameKey(row.name), row)
-
     if (row.wikipediaPage !== null) {
       byPage.set(nameKey(row.wikipediaPage), row)
     }
@@ -493,7 +493,10 @@ async function storePlayers(
     if (before === undefined) {
       counts.added++
 
-      const [{ insertId }] = await db.insert(players).values({ ...player, personId, season, source: 'selectie' })
+      const { name, ...read } = player
+      const [{ insertId }] = await db
+        .insert(players)
+        .values({ ...read, personId, season, source: 'selectie', sourceName: name })
 
       ids.set(player, insertId)
 
@@ -510,12 +513,12 @@ async function storePlayers(
 
     // The fields the editors set stay as they are, and what the table says instead waits.
     const held = holdEditorsFields(before, {
-      name: player.name,
       position: player.position,
       shirtNumber: player.shirtNumber,
       wikipediaPage: player.wikipediaPage,
     })
-    const wanted = { ...held.allowed, name: held.allowed.name ?? before.name }
+    // The name of the source is no field of the editors: their name is that of the person.
+    const wanted = { ...held.allowed, sourceName: player.name }
     // The person belongs to the page: a page of the editors that is not the page of the table
     // keeps the person it had.
     const ownPage = before.editorsFields.includes('wikipedia_page') && before.wikipediaPage !== player.wikipediaPage
@@ -531,7 +534,7 @@ async function storePlayers(
     if (
       before.inSquad &&
       before.source !== 'doelpunten' &&
-      before.name === wanted.name &&
+      before.sourceName === wanted.sourceName &&
       before.position === wanted.position &&
       before.shirtNumber === wanted.shirtNumber &&
       before.country === player.country &&
@@ -547,10 +550,10 @@ async function storePlayers(
           country: player.country,
           inSquad: true,
           leftSquadAt: null,
-          name: wanted.name,
           personId: wantedPerson,
           position: wanted.position,
           shirtNumber: wanted.shirtNumber,
+          sourceName: wanted.sourceName,
           // A scorer who is in the table now is a player of the table.
           ...(before.source === 'doelpunten' ? { source: 'selectie' as const } : {}),
           wikipediaPage: wanted.wikipediaPage,

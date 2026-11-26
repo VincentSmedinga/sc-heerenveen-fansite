@@ -1,8 +1,8 @@
 import type { Database } from '@fansite/db/client'
-import type { Competition, Match, MatchGoal, MatchImport, Player, WikipediaPageKind } from '@fansite/db/schema'
+import type { Competition, Match, MatchGoal, MatchImport, WikipediaPageKind } from '@fansite/db/schema'
 
 import { createClubBook, repairClubs } from '@fansite/db/clubs'
-import { lockedFields, type MatchPart } from '@fansite/db/match-edits'
+import { goalFieldsOf, lockedFields, type MatchPart } from '@fansite/db/match-edits'
 import { compareClaim, findMatchByDate } from '@fansite/db/match-lookup'
 import { createPersonBook, storePersonNames } from '@fansite/db/persons'
 import {
@@ -16,6 +16,7 @@ import {
   wikipediaPages,
 } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
+import { type NamedPlayer, readNamedPlayers } from '@fansite/db/shown-name'
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
 import { linkMatchToStadium } from '@fansite/db/stadiums'
 import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
@@ -657,7 +658,7 @@ export function unlinkedWarning(goals: LinkedGoal[]): string | undefined {
 async function adoptScorers(
   db: Pick<Database, 'insert' | 'select' | 'update'>,
   season: string,
-  squad: Player[],
+  squad: NamedPlayer[],
   skip: ReadonlySet<number>,
 ): Promise<{ adopted: string[]; left: number; linked: number }> {
   const adopted: string[] = []
@@ -669,7 +670,7 @@ async function adoptScorers(
       .where(and(eq(matches.season, season), eq(matches.dataSource, 'wikipedia'), isNull(matchGoals.playerId)))
       .orderBy(asc(matchGoals.id))
   )
-    .map(({ goal }) => ({ ...goal, playerPage: goal.wikipediaPage }))
+    .map(({ goal }) => ({ ...goalFieldsOf(goal), playerPage: goal.wikipediaPage }))
     .filter((goal) => isGoalOfOurPlayer(goal) && !skip.has(goal.matchId))
 
   for (const goal of goals) {
@@ -684,17 +685,21 @@ async function adoptScorers(
     if (
       name === '' ||
       name.length > playerNameMaxLength ||
-      squad.some((player) => player.personId === personId || nameKey(player.name) === nameKey(name))
+      squad.some(
+        (player) =>
+          player.personId === personId ||
+          [player.name, player.sourceName].some((one) => nameKey(one) === nameKey(name)),
+      )
     ) {
       continue
     }
 
     const row = {
-      name,
       personId,
       searchTerm: searchTerm(name),
       season,
       source: 'doelpunten' as const,
+      sourceName: name,
       wikipediaPage: playerPage,
     }
     const [{ insertId }] = await db.insert(players).values(row)
@@ -706,6 +711,7 @@ async function adoptScorers(
       id: insertId,
       inSquad: true,
       leftSquadAt: null,
+      name,
       position: null,
       previousShirtNumber: null,
       shirtNumber: null,
@@ -826,7 +832,7 @@ function isSameGoals(before: MatchGoal[], now: LinkedGoal[]): boolean {
         goal.ours === now[index]?.ours &&
         goal.minute === now[index].minute &&
         goal.stoppageMinutes === now[index].stoppageMinutes &&
-        goal.player === now[index].player &&
+        goal.sourceName === now[index].player &&
         goal.personId === now[index].personId &&
         goal.playerId === now[index].playerId &&
         goal.wikipediaPage === now[index].playerPage &&
@@ -1264,7 +1270,7 @@ async function storeMatches(
     seasonRows.filter((row) => row.dataSource !== 'wikipedia').map((row) => [key(row), row.dataSource]),
   )
   const existing = new Map(known)
-  const squad = await db.select().from(players).where(eq(players.season, season))
+  const squad = await readNamedPlayers(db, eq(players.season, season))
   const personBook = await createPersonBook(db, { aliases: aliasMap(personTitleAliases), redirects: personRedirects })
 
   // A player of the squad that has no person yet gets it from the page of his name. Then the

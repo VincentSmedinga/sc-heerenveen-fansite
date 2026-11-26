@@ -132,7 +132,7 @@ const goalsOf = async (round: string) => {
       .from(matchGoals)
       .where(eq(matchGoals.matchId, found?.id ?? 0))
       .orderBy(asc(matchGoals.id))
-  ).map((goal) => [goal.minute, goal.player, goal.ours])
+  ).map((goal) => [goal.minute, goal.sourceName, goal.ours])
 }
 
 const edits = () => database.db.select().from(matchEdits)
@@ -166,11 +166,16 @@ async function enter(
     // A scorer who is a player of the season is entered as that player, as the form does.
     const squad = await database.db.select().from(players).where(eq(players.season, before.season))
     const playerOf = (goal: { ours: boolean; player: string }) =>
-      goal.ours ? (squad.find((player) => player.name.endsWith(` ${goal.player}`))?.id ?? null) : null
+      goal.ours ? (squad.find((player) => player.sourceName.endsWith(` ${goal.player}`))?.id ?? null) : null
 
-    await database.db
-      .insert(matchGoals)
-      .values(goals.map((goal) => ({ ...goal, matchId: before.id, playerId: playerOf(goal) })))
+    await database.db.insert(matchGoals).values(
+      goals.map(({ player, ...goal }) => ({
+        ...goal,
+        matchId: before.id,
+        playerId: playerOf({ ...goal, player }),
+        sourceName: player,
+      })),
+    )
   }
 
   await database.db.insert(matchEdits).values({
@@ -285,7 +290,7 @@ describe('Wikipedia has the same', () => {
   it('sees a goal the editors entered by name as the goal of the page that links a scorer who is no player yet (#1024)', async () => {
     const { pages, server } = await serve()
     const unlinked = (text: string) => text.replaceAll('[[Luca Oyen|Oyen]]', 'Oyen')
-    const ofOyen = () => database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const ofOyen = () => database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
 
     // No page names Oyen with a link, so the import makes no player of him.
     pages.programme = unlinked(original.programme)
@@ -329,7 +334,7 @@ describe('Wikipedia has the same', () => {
     pages.programme = pages.programme.replace('Oyen {{goal|52}}', '[[Luca Oyen|Oyen]] {{goal|52}}')
     await importAt(server, later(first, 2))
 
-    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const [oyen] = await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
 
     expect(oyen).toMatchObject({ source: 'doelpunten', wikipediaPage: 'Luca Oyen' })
     expect(
@@ -460,7 +465,7 @@ describe('Wikipedia has something else', () => {
 
     const [appearance] = await database.db
       .insert(matchAppearances)
-      .values({ matchId, name: 'Oyen', ours: true, shirtNumber: 9, starter: true })
+      .values({ matchId, ours: true, shirtNumber: 9, sourceName: 'Oyen', starter: true })
       .$returningId()
 
     await enter(roundOne, {}, ['goals'], [{ minute: 52, ours: true, player: 'Oyen' }])
@@ -1132,8 +1137,8 @@ describe('a match with a report (issue 1077)', () => {
     const [scorer, passer] = await database.db
       .insert(matchAppearances)
       .values([
-        { matchId, name: 'Oyen', ours: true, shirtNumber: 9, starter: true },
-        { matchId, name: 'Klaverboer', ours: true, shirtNumber: 7, starter: true },
+        { matchId, ours: true, shirtNumber: 9, sourceName: 'Oyen', starter: true },
+        { matchId, ours: true, shirtNumber: 7, sourceName: 'Klaverboer', starter: true },
       ])
       .$returningId()
 
@@ -1161,7 +1166,7 @@ describe('a match with a report (issue 1077)', () => {
     await importAt(server, later(first, 2))
     await importAt(server, later(first, 3))
 
-    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 52, player: 'Oyen' }])
+    expect(await storedGoals(matchId)).toMatchObject([{ ...links, minute: 52, sourceName: 'Oyen' }])
     expect(await edits()).toMatchObject([{ goalsEdited: true, matchId }])
     expect(await log()).toEqual([])
     expect(await changes()).toEqual([])

@@ -976,6 +976,7 @@
 - **Later:** zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ (10 november 2026).
   Vindt geen regel de doelpuntenmaker en linkt het doelpunt naar zijn pagina, dan maakt de import hem als speler van het seizoen.
   De waarschuwing blijft voor een doelpunt zonder link.
+- **Later:** zie _De import houdt de naam van de bron bij en koppelt ook op de naam van de persoon_ (26 november 2026): de naam en de achternaam zijn die van de bron of die van de persoon.
 
 ## De eerste goede lezing van de selectie vervangt de verzonnen selectie
 
@@ -3797,6 +3798,8 @@
   De waarde van Wikipedia bewaren naast die van de redactie, zoals `table_goals` (dan volgt de import Wikipedia weer zodra de tabel verandert, en beslist de redactie niets).
   Een lege waarde van een lijst als afwijking tellen (de lijsten van eerdere seizoenen hebben vaak geen rugnummer, dus dat geeft bij elke speler een wijziging).
 - **Later:** de pagina staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>` (#1305).
+- **Later:** zie _De import houdt de naam van de bron bij en koppelt ook op de naam van de persoon_ (26 november 2026): de naam is geen veld van de redactie meer.
+  De import schrijft de naam van de bron, maakt er geen afwijking van en toont geen openstaande afwijking over een naam.
 
 ## Een speler van de redactie en een speler van de import worden één rij
 
@@ -3898,6 +3901,8 @@
 - **Waarom:** de spelling die supporters het best kennen of de kortste, en voor Korneev de Engelse; de achternaam staat vet op de kaart en het blijft simpel (Gușatu, Nørregaard).
   De rij moet ook kloppen, want Beheer toont de naam van de rij en de site valt er alleen op terug.
 - **Alternatieven:** de spelling van de selectie van Wikipedia laten staan; de gekozen spelling als titel in `personTitleAliases` zetten (de titel is dan een doorverwijzing of bestaat niet, en elke import vraagt Wikipedia naar een titel waar de persoon niet onder staat); Leeroy Echteld; Mugur Radu als voornamen; Bo bij de achternaam.
+- **Later:** zie _De import houdt de naam van de bron bij en koppelt ook op de naam van de persoon_ (26 november 2026): de naam op de rij is die van de bron, en ook een rij die de redactie eerder hernoemde krijgt de gekozen spelling.
+  Het beheer en de site tonen de naam van de persoon.
 
 ## Een selectierij zonder link krijgt een persoon op naam
 
@@ -4950,3 +4955,14 @@
   Eén trage plek is genoeg om een import te laten hangen.
   Gewone wikitekst heeft geen kopjes zonder titel.
 - **Alternatieven:** alleen de drie gemelde patronen herstellen; elk patroon apart herschrijven; een bibliotheek die wikitekst ontleedt, wat een dependency toevoegt.
+
+## De import houdt de naam van de bron bij en koppelt ook op de naam van de persoon
+
+- **Datum:** 26 november 2026
+- **Besluit:** de import mag de naam van de bron op een regel bijwerken, en wijzigt nooit een naam die de redactie aan een persoon gaf (#1697).
+  Een naam is geen veld van de redactie meer.
+  Koppelen op naam werkt met de naam van de bron en met de naam van de persoon.
+  Daarbij wint de naam van de bron, en een naam van een persoon die bij twee regels past, koppelt niets (`rowsByName`).
+- **Waarom:** een bron die de nieuwe schrijfwijze gebruikt, vindt dan dezelfde regel en maakt in dat seizoen geen tweede regel voor die persoon.
+  Zonder merkteken op de naam blijft de naam van de bron gelijk aan wat de bron schrijft.
+- **Alternatieven:** alleen op de naam van de bron koppelen (na een wijziging een tweede rij); de naam als veld van de redactie houden (de import kan de naam van de bron dan niet meer bijhouden, en de redactie krijgt afwijkingen over een naam die niemand ziet).

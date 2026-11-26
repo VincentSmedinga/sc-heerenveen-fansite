@@ -33,6 +33,7 @@ import {
   standings,
   wikipediaPages,
 } from './schema.ts'
+import { shownGoalName, shownPlayerName, shownSearchTerm } from './shown-name.ts'
 import { squadSeasonNumber } from './squad-season-number.ts'
 import { stadiumOnTheDay } from './stadiums.ts'
 import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
@@ -1047,7 +1048,7 @@ export async function listSeasonNumbers(db: Database, season: string): Promise<M
   const shown = alias(players, 'shown_player')
   const [rows, complete] = await Promise.all([
     db
-      .select({ name: shown.name, season: players.season })
+      .select({ name: shown.sourceName, season: players.season })
       .from(shown)
       .innerJoin(players, and(eq(players.personId, shown.personId), lte(players.season, season)))
       .where(eq(shown.season, season)),
@@ -1084,12 +1085,12 @@ export function listSeasonPlayerBirths(db: Database, season: string) {
     .select({
       birthDate: persons.birthDate,
       birthDatePrecision: persons.birthDatePrecision,
-      name: players.name,
+      sourceName: players.sourceName,
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))
     .where(eq(players.season, season))
-    .orderBy(asc(players.name))
+    .orderBy(asc(players.sourceName))
 }
 
 /**
@@ -1098,7 +1099,10 @@ export function listSeasonPlayerBirths(db: Database, season: string) {
  * two seasons with it. A row of every source counts, also one of a player who left.
  */
 export function listSeasonPlayerPersons(db: Database, season: string) {
-  return db.select({ name: players.name, personId: players.personId }).from(players).where(eq(players.season, season))
+  return db
+    .select({ name: shownPlayerName(), personId: players.personId, sourceName: players.sourceName })
+    .from(players)
+    .where(eq(players.season, season))
 }
 
 /**
@@ -1119,15 +1123,16 @@ export function listSeasonPlayers(db: Database, season: string) {
   return db
     .select({
       country: sql<null | string>`coalesce(${persons.country}, ${players.country})`,
-      name: players.name,
+      name: shownPlayerName(),
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
       personSlug: persons.slug,
       position: sql<null | PlayerPosition>`coalesce(${players.position}, ${persons.line})`,
-      searchTerm: players.searchTerm,
+      searchTerm: shownSearchTerm(),
       shirtNumber: players.shirtNumber,
       source: players.source,
+      sourceName: players.sourceName,
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))
@@ -1135,8 +1140,8 @@ export function listSeasonPlayers(db: Database, season: string) {
     .orderBy(
       asc(sql`${players.shirtNumber} is null`),
       asc(players.shirtNumber),
-      asc(players.searchTerm),
-      asc(players.name),
+      asc(shownSearchTerm()),
+      asc(shownPlayerName()),
     )
 }
 
@@ -1158,7 +1163,7 @@ export function listSeasonPlayerStats(db: Database, season: string) {
       competition: playerSeasonStats.competition,
       goals: playerSeasonStats.goals,
       inSquad: players.inSquad,
-      name: players.name,
+      name: shownPlayerName(),
       playerId: players.id,
       position: players.position,
       wikipediaPage: players.wikipediaPage,
@@ -1166,7 +1171,7 @@ export function listSeasonPlayerStats(db: Database, season: string) {
     .from(playerSeasonStats)
     .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
     .where(eq(playerSeasonStats.season, season))
-    .orderBy(asc(players.name), asc(players.id), asc(playerSeasonStats.competition))
+    .orderBy(asc(shownPlayerName()), asc(players.id), asc(playerSeasonStats.competition))
 }
 
 /**
@@ -1209,17 +1214,17 @@ export function listSeasonStandings(db: Database, season: string) {
 export function listSquad(db: Database, season: string) {
   return db
     .select({
-      name: players.name,
+      name: shownPlayerName(),
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
       position: players.position,
-      searchTerm: players.searchTerm,
+      searchTerm: shownSearchTerm(),
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))
     .where(and(eq(players.season, season), eq(players.inSquad, true)))
-    .orderBy(asc(sql`${players.shirtNumber} is null`), asc(players.shirtNumber), asc(players.name))
+    .orderBy(asc(sql`${players.shirtNumber} is null`), asc(players.shirtNumber), asc(shownPlayerName()))
 }
 
 /**
@@ -1473,6 +1478,25 @@ function omitId<T extends { id: number }>({ id, ...match }: T): Omit<T, 'id'> {
 }
 
 /**
+ * The scorer as the line of the goals of a match writes him: the surname of his person with the
+ * prefix (`Van Aken`), or the given name of a person without one, and else the name we show
+ * (`shownGoalName`): that of a person without parts, or that of the source without a person.
+ */
+function scorerNameOf(goal: {
+  name: string
+  personFamilyName: null | string
+  personFamilyNamePrefix: null | string
+  personGivenName: null | string
+}) {
+  const family = goal.personFamilyName?.trim() ?? ''
+  const written = [goal.personFamilyNamePrefix?.trim(), family].filter(Boolean).join(' ')
+  // A surname that stands alone starts with a capital, as in Dutch: `Van Aken`.
+  const surname = family === '' ? '' : written.charAt(0).toLocaleUpperCase('nl') + written.slice(1)
+
+  return surname || (goal.personGivenName?.trim() ?? '') || goal.name
+}
+
+/**
  * Gives each of `rows` its `goals`, found by its `id`: the scorers of the match in the order
  * of the clock, both clubs together. `where` picks the matches the rows are of, so one query
  * reads the goals of all of them, and a match without a goal gets an empty list. A match that
@@ -1483,6 +1507,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
     .select({
       matchId: matchGoals.matchId,
       minute: matchGoals.minute,
+      name: shownGoalName(),
       ours: matchGoals.ours,
       ownGoal: matchGoals.ownGoal,
       penalty: matchGoals.penalty,
@@ -1491,7 +1516,6 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
       personGivenName: persons.givenName,
       personId: sql<null | number>`coalesce(${matchGoals.personId}, ${players.personId})`,
       personSlug: persons.slug,
-      player: matchGoals.player,
       playerId: matchGoals.playerId,
       playerPage: matchGoals.wikipediaPage,
       stoppageMinutes: matchGoals.stoppageMinutes,
@@ -1524,7 +1548,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
         personGivenName: goal.personGivenName,
         personId: goal.personId,
         personSlug: goal.personSlug,
-        player: goal.player,
+        player: scorerNameOf(goal),
         playerId: goal.playerId,
         playerPage: goal.playerPage,
         stoppageMinutes: goal.stoppageMinutes,

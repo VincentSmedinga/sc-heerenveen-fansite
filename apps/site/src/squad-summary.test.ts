@@ -109,11 +109,11 @@ describe('getSquadSummary', () => {
   beforeEach(() => {
     vi.mocked(listSeasonPlayerBirths).mockReset()
     vi.mocked(listSeasonPlayerBirths).mockResolvedValue([
-      { birthDate: '2000-10-23', birthDatePrecision: 'day', name: first! },
-      { birthDate: '1990-10-24', birthDatePrecision: 'day', name: second! },
-      { birthDate: '1999-01-01', birthDatePrecision: 'year', name: third! },
-      { birthDate: null, birthDatePrecision: null, name: fourth! },
-      { birthDate: null, birthDatePrecision: null, name: fifth! },
+      { birthDate: '2000-10-23', birthDatePrecision: 'day', sourceName: first! },
+      { birthDate: '1990-10-24', birthDatePrecision: 'day', sourceName: second! },
+      { birthDate: '1999-01-01', birthDatePrecision: 'year', sourceName: third! },
+      { birthDate: null, birthDatePrecision: null, sourceName: fourth! },
+      { birthDate: null, birthDatePrecision: null, sourceName: fifth! },
     ])
   })
 
@@ -140,7 +140,7 @@ describe('getSquadSummary', () => {
       squadData.players.map((player, index) => ({
         birthDate: index < 4 ? `${2000 - index}-10-23` : null,
         birthDatePrecision: index < 4 ? ('day' as const) : null,
-        name: player.name,
+        sourceName: player.name,
       })),
     )
 
@@ -185,7 +185,7 @@ describe('getSquadSummary', () => {
       squadData.players.map((player) => ({
         birthDate: '2000-10-23',
         birthDatePrecision: 'day' as const,
-        name: player.name,
+        sourceName: player.name,
       })),
     )
 

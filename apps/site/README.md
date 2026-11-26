@@ -1364,6 +1364,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Markeren en intrekken rekenen het seizoen meteen uit en komen in het logboek (`squad.mark-complete` en `squad.unmark-complete`, met het beginjaar in `item_id`); de site volgt binnen vijf minuten.
 - `/beheer/spelers/nieuw?seizoen=<seizoen>` voegt een speler toe.
   Bovenaan staat een zoekformulier met methode GET (`q`): wat het vindt (`searchPersons`, hoogstens 25 personen), staat als lijst "Persoon" in het formulier, met "Een nieuwe persoon" als laatste keuze.
+  Het zoekt in de naam en de titel, en in de namen die een bron op een selectie, opstelling of doelpunt van hem schreef, zoals een oude spelling; het resultaat toont de naam van de persoon.
   Elke keuze noemt de seizoenen van de persoon en, als die anders is dan de naam, de titel van zijn artikel.
   Kiest de redactie een persoon die we kennen, dan blijft dat dezelfde persoon; anders vult ze voornaam, tussenvoegsel, achternaam en een Wikipedia-pagina in, die leeg mag blijven.
   Rugnummer (1 tot en met 99) en positie mogen ook leeg blijven: de oude seizoenen hebben ze niet.
@@ -1374,17 +1375,20 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 - De speler krijgt de bron `redactie` in `players`, en een nieuwe persoon de bron `redactie` voor zijn naam.
   Een Wikipedia-pagina die al bij een persoon hoort, maakt geen tweede persoon: de speler wordt die persoon.
   De site vraagt Wikipedia niets: de titel geldt zoals de redactie hem invult.
-- Een persoon, een naam of een Wikipedia-pagina die het seizoen al heeft, wordt geweigerd met een zin bij het veld.
+- Bij het toevoegen wordt een persoon, een naam of een Wikipedia-pagina die het seizoen al heeft geweigerd met een zin bij het veld.
+  Bij het aanpassen geldt dat alleen voor de persoon en de pagina.
   Elk veld toont zijn eigen fout, en de lijst van fouten krijgt de focus, ook bij een fout zonder veld.
 - `/beheer/spelers/<nummer>` past een speler aan (`PlayerForm.tsx`, hetzelfde formulier zonder de lijst van personen).
-  Een andere naam geldt ook voor de persoon, in elk seizoen, met de bron `redactie`.
+  Een andere naam gaat alleen naar de persoon, met de bron `redactie`: elk seizoen en elke opstelling toont hem, en de regels houden de naam van hun bron (#1697).
+  Een speler zonder persoon die een andere naam krijgt, krijgt daarvoor een persoon.
+  Een naam die een andere speler van het seizoen ook heeft, is geen reden om te weigeren.
   Een Wikipedia-pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel; zijn doelpunten krijgen die persoon ook.
   Een pagina die bij een andere persoon hoort, wordt geweigerd, met onder het veld een link naar het samenvoegen van de twee personen.
   Onder "Wie" staat de link "Persoon bewerken" naar het formulier van zijn persoon.
 - `/beheer/personen/<nummer>` (`src/app/beheer/personen`) is het formulier van een persoon, in de delen Naam, Leven, Land en Linie (#1164).
   Elk deel heeft een eigen adres, zoals `/beheer/personen/<nummer>/leven`, dat alleen dat deel toont en opslaat; de navigatie "Delen van de persoon" staat erboven.
   De velden en controles zijn die van het formulier van een speler (`PersonFields.tsx` en `src/beheer/person-checks.ts`).
-  Een nieuwe naam geldt voor de persoon en voor zijn speler in elk seizoen.
+  Een nieuwe naam gaat alleen naar de persoon, en elk seizoen en elke opstelling toont hem.
   De geboortedatum is een jaar of een datum, met de bron `manual`, die de importer niet vervangt; leeg haalt hem weg, zodat de importer hem weer invult.
   Opslaan vraagt geen reden (die mag leeg), en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
 - Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
@@ -1414,7 +1418,8 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   De wijziging staat in het logboek, in de regel van de speler.
 - Het uitklapblok "Uit de selectie halen" zet `in_squad` uit, met het moment; de rij blijft staan.
   Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel hoort bij het seizoen: hij heeft het blok niet, en de pagina zegt waarom.
-- Wat de redactie zet, is daarna van de redactie (`players.editors_fields`, #1022): bij toevoegen de naam en elk ingevuld veld, bij aanpassen de velden die veranderden.
+- Wat de redactie zet, is daarna van de redactie (`players.editors_fields`, #1022): bij toevoegen elk ingevuld veld, bij aanpassen de velden die veranderden.
+  De naam hoort daar niet bij: die staat bij de persoon (#1697).
   De import schrijft die velden niet meer, en een andere waarde van de import wacht op `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>`.
 - `addPlayer`, `editPlayer` en `removePlayer` in `src/beheer/players.ts` schrijven de wijziging en `player.add`, `player.edit` of `player.remove` in het logboek, in één transactie, met het nummer van de speler.
 - De speler staat daarna in de kiezer van een doelpunt van dat seizoen en op de pagina Spelers, met dezelfde bronvermelding als de andere spelers.

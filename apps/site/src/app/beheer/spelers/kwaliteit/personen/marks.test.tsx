@@ -53,7 +53,7 @@ beforeEach(async () => {
   ;[{ insertId: personId }] = await database.db
     .insert(persons)
     .values({ country: 'NL', familyName: 'Bos', givenName: 'Tom', line: 'doelman', name: 'Tom Bos' })
-  await database.db.insert(players).values({ name: 'Tom Bos', personId, searchTerm: 'Bos', season: '2001/02' })
+  await database.db.insert(players).values({ personId, searchTerm: 'Bos', season: '2001/02', sourceName: 'Tom Bos' })
 })
 
 const empty = { errors: {}, values: {} } as never

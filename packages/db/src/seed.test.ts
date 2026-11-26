@@ -970,8 +970,8 @@ describe('the made-up matches', () => {
     expect(goals.some((goal) => goal.stoppageMinutes !== null)).toBe(true)
     expect(goals.some((goal) => (goal.minute ?? 0) > 90)).toBe(true)
     expect(goals.some((goal) => goal.minute === null)).toBe(true)
-    expect(goals.some((goal) => goal.player.length > 25)).toBe(true)
-    expect(goals.filter((goal) => goal.player === 'Proefman' && goal.matchId === goals[0]?.matchId).length).toBe(2)
+    expect(goals.some((goal) => goal.sourceName.length > 25)).toBe(true)
+    expect(goals.filter((goal) => goal.sourceName === 'Proefman' && goal.matchId === goals[0]?.matchId).length).toBe(2)
   })
 
   it('gives at least twelve players a goal for sc Heerenveen, with levels, for a long list of top scorers', async () => {
@@ -982,7 +982,7 @@ describe('the made-up matches', () => {
 
     for (const goal of goals.filter((item) => item.ours && !item.ownGoal)) {
       // Two players can have the same surname: the page is what tells them apart.
-      const key = goal.wikipediaPage ?? goal.player
+      const key = goal.wikipediaPage ?? goal.sourceName
 
       perPlayer.set(key, (perPlayer.get(key) ?? 0) + 1)
     }
@@ -999,7 +999,7 @@ describe('the made-up matches', () => {
     const linked = async () =>
       (
         await database.db
-          .select({ goal: matchGoals, inSquad: players.inSquad, name: players.name })
+          .select({ goal: matchGoals, inSquad: players.inSquad, name: players.sourceName })
           .from(matchGoals)
           .leftJoin(players, eq(matchGoals.playerId, players.id))
           .orderBy(asc(matchGoals.id))
@@ -1009,7 +1009,7 @@ describe('the made-up matches', () => {
         ours: goal.ours,
         ownGoal: goal.ownGoal,
         page: goal.wikipediaPage,
-        player: goal.player,
+        player: goal.sourceName,
       }))
 
     const bothSeeds = async (first: 'matches' | 'squad') => {
@@ -1061,7 +1061,7 @@ describe('the made-up matches', () => {
         },
       ])
       expect(madeUpSquad(now).filter((player) => player.inSquad === false)).toMatchObject([
-        { leftSquadAt: new Date('2026-10-22T12:00:00Z'), name: 'Sander Monster' },
+        { leftSquadAt: new Date('2026-10-22T12:00:00Z'), sourceName: 'Sander Monster' },
       ])
     })
 
@@ -1110,7 +1110,7 @@ describe('the made-up matches', () => {
       const squad = madeUpSquad(now)
 
       expect(new Set(squad.map((player) => player.wikipediaPage)).size).toBe(squad.length)
-      expect(squad.every((player) => player.wikipediaPage === player.name)).toBe(true)
+      expect(squad.every((player) => player.wikipediaPage === player.sourceName)).toBe(true)
       expect(squad.filter((player) => player.searchTerm === 'Testvoort')).toHaveLength(2)
     })
   })
@@ -1228,9 +1228,13 @@ describe('the made-up squad', () => {
   })
 
   it('leaves a squad that is there alone', async () => {
-    await database.db
-      .insert(players)
-      .values({ name: 'Echte Speler', position: 'doelman', searchTerm: 'Speler', season: '2026/27', shirtNumber: 1 })
+    await database.db.insert(players).values({
+      position: 'doelman',
+      searchTerm: 'Speler',
+      season: '2026/27',
+      shirtNumber: 1,
+      sourceName: 'Echte Speler',
+    })
 
     expect(await seedSquad(database.db, now)).toBe(false)
     expect(await database.db.select().from(players)).toHaveLength(1)
@@ -1247,8 +1251,8 @@ describe('the made-up squad', () => {
       )
     }
     expect(squad.some((player) => player.shirtNumber === null)).toBe(true)
-    expect(squad.some((player) => !player.name.includes(' '))).toBe(true)
-    expect(new Set(squad.map((player) => player.name)).size).toBe(squad.length)
+    expect(squad.some((player) => !player.sourceName.includes(' '))).toBe(true)
+    expect(new Set(squad.map((player) => player.sourceName)).size).toBe(squad.length)
   })
 
   it('has appearances for the made-up scorers, in the Eredivisie and the cup, that agree with the made-up goals', () => {
@@ -1273,7 +1277,7 @@ describe('the made-up squad', () => {
         .filter((item) => item.ours && item.ownGoal !== true)) {
         expect(
           madeUpPlayerStats[goal.wikipediaPage ?? '']?.some(([name]) => name === competition),
-          goal.player,
+          goal.sourceName,
         ).toBe(true)
       }
     }

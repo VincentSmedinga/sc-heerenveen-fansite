@@ -13,6 +13,7 @@ import {
   personPages,
   persons,
 } from './schema.ts'
+import { shownClubPlayerName } from './shown-name.ts'
 
 /** A name to look for, with each club and season of the rows that no rule can link. */
 export type OpponentName = {
@@ -280,7 +281,7 @@ async function judgeRows(
       clubId: clubs.id,
       clubWikidataId: clubs.wikidataId,
       id: matchAppearances.id,
-      name: matchAppearances.name,
+      name: matchAppearances.sourceName,
       season: matches.season,
     })
     .from(matchAppearances)
@@ -331,14 +332,21 @@ async function judgeRows(
 
   for (const part of chunks([...new Set(rows.map((row) => row.clubId))])) {
     for (const player of await db
-      .select({ clubId: clubSquadPlayers.clubId, name: clubSquadPlayers.name, personId: clubSquadPlayers.personId })
+      .select({
+        clubId: clubSquadPlayers.clubId,
+        name: clubSquadPlayers.sourceName,
+        personId: clubSquadPlayers.personId,
+        shownName: shownClubPlayerName(),
+      })
       .from(clubSquadPlayers)
       .where(and(inArray(clubSquadPlayers.clubId, part), isNotNull(clubSquadPlayers.personId)))) {
       const names = bySquad.get(player.clubId) ?? new Map<string, null | number>()
-      const key = nameKey(player.name)
-      const before = names.get(key)
+      // A row is found by the name of the source and by the name of the person (#1697).
+      for (const key of new Set([nameKey(player.name), nameKey(player.shownName)])) {
+        const before = names.get(key)
 
-      names.set(key, before === undefined || before === player.personId ? player.personId : null)
+        names.set(key, before === undefined || before === player.personId ? player.personId : null)
+      }
       bySquad.set(player.clubId, names)
     }
   }

@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { coachRatings, matchAppearances, matches, playerRatings, staff } from '@fansite/db/schema'
+import { shownAppearanceName } from '@fansite/db/shown-name'
 import { desc, eq } from 'drizzle-orm'
 
 import type { GameData } from './my-data'
@@ -30,14 +31,14 @@ export async function ratingData(db: Database, supporterId: number): Promise<Gam
       home: matches.home,
       matchDate: matches.matchDate,
       matchId: matches.id,
-      name: matchAppearances.name,
+      name: shownAppearanceName(),
       opponent: matches.opponent,
     })
     .from(playerRatings)
     .innerJoin(matchAppearances, eq(matchAppearances.id, playerRatings.appearanceId))
     .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
     .where(eq(playerRatings.supporterId, supporterId))
-    .orderBy(desc(matches.matchDate), desc(matches.id), matchAppearances.name)
+    .orderBy(desc(matches.matchDate), desc(matches.id), shownAppearanceName())
 
   const coaches = await db
     .select({

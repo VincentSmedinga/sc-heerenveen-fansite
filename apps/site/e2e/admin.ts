@@ -259,7 +259,7 @@ export async function addRatingMatch(email: string, { coach = false }: { coach?:
 
     // What a check that stopped halfway left behind, so a second run starts clean.
     await db.delete(matches).where(and(eq(matches.opponent, 'Cijferploeg'), eq(matches.round, 'Cijfer-controle')))
-    await db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+    await db.delete(players).where(inArray(players.sourceName, [...ratingPlayers]))
     await db.delete(staff).where(eq(staff.name, otherCoach))
 
     if (!coach) {
@@ -295,11 +295,18 @@ export async function addRatingMatch(email: string, { coach = false }: { coach?:
     await db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'klaar' })
 
     for (const [index, name] of ratingPlayers.entries()) {
-      const [player] = await db.insert(players).values({ name, searchTerm: name, season, source: 'selectie' })
+      const [player] = await db
+        .insert(players)
+        .values({ searchTerm: name, season, source: 'selectie', sourceName: name })
 
-      await db
-        .insert(matchAppearances)
-        .values({ matchId, name, ours: true, playerId: player.insertId, shirtNumber: index + 1, starter: true })
+      await db.insert(matchAppearances).values({
+        matchId,
+        ours: true,
+        playerId: player.insertId,
+        shirtNumber: index + 1,
+        sourceName: name,
+        starter: true,
+      })
     }
 
     return async () => {
@@ -308,7 +315,7 @@ export async function addRatingMatch(email: string, { coach = false }: { coach?:
       try {
         // The report, its players and their grades go with the match.
         await connection.db.delete(matches).where(eq(matches.id, matchId))
-        await connection.db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+        await connection.db.delete(players).where(inArray(players.sourceName, [...ratingPlayers]))
         await connection.db.delete(staff).where(eq(staff.name, otherCoach))
         await connection.db.delete(clubs).where(eq(clubs.id, row?.clubId ?? 0))
       } finally {

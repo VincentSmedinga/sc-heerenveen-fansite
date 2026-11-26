@@ -3,6 +3,7 @@ import type { PredictionMatch } from '@fansite/db/prediction-matches'
 
 import { clubs, fantasyPicks, fantasyPlayerLines, matches, persons, players } from '@fansite/db/schema'
 import { utcToAmsterdam } from '@fansite/db/season'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm'
 
 import { personNameParts, personSortName, splitPersonName } from '../player-name'
@@ -105,7 +106,7 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
       inSquad: players.inSquad,
       keptLine: fantasyPlayerLines.line,
       leftSquadAt: players.leftSquadAt,
-      name: players.name,
+      name: shownPlayerName(),
       position: sql<FjouwerLine | null>`coalesce(${players.position}, ${persons.line})`,
     })
     .from(players)
@@ -183,7 +184,7 @@ export async function fjouwerSurnames(db: Database, ids: readonly number[]): Pro
       familyNamePrefix: persons.familyNamePrefix,
       givenName: persons.givenName,
       id: players.id,
-      name: players.name,
+      name: shownPlayerName(),
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))

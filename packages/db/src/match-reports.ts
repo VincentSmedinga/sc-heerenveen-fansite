@@ -1,7 +1,7 @@
 import type { MatchReport as ReportForRules, ReportMatch } from '@fansite/shared/match-report'
 
 import { minutesPlayed, playedMatch } from '@fansite/shared/match-report'
-import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { and, asc, eq, getTableColumns, inArray, isNull, or } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -36,6 +36,7 @@ import {
   statsCompetitions,
 } from './schema.ts'
 import { utcToAmsterdam } from './season.ts'
+import { shownAppearanceName, shownGoalName, shownPlayerName, shownSearchTerm } from './shown-name.ts'
 
 // What the pages read of the match reports (see `match_reports` in schema.ts). Writing a report
 // is the work of the admin, and the rules that say whether a report is right are in
@@ -72,6 +73,9 @@ export type PlayerReportStats = {
   yellowCards: number
   yellowRedCards: number
 }
+
+/** A line of a lineup or a bench, with the name we show for it (`shownAppearanceName`). */
+export type ReportAppearance = MatchAppearance & { name: string }
 
 /**
  * A match with a report that is `klaar` or `bezig`, for the page of the match and the links to
@@ -126,6 +130,9 @@ export type ReportedPlayerName = {
   slug: null | string
 }
 
+/** A goal of a match, with the name we show for it (`shownGoalName`). */
+export type ReportGoal = MatchGoal & { name: string }
+
 /** A player whose goals in a competition differ between the reports and the squad table. */
 export type ReportGoalDifference = {
   competition: StatsCompetition
@@ -170,9 +177,9 @@ export type SeasonMatchReport = Pick<
  * of a `ReportedMatch` has the name of our players.
  */
 export type StoredMatchReport = {
-  appearances: MatchAppearance[]
+  appearances: ReportAppearance[]
   cards: MatchCard[]
-  goals: MatchGoal[]
+  goals: ReportGoal[]
   incidents: MatchIncident[]
   report: MatchReport
   shootout: MatchShootoutKick[]
@@ -183,6 +190,14 @@ type FamilyMember = { familyName: string; familyNamePrefix: null | string; given
 
 /** What the reading functions read through. */
 type ReportDatabase = Pick<Database, 'select'>
+
+/** The lines of lineups and benches, each with the name we show. */
+export const selectReportAppearances = (db: ReportDatabase) =>
+  db.select({ ...getTableColumns(matchAppearances), name: shownAppearanceName() }).from(matchAppearances)
+
+/** The goals, each with the name we show. */
+export const selectReportGoals = (db: ReportDatabase) =>
+  db.select({ ...getTableColumns(matchGoals), name: shownGoalName() }).from(matchGoals)
 
 /**
  * The played match of a season on a day against a club (by its `slug`), when it has a report,
@@ -225,7 +240,7 @@ export async function findReportGoalDifferences(db: ReportDatabase, season: stri
     }
 
     const table = await db
-      .select({ goals: playerSeasonStats.goals, name: players.name, playerId: playerSeasonStats.playerId })
+      .select({ goals: playerSeasonStats.goals, name: shownPlayerName(), playerId: playerSeasonStats.playerId })
       .from(playerSeasonStats)
       .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
       .where(and(eq(playerSeasonStats.season, season), eq(playerSeasonStats.competition, competition)))
@@ -388,11 +403,11 @@ export async function readMatchReport(db: ReportDatabase, matchId: number): Prom
   }
 
   const [appearances, substitutions, cards, incidents, goals, shootout] = await Promise.all([
-    db.select().from(matchAppearances).where(eq(matchAppearances.matchId, matchId)).orderBy(asc(matchAppearances.id)),
+    selectReportAppearances(db).where(eq(matchAppearances.matchId, matchId)).orderBy(asc(matchAppearances.id)),
     db.select().from(matchSubstitutions).where(eq(matchSubstitutions.matchId, matchId)),
     db.select().from(matchCards).where(eq(matchCards.matchId, matchId)),
     db.select().from(matchIncidents).where(eq(matchIncidents.matchId, matchId)),
-    db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId)),
+    selectReportGoals(db).where(eq(matchGoals.matchId, matchId)),
     db.select().from(matchShootoutKicks).where(eq(matchShootoutKicks.matchId, matchId)),
   ])
 
@@ -444,10 +459,10 @@ export async function readPlayerReportStats(
 
   const ids = finished.map((match) => match.id)
   const [appearances, substitutions, cards, goals] = await Promise.all([
-    db.select().from(matchAppearances).where(inArray(matchAppearances.matchId, ids)),
+    selectReportAppearances(db).where(inArray(matchAppearances.matchId, ids)),
     db.select().from(matchSubstitutions).where(inArray(matchSubstitutions.matchId, ids)),
     db.select().from(matchCards).where(inArray(matchCards.matchId, ids)),
-    db.select().from(matchGoals).where(inArray(matchGoals.matchId, ids)),
+    selectReportGoals(db).where(inArray(matchGoals.matchId, ids)),
   ])
   const stats = new Map<number, PlayerReportStats>()
 
@@ -480,7 +495,7 @@ export async function readPlayerReportStats(
         stoppageMinutes: substitution.stoppageMinutes,
       })),
     }
-    const entry = (appearance: MatchAppearance) => {
+    const entry = (appearance: ReportAppearance) => {
       if (appearance.playerId === null) {
         return undefined
       }
@@ -679,7 +694,7 @@ async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<Sto
       givenName: persons.givenName,
       id: players.id,
       personId: players.personId,
-      searchTerm: players.searchTerm,
+      searchTerm: shownSearchTerm(),
       slug: persons.slug,
     })
     .from(players)
@@ -802,11 +817,11 @@ async function readStoredReports(db: ReportDatabase, ids: number[]) {
 
   const [reports, appearances, substitutions, cards, incidents, goals, shootout] = await Promise.all([
     db.select().from(matchReports).where(inArray(matchReports.matchId, ids)),
-    db.select().from(matchAppearances).where(inArray(matchAppearances.matchId, ids)).orderBy(asc(matchAppearances.id)),
+    selectReportAppearances(db).where(inArray(matchAppearances.matchId, ids)).orderBy(asc(matchAppearances.id)),
     db.select().from(matchSubstitutions).where(inArray(matchSubstitutions.matchId, ids)),
     db.select().from(matchCards).where(inArray(matchCards.matchId, ids)),
     db.select().from(matchIncidents).where(inArray(matchIncidents.matchId, ids)),
-    db.select().from(matchGoals).where(inArray(matchGoals.matchId, ids)),
+    selectReportGoals(db).where(inArray(matchGoals.matchId, ids)),
     db.select().from(matchShootoutKicks).where(inArray(matchShootoutKicks.matchId, ids)),
   ])
   const ofMatch = <T extends { matchId: number }>(rows: T[], id: number) => rows.filter((row) => row.matchId === id)

@@ -42,7 +42,7 @@ async function addPerson(name: null | string, { birthDate = null as null | strin
   if (season !== '') {
     await database.db
       .insert(players)
-      .values({ name: name ?? 'Speler Zondernaam', personId: id, searchTerm: 'x', season })
+      .values({ personId: id, searchTerm: 'x', season, sourceName: name ?? 'Speler Zondernaam' })
   }
 
   return id
@@ -108,7 +108,7 @@ describe('personSlug', () => {
 
 describe('the names of the made-up squad of the seed', () => {
   it('lose no letter in their address (#1113), so a new letter is noticed', () => {
-    const names = madeUpSquad(new Date('2026-11-11T12:00:00Z')).map(({ name }) => name)
+    const names = madeUpSquad(new Date('2026-11-11T12:00:00Z')).map(({ sourceName: name }) => name)
 
     expect(names.length).toBeGreaterThan(0)
 
@@ -309,7 +309,7 @@ describe('searchPlayers', () => {
     const id = inserted!.id
 
     for (const season of seasons) {
-      await database.db.insert(players).values({ name, personId: id, searchTerm: 'x', season })
+      await database.db.insert(players).values({ personId: id, searchTerm: 'x', season, sourceName: name })
     }
     for (const address of old) {
       await database.db.insert(personSlugs).values({ personId: id, slug: address })

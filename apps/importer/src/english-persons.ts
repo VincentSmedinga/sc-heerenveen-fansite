@@ -14,6 +14,7 @@ import type { Database } from '@fansite/db/client'
 
 import { knownPersonPages, type PersonName } from '@fansite/db/persons'
 import { players } from '@fansite/db/schema'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import { isNotNull } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
@@ -107,10 +108,12 @@ export async function findEnglishPersons(
   const ofName = new Map<string, Set<number>>()
 
   for (const row of await db
-    .select({ name: players.name, personId: players.personId })
+    .select({ name: shownPlayerName(), personId: players.personId, sourceName: players.sourceName })
     .from(players)
     .where(isNotNull(players.personId))) {
-    ofName.set(nameKey(row.name), (ofName.get(nameKey(row.name)) ?? new Set()).add(row.personId as number))
+    for (const key of [row.sourceName, row.name].map(nameKey)) {
+      ofName.set(key, (ofName.get(key) ?? new Set()).add(row.personId as number))
+    }
   }
   for (const player of without) {
     const persons = ofName.get(nameKey(player.name))

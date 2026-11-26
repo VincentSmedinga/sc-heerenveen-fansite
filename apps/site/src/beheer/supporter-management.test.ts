@@ -238,21 +238,21 @@ describe('the grades of a blocked account (issue 1476)', () => {
     const [player] = await database.db
       .insert(players)
       .values({
-        name: 'Zeno Keeper',
         position: 'doelman',
         searchTerm: 'Zeno Keeper',
         season: '2026/27',
         source: 'selectie',
+        sourceName: 'Zeno Keeper',
       })
       .$returningId()
     const [appearance] = await database.db
       .insert(matchAppearances)
       .values({
         matchId: match!.id,
-        name: 'Zeno Keeper',
         ours: true,
         playerId: player!.id,
         shirtNumber: 1,
+        sourceName: 'Zeno Keeper',
         starter: true,
       })
       .$returningId()

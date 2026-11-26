@@ -84,21 +84,21 @@ beforeEach(async () => {
   await database.db.insert(personPages).values({ page: 'Luca Oyen', personId })
   await database.db.insert(players).values([
     {
-      name: 'Luca Oyen',
       personId,
       position: 'aanvaller',
       searchTerm: 'Oyen',
       season,
       shirtNumber: 7,
+      sourceName: 'Luca Oyen',
       wikipediaPage: 'Luca Oyen',
     },
     {
       inSquad: false,
       leftSquadAt: new Date('2020-01-31T12:00:00Z'),
-      name: 'Jan Vos',
       searchTerm: 'Vos',
       season,
       source: 'verslag',
+      sourceName: 'Jan Vos',
     },
   ])
 
@@ -127,7 +127,7 @@ const playerForm = async (id: number | string, searchParams: Record<string, stri
     await PlayerPage({ params: Promise.resolve({ id: String(id) }), searchParams: Promise.resolve(searchParams) }),
   )
 const idOf = async (name: string) =>
-  (await database.db.select().from(players)).find((row) => row.name === name)?.id ?? 0
+  (await database.db.select().from(players)).find((row) => row.sourceName === name)?.id ?? 0
 
 /** The rows of the table of the list: the name in the row header and the texts of the cells. */
 const rowsOf = (html: string) =>
@@ -192,11 +192,11 @@ describe('the list of the players', () => {
 
   it('says which number two players in the squad share, with their names, before the table', async () => {
     await database.db.insert(players).values({
-      name: 'Testspeler Dubbel',
       searchTerm: 'Dubbel',
       season,
       shirtNumber: 7,
       source: 'redactie',
+      sourceName: 'Testspeler Dubbel',
     })
 
     const html = (await list({ seizoen: '2019-20' })).replaceAll('<!-- -->', '')
@@ -211,18 +211,18 @@ describe('the list of the players', () => {
       {
         inSquad: false,
         leftSquadAt: new Date('2019-12-01T00:00:00Z'),
-        name: 'Testspeler Weg',
         searchTerm: 'Weg',
         season,
         shirtNumber: 7,
+        sourceName: 'Testspeler Weg',
       },
       {
-        name: 'Testspeler Eerder',
         previousShirtNumber: 7,
         searchTerm: 'Eerder',
         season,
         shirtNumber: 9,
         shirtNumberFrom: '2019-10-01',
+        sourceName: 'Testspeler Eerder',
       },
     ])
 
@@ -237,12 +237,12 @@ describe('the list of the players', () => {
     const [{ insertId: onlyPerson }] = await person('Persoon', 'doelman')
     const [{ insertId: neither }] = await person('Geen', null)
     const row = (name: string, personId: null | number, position: 'middenvelder' | null, searchTerm: string) => ({
-      name,
       personId,
       position,
       searchTerm,
       season: other,
       source: 'selectie' as const,
+      sourceName: name,
     })
     await database.db
       .insert(players)
@@ -257,16 +257,17 @@ describe('the list of the players', () => {
       expect(
         rowsOf(await list({ seizoen: '2019-20' }))
           .map(([name, , position]) => [name, position])
-          .filter(([name]) => /^(Alleen|Beide|Geen van)/u.test(name ?? '')),
+          .filter(([name]) => /^(Alleen|Beide|Geen|Persoon)/u.test(name ?? '')),
       ).toEqual([
         ['Alleen seizoen', 'Middenvelder'],
-        ['Alleen persoon', 'Doelman (linie van de persoon)'],
         ['Beide', 'Middenvelder'],
-        ['Geen van beide', 'Positie onbekend'],
+        ['Geen', 'Positie onbekend'],
+        // A row with a person shows the name of the person, and sorts by it.
+        ['Persoon', 'Doelman (linie van de persoon)'],
       ])
     } finally {
       await database.db.delete(players).where(inArray(players.personId, [both, onlyPerson, neither]))
-      await database.db.delete(players).where(eq(players.name, 'Alleen seizoen'))
+      await database.db.delete(players).where(eq(players.sourceName, 'Alleen seizoen'))
       await database.db.delete(persons).where(inArray(persons.id, [both, onlyPerson, neither]))
     }
   })
@@ -308,7 +309,7 @@ describe('the mark that a squad is complete, on the list of the players (#1675)'
   })
 
   it('has no card for the running season, also when it has players', async () => {
-    await database.db.insert(players).values({ name: 'Nu', searchTerm: 'Nu', season: current })
+    await database.db.insert(players).values({ searchTerm: 'Nu', season: current, sourceName: 'Nu' })
 
     expect(await list()).not.toContain('Selectie compleet')
   })
@@ -338,7 +339,7 @@ describe('the mark that a squad is complete, on the list of the players (#1675)'
   })
 
   it('says that the mark does not count and who is missing, when a scorer is not in the list', async () => {
-    await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, player: 'Niet Erbij' })
+    await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, sourceName: 'Niet Erbij' })
     await markSquadComplete(database.db, userId, season)
 
     expect(await list({ seizoen: '2019-20' })).toContain(
@@ -347,7 +348,7 @@ describe('the mark that a squad is complete, on the list of the players (#1675)'
   })
 
   it('does not promise in the notice that the site shows a mark that does not count', async () => {
-    await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, player: 'Niet Erbij' })
+    await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, sourceName: 'Niet Erbij' })
     await markSquadComplete(database.db, userId, season)
 
     const html = await list({ gedaan: 'compleet', seizoen: '2019-20' })
@@ -418,12 +419,12 @@ describe('the form that adds a player', () => {
       .values({ familyName: 'Voorstel', givenName: 'Testspeler', name: 'Testspeler Voorstel', nameSource: 'sort_key' })
 
     await database.db.insert(players).values({
-      name: 'Testspeler Voorstel',
       personId: insertId,
       searchTerm: 'Voorstel',
       season: '2018/19',
       shirtNumber: 21,
       source: 'selectie',
+      sourceName: 'Testspeler Voorstel',
     })
 
     const html = await addForm({ q: 'voorstel', seizoen: '2019-20' })
@@ -438,12 +439,12 @@ describe('the form that adds a player', () => {
       .values({ familyName: 'Voorstel', givenName: 'Testspeler', name: 'Testspeler Voorstel', nameSource: 'sort_key' })
 
     await database.db.insert(players).values({
-      name: 'Testspeler Voorstel',
       personId: insertId,
       searchTerm: 'Voorstel',
       season: '2018/19',
       shirtNumber: 7,
       source: 'selectie',
+      sourceName: 'Testspeler Voorstel',
     })
 
     const html = await addForm({ q: 'voorstel', seizoen: '2019-20' })
@@ -509,7 +510,7 @@ describe('the form of a player', () => {
   it('has no such block for a player with a goal, and says why', async () => {
     await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 12, ours: true, player: 'Van Amersfoort', playerId: pelleId })
+      .values({ matchId, minute: 12, ours: true, playerId: pelleId, sourceName: 'Van Amersfoort' })
 
     const html = await playerForm(pelleId)
 
@@ -618,7 +619,7 @@ describe('the page that merges two persons', () => {
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 12, ours: true, personId: pelle, player: 'Van Amersfoort', playerId: pelleId })
+      .values({ matchId, minute: 12, ours: true, personId: pelle, playerId: pelleId, sourceName: 'Van Amersfoort' })
 
     const html = text(await mergePage({ met: String(luca), persoon: String(pelle) }))
 
@@ -626,8 +627,8 @@ describe('the page that merges two persons', () => {
     expect(html).toContain('1 spelersrij: Pelle van Amersfoort in 2019/20')
     expect(html).toContain('0 wedstrijdoptredens in onze verslagen')
     expect(html).toContain('0 titels van Wikipedia-pagina’s')
-    // The name, the shirt number and the position the editors set on his row, and his name.
-    expect(html).toContain('4 handmatige wijzigingen van de redactie')
+    // The shirt number and the position the editors set on his row, and his name.
+    expect(html).toContain('3 handmatige wijzigingen van de redactie')
     expect(html).toContain('In 2019/20 hebben beide personen een rij.')
     // The row of the editors stays.
     expect(html).toContain('de rij van Luca Oyen gaat op in de rij van Pelle van Amersfoort.')

@@ -102,8 +102,8 @@ beforeEach(async () => {
   matchId = result.insertId
   await database.db
     .insert(players)
-    .values(names.map(([name, position]) => ({ name, position, searchTerm: name, season: '2026/27' })))
-  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.name, row.id]))
+    .values(names.map(([name, position]) => ({ position, searchTerm: name, season: '2026/27', sourceName: name })))
+  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.sourceName, row.id]))
 })
 
 afterEach(() => {

@@ -57,11 +57,11 @@ describe('the coverage per season', () => {
     const [{ insertId: secondId }] = await database.db.insert(matches).values(second!)
 
     await database.db.insert(matchGoals).values([
-      { matchId: insertId, ours: true, player: 'Onbekend' },
-      { matchId: insertId, ours: false, player: 'Tegen' },
+      { matchId: insertId, ours: true, sourceName: 'Onbekend' },
+      { matchId: insertId, ours: false, sourceName: 'Tegen' },
     ])
     await database.db.insert(matchReports).values({ matchId: insertId, status: 'klaar' })
-    await database.db.insert(players).values({ name: 'A Speler', searchTerm: 'Speler', season: '1990/91' })
+    await database.db.insert(players).values({ searchTerm: 'Speler', season: '1990/91', sourceName: 'A Speler' })
     await database.db.insert(squadCompleteness).values({
       bestSource: 'verslag',
       calculatedAt: new Date('2026-01-01T00:00:00Z'),

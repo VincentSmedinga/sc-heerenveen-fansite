@@ -71,8 +71,8 @@ export async function oldSitePlayerRows(
     .orderBy(players.id)
 
   for (const row of rows) {
-    if (!found.has(oldSitePlayerKey(row.season, row.name))) {
-      found.set(oldSitePlayerKey(row.season, row.name), row)
+    if (!found.has(oldSitePlayerKey(row.season, row.sourceName))) {
+      found.set(oldSitePlayerKey(row.season, row.sourceName), row)
     }
   }
 
@@ -116,7 +116,7 @@ async function namesOfPersons(db: Pick<OldSiteDatabase, 'select'>, personIds: re
       add(row.id, row.name)
     }
     for (const row of await db
-      .select({ name: players.name, personId: players.personId })
+      .select({ name: players.sourceName, personId: players.personId })
       .from(players)
       .where(inArray(players.personId, [...personIds]))) {
       add(row.personId, row.name)
@@ -132,10 +132,10 @@ async function namesOfPersons(db: Pick<OldSiteDatabase, 'select'>, personIds: re
  * rows. Pure.
  */
 function spellingsOf(row: PlayerRow, personNames: ReadonlyMap<number, ReadonlySet<string>>): string[] {
-  const chosen = oldSiteNameCorrections.get(row.name)
+  const chosen = oldSiteNameCorrections.get(row.sourceName)
 
   return [
-    row.name,
+    row.sourceName,
     ...(chosen === undefined ? [] : [chosen]),
     ...(row.personId === null ? [] : [...(personNames.get(row.personId) ?? [])]),
   ]
@@ -216,25 +216,28 @@ export async function importOldSitePlayers(
     if (row !== undefined) {
       // A row under another spelling is the same player: it is not added again (#1639).
       if (
-        row.name !== player.name &&
-        oldSiteNameCorrections.get(row.name) === player.name &&
+        row.sourceName !== player.name &&
+        oldSiteNameCorrections.get(row.sourceName) === player.name &&
         row.source === 'verslag' &&
         row.wikipediaPage === null &&
         row.personId === null
       ) {
-        await db.update(players).set({ name: player.name, searchTerm: player.searchTerm }).where(eq(players.id, row.id))
+        await db
+          .update(players)
+          .set({ searchTerm: player.searchTerm, sourceName: player.name })
+          .where(eq(players.id, row.id))
         report.changed += 1
-        report.lines.push(`${row.name} (${row.season}) is now ${player.name}`)
+        report.lines.push(`${row.sourceName} (${row.season}) is now ${player.name}`)
       } else {
         report.unchanged += 1
       }
       continue
     }
     fresh.push({
-      name: player.name,
       searchTerm: player.searchTerm,
       season: player.season,
       source: 'verslag',
+      sourceName: player.name,
     })
   }
 
@@ -360,13 +363,15 @@ async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly s
       continue
     }
 
-    const own = new Set([stale.name, oldSiteNameCorrections.get(stale.name) ?? stale.name].map(foldedName))
+    const own = new Set(
+      [stale.sourceName, oldSiteNameCorrections.get(stale.sourceName) ?? stale.sourceName].map(foldedName),
+    )
     const targets = rows.filter(
       (row) =>
         row.season === stale.season &&
         row.id !== stale.id &&
         (row.source !== 'verslag' || row.id < stale.id) &&
-        [row.name, ...(row.personId === null ? [] : [...(personNames.get(row.personId) ?? [])])].some((name) =>
+        [row.sourceName, ...(row.personId === null ? [] : [...(personNames.get(row.personId) ?? [])])].some((name) =>
           own.has(foldedName(name)),
         ),
     )
@@ -397,7 +402,7 @@ async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly s
 
     if (done) {
       merged += 1
-      lines.push(`${stale.name} (${stale.season}) is merged into ${target.name}`)
+      lines.push(`${stale.sourceName} (${stale.season}) is merged into ${target.sourceName}`)
     }
   }
 

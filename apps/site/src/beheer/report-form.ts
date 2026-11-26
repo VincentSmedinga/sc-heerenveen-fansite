@@ -334,7 +334,11 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
       // A player of ours is one row in `players`: the squad's, or one with the same name.
       const sameName =
         side === 'wij' && chosen === undefined
-          ? context.squad.find((player) => player.name.toLocaleLowerCase('nl') === given.toLocaleLowerCase('nl'))
+          ? context.squad.find((player) =>
+              [player.name, player.sourceName].some(
+                (name) => name?.toLocaleLowerCase('nl') === given.toLocaleLowerCase('nl'),
+              ),
+            )
           : undefined
       const known = chosen ?? sameName
       // The shirt number may stay empty: a player of the squad then has his own, and anybody
