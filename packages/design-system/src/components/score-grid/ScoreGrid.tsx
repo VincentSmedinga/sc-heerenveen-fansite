@@ -57,7 +57,8 @@ const rows = [
  * one digit, so the grid works without JavaScript in a plain form, and a field left empty is
  * sent empty, never as 0. A field with an error looks like any invalid field, and the text of
  * the error is above the grid. `readOnly` shows the same four numbers and labels without
- * fields. score-grid.css gives it its look.
+ * fields. With little room, as with large text, the label of a row stands above its fields.
+ * score-grid.css gives it its look.
  */
 export const ScoreGrid = ({
   awayName,
@@ -99,67 +100,69 @@ export const ScoreGrid = ({
           ))}
         </div>
       ) : null}
-      <div className="hf-score-grid-grid">
-        <span aria-hidden="true" />
-        <span className="hf-score-grid-club" id={homeId}>
-          {homeName}
-        </span>
-        <span aria-hidden="true" />
-        <span className="hf-score-grid-club" id={awayId}>
-          {awayName}
-        </span>
-        {rows.map((row) => {
-          const cell = (field: ScoreField, clubId: string, club: string) => {
-            const value = values ? (values[field] ?? '') : undefined
-            const fieldError = errors[field]
+      <div className="hf-score-grid-container">
+        <div className="hf-score-grid-grid">
+          <span aria-hidden="true" className="hf-score-grid-corner" />
+          <span className="hf-score-grid-club" id={homeId}>
+            {homeName}
+          </span>
+          <span aria-hidden="true" />
+          <span className="hf-score-grid-club" id={awayId}>
+            {awayName}
+          </span>
+          {rows.map((row) => {
+            const cell = (field: ScoreField, clubId: string, club: string) => {
+              const value = values ? (values[field] ?? '') : undefined
+              const fieldError = errors[field]
 
-            if (readOnly) {
-              const shown = values?.[field] ?? defaultValues?.[field] ?? ''
+              if (readOnly) {
+                const shown = values?.[field] ?? defaultValues?.[field] ?? ''
+
+                return (
+                  <span className="hf-score-grid-value" data-empty={shown === '' ? '' : undefined}>
+                    <span className="hf-visually-hidden">
+                      {row.label}, {club}:{' '}
+                    </span>
+                    {shown === '' ? '–' : shown}
+                  </span>
+                )
+              }
 
               return (
-                <span className="hf-score-grid-value" data-empty={shown === '' ? '' : undefined}>
-                  <span className="hf-visually-hidden">
-                    {row.label}, {club}:{' '}
-                  </span>
-                  {shown === '' ? '–' : shown}
-                </span>
+                <input
+                  aria-describedby={
+                    [fieldError ? `${id}-${field}-error` : undefined, error ? gridErrorId : undefined]
+                      .filter(Boolean)
+                      .join(' ') || undefined
+                  }
+                  aria-invalid={fieldError ? true : undefined}
+                  aria-labelledby={`${labelOf(row)} ${clubId}`}
+                  autoComplete="off"
+                  className="hf-score-grid-field"
+                  defaultValue={values ? undefined : defaultValues?.[field]}
+                  id={ids[field]}
+                  inputMode="numeric"
+                  maxLength={1}
+                  name={nameOf(field)}
+                  pattern="[0-9]"
+                  spellCheck={false}
+                  type="text"
+                  {...(values ? { onChange: (event) => onValueChange?.(field, event.currentTarget.value), value } : {})}
+                />
               )
             }
 
             return (
-              <input
-                aria-describedby={
-                  [fieldError ? `${id}-${field}-error` : undefined, error ? gridErrorId : undefined]
-                    .filter(Boolean)
-                    .join(' ') || undefined
-                }
-                aria-invalid={fieldError ? true : undefined}
-                aria-labelledby={`${labelOf(row)} ${clubId}`}
-                autoComplete="off"
-                className="hf-score-grid-field"
-                defaultValue={values ? undefined : defaultValues?.[field]}
-                id={ids[field]}
-                inputMode="numeric"
-                maxLength={1}
-                name={nameOf(field)}
-                pattern="[0-9]"
-                spellCheck={false}
-                type="text"
-                {...(values ? { onChange: (event) => onValueChange?.(field, event.currentTarget.value), value } : {})}
-              />
+              <ScoreRow key={row.label} label={row.label} labelId={labelOf(row)}>
+                {cell(row.home, homeId, homeName)}
+                <span aria-hidden="true" className="hf-score-grid-dash">
+                  –
+                </span>
+                {cell(row.away, awayId, awayName)}
+              </ScoreRow>
             )
-          }
-
-          return (
-            <ScoreRow key={row.label} label={row.label} labelId={labelOf(row)}>
-              {cell(row.home, homeId, homeName)}
-              <span aria-hidden="true" className="hf-score-grid-dash">
-                –
-              </span>
-              {cell(row.away, awayId, awayName)}
-            </ScoreRow>
-          )
-        })}
+          })}
+        </div>
       </div>
     </fieldset>
   )
