@@ -63,8 +63,50 @@
     min-inline-size: 0;
   }
 
-  /* The line behind the name: small and quiet, on a line of its own, in the normal weight. */
+  /* The line of the children: small and quiet, on a line of its own, in the normal weight. */
   .hf-player-name-meta {
     display: block;
+  }
+
+  /*
+   * With `lineBehind` the line stands behind the name, in the same text. It goes to the next
+   * line as a whole, and breaks only when it is wider than the column, such as with large text.
+   * With a shirt number the flag, the name and the line are one column beside the number.
+   */
+  .hf-player-name-behind .hf-player-name-meta {
+    display: inline-block;
+    max-inline-size: 100%;
+  }
+
+  .hf-player-name-line {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
+  /*
+   * The link is plain text in that column, so a long name and the line go on from the same
+   * place. The padding keeps it a target of at least 24 pixels high without moving the lines.
+   */
+  .hf-player-name-behind .hf-player-name-link {
+    display: inline;
+    padding-block: var(--hf-space-xs);
+  }
+
+  /*
+   * With a flag the column makes room for it beside every line, and the flag stands in that
+   * room at the top. So a long word never leaves the flag alone on the first line.
+   */
+  .hf-player-name-line-flagged {
+    /* The width of a flag and the space behind it. */
+    --hf-player-name-flag-place: calc(1.25rem + var(--hf-space-s));
+
+    padding-inline-start: var(--hf-player-name-flag-place);
+    position: relative;
+  }
+
+  .hf-player-name-flag {
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    position: absolute;
   }
 }

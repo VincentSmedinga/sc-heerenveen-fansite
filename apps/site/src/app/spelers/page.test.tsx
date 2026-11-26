@@ -386,7 +386,9 @@ describe('the card Selectie on /spelers', () => {
     expect(alt('Testaanvaller Vier')).toBe('Zweden')
     expect(lines.join('').match(/<img /g)).toHaveLength(3)
     // In the line the number comes first, then the flag, then the name.
-    expect(lines[0]).toMatch(/hf-player-name-number">1<\/span> <img [^>]*\/> <span class="hf-player-name-text">/u)
+    expect(lines[0]).toMatch(
+      /hf-player-name-number">1<\/span> .*?hf-player-name-flag"><img [^>]*\/> <\/span><span class="hf-player-name-text">/u,
+    )
   })
 
   it('gives a player without a country an empty place, and a country without a drawing its code', async () => {
@@ -394,10 +396,10 @@ describe('the card Selectie on /spelers', () => {
 
     // Proefman Drie is from Kazakhstan, which has no drawing in the set: the code in a frame.
     expect(html).toMatch(
-      /hf-player-name-number">8<\/span> <span aria-label="Kazachstan" class="hf-flag hf-flag-code" role="img">KZ<\/span> <span/u,
+      /hf-player-name-number">8<\/span> .*?hf-player-name-flag"><span aria-label="Kazachstan" class="hf-flag hf-flag-code" role="img">KZ<\/span> <\/span><span/u,
     )
     // Testreserve Vijf has no country, among others who have one.
-    expect(html).toMatch(/hf-player-name-number"><\/span><span class="hf-flag"><\/span><span/)
+    expect(html).toMatch(/hf-player-name-flag"><span class="hf-flag"><\/span><\/span><span/)
   })
 
   it('has no place for a flag in a part where nobody has a country', async () => {

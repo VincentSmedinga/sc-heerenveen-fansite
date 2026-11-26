@@ -33,6 +33,7 @@ import {
   standings,
   wikipediaPages,
 } from './schema.ts'
+import { squadSeasonNumber } from './squad-season-number.ts'
 import { stadiumOnTheDay } from './stadiums.ts'
 import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
 
@@ -1034,6 +1035,41 @@ export async function listSeasonMatches(db: Database, season: string) {
 
     return match
   })
+}
+
+/**
+ * For the card Selectie on the page Spelers: the how-manyth season of each player it is in a
+ * season, such as `2026/27`, by the name of the row (`name`, unique in a season). A player is
+ * followed over the seasons by the person. A player without a person, and one whose number our
+ * lists don't prove (see `squadSeasonNumber`), is not in the result.
+ */
+export async function listSeasonNumbers(db: Database, season: string): Promise<Map<string, number>> {
+  const shown = alias(players, 'shown_player')
+  const [rows, complete] = await Promise.all([
+    db
+      .select({ name: shown.name, season: players.season })
+      .from(shown)
+      .innerJoin(players, and(eq(players.personId, shown.personId), lte(players.season, season)))
+      .where(eq(shown.season, season)),
+    db
+      .select({ season: squadCompleteness.season })
+      .from(squadCompleteness)
+      .where(and(eq(squadCompleteness.level, 'compleet'), lte(squadCompleteness.season, season))),
+  ])
+  const completeSeasons = new Set(complete.map((row) => row.season))
+  const seasonsByName = new Map<string, string[]>()
+
+  for (const row of rows) {
+    seasonsByName.set(row.name, [...(seasonsByName.get(row.name) ?? []), row.season])
+  }
+
+  return new Map(
+    [...seasonsByName].flatMap(([name, own]) => {
+      const number = squadSeasonNumber(own, completeSeasons, season)
+
+      return number === undefined ? [] : [[name, number] as const]
+    }),
+  )
 }
 
 /**

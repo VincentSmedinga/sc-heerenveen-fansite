@@ -8451,6 +8451,39 @@
 - **Alternatieven:** "Dit is de hele selectie" (zegt niet wie dat weet).
   De zin van `compleet` met "Waarschijnlijk" (zwakker dan wat de redactie weet).
 
+## De kaart Selectie toont het hoeveelste seizoen alleen met complete seizoenen
+
+- **Datum:** 26 november 2026
+- **Besluit:** achter de naam van een speler staat "Ne seizoen", zoals "3e seizoen" (#811).
+  Dat staat er alleen als elk seizoen in `squad_completeness` het niveau `compleet` heeft, vanaf het seizoen vóór de eerste van de speler tot en met het getoonde.
+  Ook een seizoen ertussen zonder de speler moet compleet zijn.
+  De markering van de redactie (#1675) telt mee.
+  De regel staat in `squadSeasonNumber` in `packages/db`.
+- **Waarom:** een lijst die `bijna` compleet is, kan iemand uit de selectie missen, en dan is "1e seizoen" onwaar.
+  Het gevolg is dat een seizoen vaak niets toont tot de redactie eerdere seizoenen markeert.
+- **Alternatieven:** ook `bijna` laten tellen.
+  Alleen het getoonde en het vorige seizoen toetsen (vanaf "2e seizoen" kan het getal te laag zijn).
+  Altijd tellen.
+
+## De regel noemt geen totaal, en zonder bewijs staat er niets
+
+- **Datum:** 26 november 2026
+- **Besluit:** de regel noemt alleen het hoeveelste seizoen, zonder "van M".
+  Kunnen we het getal niet bewijzen, dan staat achter de naam niets (#811).
+- **Waarom:** een totaal is alleen te bewijzen voor wie in een later compleet seizoen ontbreekt, nooit voor de huidige selectie, en een terugkeer verandert het achteraf.
+  Een andere tekst, zoals "sinds 2012/13", heeft hetzelfde gat bij een onvolledig eerder seizoen.
+- **Alternatieven:** "van M" op oude seizoenen waar het te bewijzen is.
+  "sinds" met een jaartal.
+  Een kanttekening onder de kop.
+
+## Een speler die terugkomt telt door
+
+- **Datum:** 26 november 2026
+- **Besluit:** het getal is het aantal seizoenen tot en met het getoonde met de persoon in een selectielijst van ons, uit elke bron (#811).
+  Seizoenen van voor en na een onderbreking tellen samen, en een seizoen waarin de speler halverwege kwam of vertrok, telt mee.
+- **Waarom:** dat is wat "het 3e seizoen bij de club" zegt.
+- **Alternatieven:** na een onderbreking weer bij 1 beginnen.
+
 ## De veranderingen alleen bij twee selecties die bijna of helemaal compleet zijn
 
 - **Datum:** 26 november 2026
