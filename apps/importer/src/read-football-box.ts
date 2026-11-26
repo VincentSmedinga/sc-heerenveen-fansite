@@ -24,6 +24,7 @@ import {
   readMatch,
   withoutRefn,
 } from './read-wikipedia.ts'
+import { findHeadings, findSectionHeadings } from './wikitext-headings.ts'
 
 /** A page with `football box` blocks, and where on it the matches of each competition are. */
 export type FootballBoxPage = {
@@ -326,10 +327,7 @@ export function footballBoxPages(season: string): readonly FootballBoxPage[] {
 export function readFootballBoxes(text: string, page: FootballBoxPage): ReadProgramme {
   const cleaned = withoutRefn(clean(text))
   const name = `the page '${page.title}'`
-  const topHeadings = [...cleaned.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)].map((heading) => ({
-    index: heading.index,
-    title: plain(heading[1] ?? ''),
-  }))
+  const topHeadings = findSectionHeadings(cleaned).map(({ index, title }) => ({ index, title: plain(title) }))
   // The UEFA pages say once, above the matches, that their times are those of the Netherlands.
   const pageZoneKnown = /^Times are \[\[Central European (?:Summer )?Time\b/imu.test(cleaned)
   const ours = findTemplates(cleaned, boxStart)
@@ -549,13 +547,11 @@ function isOurs(box: Template): boolean {
  * without us or without a result.
  */
 function readLeagueTable(cleaned: string, table: LeagueTable): { matches: ReadMatch[]; problems: string[] } {
-  const headings = [...cleaned.matchAll(/^(={2,})[ \t]*(.+?)[ \t]*\1[ \t]*$/gmu)]
-  const heading = headings.find((found) => table.heading.test(plain(found[2] ?? '')))
+  const headings = findHeadings(cleaned, Number.POSITIVE_INFINITY)
+  const heading = headings.find((found) => table.heading.test(plain(found.title)))
   const end = headings.find((found) => heading !== undefined && found.index > heading.index)?.index
   const body =
-    heading === undefined
-      ? undefined
-      : /^\{\|[^\n]*\n([\s\S]*?)^\|\}/mu.exec(cleaned.slice(heading.index + heading[0].length, end))?.[1]
+    heading === undefined ? undefined : /^\{\|[^\n]*\n([\s\S]*?)^\|\}/mu.exec(cleaned.slice(heading.end, end))?.[1]
 
   if (body === undefined) {
     return { matches: [], problems: ['the page has no table with the league matches under the heading we know'] }

@@ -14,6 +14,7 @@ import {
 } from '@fansite/db/schema'
 
 import { printable } from './text.ts'
+import { findHeadings, findLooseHeadings, findSectionHeadings } from './wikitext-headings.ts'
 
 export type { ReadGoal, ReadMatch, Template }
 
@@ -310,13 +311,13 @@ export function readCup(text: string): ReadProgramme {
 export function readEuropaLeague(text: string, season: string): ReadProgramme {
   const cleaned = withoutRefn(clean(text))
   const name = `the Europa League page of ${season}`
-  const headings = [...cleaned.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)]
+  const headings = findSectionHeadings(cleaned)
   const timesKnown = /Times are \[\[Central European Summer Time/iu.test(cleaned.slice(0, headings[0]?.index))
   const matches: ReadMatch[] = []
   const problems: string[] = []
 
   for (const [index, heading] of headings.entries()) {
-    const title = plain(heading[1] ?? '')
+    const title = plain(heading.title)
 
     if (!Object.hasOwn(europaLeagueRounds, title)) {
       continue
@@ -522,10 +523,9 @@ export function readPlayoffs(text: string): ReadProgramme {
   }
 
   const { competition } = section
-  const rounds: Heading[] = [...section.text.matchAll(/^===[ \t]*([^=\n].*?)[ \t]*===[ \t]*$/gmu)].map((heading) => ({
-    index: heading.index,
-    title: plain(heading[1] ?? ''),
-  }))
+  const rounds: Heading[] = findHeadings(section.text)
+    .filter(({ level, opening }) => level === 3 && opening === 3)
+    .map(({ index, title }) => ({ index, title: plain(title) }))
   const boxes = findTemplates(section.text, /\{\{\s*Footballbox2\s*(?=\||\n)/giu)
   const matches: ReadMatch[] = []
   const problems: string[] = []
@@ -614,7 +614,7 @@ export function readStandings(text: string): ReadStandings {
  * 34 wedstrijden` and `Eindstand na 34 wedstrijden`. `Officiële eindstand`, the order after the
  * play-offs, has only the reasons and is not matched.
  */
-const standingsHeading = /^=+[ \t]*(?:eind)?stand(?: na \d+ wedstrijden)?(?: \d{4}[-–/]\d{2,4})?[ \t]*=+[ \t]*$/imu
+const standingsTitle = /^(?:eind)?stand(?: na \d+ wedstrijden)?(?: \d{4}[-–/]\d{2,4})?$/iu
 
 /**
  * The first season whose page of the play-offs we read: 2010/11, the page of 2011. The page
@@ -802,10 +802,7 @@ function dutchBox(box: Template, timesKnown: boolean): Map<string, string> {
  * (`[[a|b]]`) do not cut it short. A parameter without `=` is ignored.
  */
 function findTemplates(text: string, start: RegExp): Template[] {
-  const headings: Heading[] = [...text.matchAll(/^(={2,6})[ \t]*(.+?)[ \t]*\1[ \t]*$/gmu)].map((heading) => ({
-    index: heading.index,
-    title: plain(heading[2] ?? ''),
-  }))
+  const headings: Heading[] = findHeadings(text).map(({ index, title }) => ({ index, title: plain(title) }))
   const templates: Template[] = []
 
   for (const found of text.matchAll(start)) {
@@ -1158,16 +1155,16 @@ function playoffRound(heading: string, leg: string): null | string {
  * first years of the Conference League.
  */
 function playoffSection(text: string): undefined | { competition: Competition; text: string } {
-  const headings = [...text.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)]
+  const headings = findSectionHeadings(text)
 
   for (const [start, found] of headings.entries()) {
-    const title = plain(found[1] ?? '')
+    const title = plain(found.title)
     const known = playoffHeadings.find(({ heading }) => heading.test(title))
 
     if (known !== undefined) {
       return {
         competition: known.competition,
-        text: text.slice(found.index + found[0].length, headings[start + 1]?.index),
+        text: text.slice(found.end, headings[start + 1]?.index),
       }
     }
   }
@@ -1189,18 +1186,20 @@ function readTableStandings(text: string): ReadStandings {
     kind: 'error',
     message: 'the league table has no Sports table template and no table under Eindstand or Stand na 34 wedstrijden',
   }
-  const heading = standingsHeading.exec(text)
+  const heading = findLooseHeadings(text).find(({ title }) => standingsTitle.test(title))
 
-  if (heading === null) {
+  if (heading === undefined) {
     return noTable
   }
 
-  const rest = text.slice(heading.index + heading[0].length)
+  const rest = text.slice(heading.end)
   const start = rest.indexOf('{|')
   const end = rest.indexOf('\n|}', start)
 
   // A table further down, under another heading, is not the table of this heading.
-  if (start === -1 || end === -1 || /^=+[^=\n]+=+[ \t]*$/mu.test(rest.slice(0, start))) {
+  const between = findLooseHeadings(rest.slice(0, start))
+
+  if (start === -1 || end === -1 || between.some(({ title }) => !title.includes('='))) {
     return noTable
   }
 

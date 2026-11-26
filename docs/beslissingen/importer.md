@@ -4932,3 +4932,18 @@
 - **Waarom:** een half onderzochte naam zou via de regel van de naam toch gekoppeld worden en nooit meer gezocht.
   Een kapotte doorverwijzing die als mislukt verzoek telt, zou bovenaan blijven staan en de stap elke run stoppen.
 - **Alternatieven:** het gevonden deel van een naam al bewaren; elke fout als mislukt verzoek tellen.
+
+## De importer leest kopjes in wikitekst op één plek en in lineaire tijd
+
+- **Datum:** 26 november 2026
+- **Besluit:**
+  - `wikitext-headings.ts` leest alle kopjes die de lezers zoeken, en telt de `=`-tekens en de witruimte met de hand.
+    Dat geldt voor alle plekken, niet alleen de drie die opvielen (#1685).
+  - Elk bestand houdt zijn eigen regels: welke niveaus tellen en welke titel past.
+  - Een regel met alleen `=`-tekens is een kopje vanaf vijf tekens.
+    Vier tekens (`====`) waren bij een paar lezers een kopje zonder titel, en zijn dat niet meer.
+    Een lezer van de groepsstanden ziet geen enkele regel met alleen `=`-tekens meer als kopje.
+- **Waarom:** iedereen kan Wikipedia bewerken, en de patronen deden bij een lange regel zonder sluiting kwadratisch tot kubisch lang over het zoeken.
+  Eén trage plek is genoeg om een import te laten hangen.
+  Gewone wikitekst heeft geen kopjes zonder titel.
+- **Alternatieven:** alleen de drie gemelde patronen herstellen; elk patroon apart herschrijven; een bibliotheek die wikitekst ontleedt, wat een dependency toevoegt.

@@ -9,6 +9,7 @@ import { playerNameMaxLength } from '@fansite/db/schema'
 
 import { dataCells, headerCells, nameOf, squadGroups } from './read-squad.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
+import { findHeadings, findHeadingStart } from './wikitext-headings.ts'
 
 /** One player of the squad of a club. */
 export type ClubSquadPlayer = {
@@ -133,17 +134,15 @@ function dropDoubles(players: ClubSquadPlayer[]): ClubSquadPlayer[] {
  * A heading with more equals signs is inside the section, and so is the text before it.
  */
 function findSection(text: string): string | undefined {
-  const heading = /^(={2,6})[ \t]*(?:Huidige selectie|Selectie|Spelerskern)[ \t]*\1[ \t]*$/imu.exec(text)
+  const heading = findHeadings(text).find(({ title }) => /^(?:Huidige selectie|Selectie|Spelerskern)$/iu.test(title))
 
-  if (heading === null) {
+  if (heading === undefined) {
     return undefined
   }
 
-  const level = heading[1]?.length ?? 2
-  const rest = text.slice(heading.index + heading[0].length)
-  const next = new RegExp(`^={2,${level}}[^=\\n].*$`, 'mu').exec(rest)
+  const rest = text.slice(heading.end)
 
-  return next === null ? rest : rest.slice(0, next.index)
+  return rest.slice(0, findHeadingStart(rest, heading.level))
 }
 
 /** The position a cell names: a word of `squadGroups` or one letter, else null. */

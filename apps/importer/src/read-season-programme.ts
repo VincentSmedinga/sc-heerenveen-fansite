@@ -10,6 +10,7 @@ import type { Competition } from '@fansite/db/schema'
 import type { ReadGoal } from './read-wikipedia.ts'
 
 import { clean, clubName, linkedPage, months, plain } from './read-wikipedia.ts'
+import { readHeading } from './wikitext-headings.ts'
 
 /** A competition of the programme, and the match it is. `round` is empty for the league. */
 export type ProgrammeCompetition = Extract<Competition, 'Eredivisie' | 'Play-offs Champions League'>
@@ -44,8 +45,6 @@ export type ReadProgramme =
 
 /** The names of the page for our own club in a row. */
 const ourNames = new Set(['sc heerenveen'])
-
-const headingLine = /^(={2,6})[ \t]*(.*?)[ \t]*\1[ \t]*$/u
 
 /** A goal of the list: the score after it, the scorer with his minute, and the marks. */
 const goalLine = /^(\d{1,2})\s*[–-]\s*(\d{1,2})\s*:\s*(.+?)\s*'\s*(\d{1,3})\s*(?:\(([^()]*)\))?$/u
@@ -126,9 +125,9 @@ export function readSeasonProgramme(text: string): ReadProgramme {
 }
 
 function headingOf(line: string): undefined | { level: number; title: string } {
-  const found = headingLine.exec(line.trim())
+  const found = readHeading(line.trim())
 
-  return found === null ? undefined : { level: found[1]?.length ?? 0, title: plain(found[2] ?? '') }
+  return found === undefined ? undefined : { level: found.level, title: plain(found.title) }
 }
 
 /** The goals of the cell of the scorers, with the running score of the match. */

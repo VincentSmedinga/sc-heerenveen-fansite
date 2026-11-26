@@ -34,6 +34,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import { countryOfAssociation, countryWarning } from './read-country.ts'
 import { dataCells, headerCells, nameKey, nameOf } from './read-squad.ts'
 import { clean, plain } from './read-wikipedia.ts'
+import { findHeadings } from './wikitext-headings.ts'
 
 /** A player as a list or a table gives him, before the lists are put together. */
 type Found = {
@@ -178,14 +179,17 @@ function englishPageOf(cell: string): null | string {
 
 /** The headings of the text, with the text under each up to the next of its level. */
 function headingsOf(text: string): Heading[] {
-  const found = [...text.matchAll(/^(={2,6})[ \t]*(.+?)[ \t]*\1[ \t]*$/gmu)]
+  const found = findHeadings(text)
 
-  return found.map((match, index) => {
-    const level = (match[1] ?? '').length
-    const start = match.index + match[0].length
-    const next = found.slice(index + 1).find((other) => (other[1] ?? '').length <= level)
+  return found.map(({ end: start, level, title }, index) => {
+    let after = index + 1
 
-    return { end: next?.index ?? text.length, level, start, title: plain(match[2] ?? '') }
+    // Not `slice` and `find`: a copy of the rest for every heading takes quadratic time.
+    while (after < found.length && (found[after]?.level ?? 0) > level) {
+      after++
+    }
+
+    return { end: found[after]?.index ?? text.length, level, start, title: plain(title) }
   })
 }
 
