@@ -12,6 +12,7 @@
     "./client": "./src/client.ts",
     "./close-account": "./src/close-account.ts",
     "./clean-up-supporters": "./src/clean-up-supporters.ts",
+    "./club-colours": "./src/club-colours.ts",
     "./club-name-periods": "./src/club-name-periods.ts",
     "./british-places": "./src/british-places.ts",
     "./clubs": "./src/clubs.ts",

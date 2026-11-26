@@ -199,6 +199,18 @@ describe('the form of a club', () => {
     expect(html).toContain('aria-label="Opslaan: land van Oefenstad AZ"')
   })
 
+  it('says which colour the club has now, and has the choice and the field for an own colour', async () => {
+    await database.pool.query("UPDATE clubs SET colour_choice = '#e30613' WHERE slug = 'oefenstad-az'")
+
+    const html = await form('oefenstad-az')
+
+    expect(html).toContain('Kleur van de club')
+    expect(html).toContain('Nu: #e30613, gekozen door de redactie.')
+    expect(html).toContain('aria-label="Opslaan: kleur van Oefenstad AZ"')
+    expect(html).toMatch(/<input[^>]*checked=""[^>]*value="eigen"/u)
+    expect(await form('oefenstad-nac')).toContain('Nu: geen kleur, uit de lijst.')
+  })
+
   it('says Wikipedia has one spelling for a club without other names', async () => {
     expect(await form('oefenstad-nac')).toContain('Wikipedia schrijft deze club altijd als Oefenstad NAC.')
   })

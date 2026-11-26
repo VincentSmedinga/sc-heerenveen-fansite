@@ -25,6 +25,7 @@ import {
 import { listAllMatchGoals, listClubMatches, listSeasonMatches } from './queries.ts'
 import {
   adminUsers,
+  clubs,
   matchAppearances,
   matchCards,
   matches,
@@ -1211,6 +1212,32 @@ describe('the matches with a report that is klaar', () => {
         slug: null,
       },
     ])
+  })
+
+  it('gives the colour of the opponent from the list, and the choice of the editors first', async () => {
+    const matchId = await playedMatch()
+
+    await report(matchId)
+
+    const colourAt = async (clubSlug: string) =>
+      (await findReportedMatch(database.db, { clubSlug, matchDate: '2026-08-08', season }))?.opponentColour
+
+    expect(await colourAt('testdorp-fc')).toBeNull()
+
+    await database.db.update(clubs).set({ slug: 'feyenoord' }).where(eq(clubs.slug, 'testdorp-fc'))
+
+    expect(await colourAt('feyenoord')).toBe('#e30613')
+
+    await database.db.update(clubs).set({ colourChoice: '#00a651' }).where(eq(clubs.slug, 'feyenoord'))
+
+    expect(await colourAt('feyenoord')).toBe('#00a651')
+
+    await database.db.update(clubs).set({ colourChoice: 'none' }).where(eq(clubs.slug, 'feyenoord'))
+
+    expect(await colourAt('feyenoord')).toBeNull()
+
+    // The clubs stay from test to test.
+    await database.db.update(clubs).set({ colourChoice: null, slug: 'testdorp-fc' }).where(eq(clubs.slug, 'feyenoord'))
   })
 
   it('gives the name of the person of an opponent who is linked to one', async () => {

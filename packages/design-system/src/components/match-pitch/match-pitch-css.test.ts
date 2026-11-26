@@ -84,6 +84,18 @@ describe('pitch-player.css', () => {
     expect(player).toMatch(/hyphens: auto/u)
   })
 
+  it('fills a disc with the colour of a club, and not in forced colours', () => {
+    expect(player).toMatch(
+      /\.hf-pitch-player-disc-theirs\.hf-pitch-player-disc-club \.hf-pitch-player-number \{\s*background-color: var\(--hf-club-colour\);\s*box-shadow: none;/u,
+    )
+    expect(player).toMatch(
+      /forced-colors: active[\s\S]*\.hf-pitch-player-disc-theirs\.hf-pitch-player-disc-club \.hf-pitch-player-number \{\s*background-color: Canvas;/u,
+    )
+    expect(pitch).toMatch(
+      /forced-colors: active[\s\S]*\.hf-match-pitch-swatch-club \{\s*background-color: transparent;\s*border-color: CanvasText;/u,
+    )
+  })
+
   it('keeps the ring and the disc visible in forced colours', () => {
     expect(player).toMatch(/@media \(forced-colors: active\)/u)
     expect(player).toMatch(/Highlight/u)

@@ -232,6 +232,11 @@ describe('the pitch', () => {
     expect(pitch.opponent).toMatchObject({ formation: '4-4-2', name: 'Testdorp FC' })
   })
 
+  it('gives the opponent the colour of his club, and none without one', () => {
+    expect(buildMatchPage({ ...data(), opponentColour: '#e30613' }).pitch.opponent?.colour).toBe('#e30613')
+    expect(buildMatchPage({ ...data(), opponentColour: null }).pitch.opponent?.colour).toBeUndefined()
+  })
+
   it('keeps the order of the players it was given, also when it is not the order of the shirt numbers', () => {
     const reversed = data()
 

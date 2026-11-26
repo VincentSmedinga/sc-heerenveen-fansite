@@ -1029,8 +1029,14 @@ export const clubs = mysqlTable(
     createdAt: datetime('created_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),
+    // The colour the editors chose for the club (#1677): `#rrggbb`, or `none` for no colour.
+    // Empty: the list in `club-colours.ts` decides. The importer never writes it.
+    colourChoice: varchar('colour_choice', { length: 7 }),
   },
-  (table) => [check('clubs_slug_format', sql`${table.slug} regexp '(?-i)^[a-z0-9]+(-[a-z0-9]+)*$'`)],
+  (table) => [
+    check('clubs_slug_format', sql`${table.slug} regexp '(?-i)^[a-z0-9]+(-[a-z0-9]+)*$'`),
+    check('clubs_colour_format', sql`${table.colourChoice} regexp '(?-i)^(none|#[0-9a-f]{6})$'`),
+  ],
 )
 
 export type Club = typeof clubs.$inferSelect

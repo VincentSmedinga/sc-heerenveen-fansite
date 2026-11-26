@@ -2890,6 +2890,7 @@
   Een team zonder formatie heeft een eigen zin, apart van "past de formatie niet bij de spelers".
   Zie ook _Een rij van de opstelling loopt van links naar rechts, in de richting van de aanval_ (13 november 2026): de volgorde binnen een rij is nu vastgelegd.
 - **Later:** zie _Een rij van vier staat breder op het veld_ (25 november 2026): ook een rij van vier krijgt meer ruimte.
+- **Later:** zie _Het rondje van de tegenstander is gevuld met de clubkleur_ (26 november 2026): een tegenstander met een kleur heeft geen open rondje meer.
 
 ## Het veld staat rechtop op een telefoon en ligt vanaf een breedte van 40 rem
 
@@ -4694,3 +4695,19 @@
 - **Waarom:** met de minuten erbij paste de tabel niet op 320 pixels.
   De projecteigenaar wil de minuten op een telefoon meteen zien.
 - **Alternatieven:** de minuten achter "Toon meer" (het seizoen blijft dan op één regel); de tabel zijwaarts laten scrollen.
+
+## Het rondje van de tegenstander is gevuld met de clubkleur
+
+- **Datum:** 26 november 2026
+- **Besluit:** een tegenstander met een kleur heeft een gevuld rondje zonder rand, met een zwart of wit rugnummer (#1677).
+  Zonder kleur blijft het rondje open.
+  `MatchPitchTeam`, `PitchPlayer` en `MatchSubstitutes` krijgen daarvoor `colour`, als `#rrggbb`.
+  Alleen zo'n waarde komt op de pagina, en bij sc Heerenveen doet ze niets.
+  Het designsysteem kiest zwart of wit: de kleur met het meeste contrast.
+  In forced colours blijft het rondje zoals het was.
+- **Waarom:** de club is zo in één blik te herkennen, en zwart of wit haalt op elke kleur minstens 4,5:1.
+  Gevuld of open zegt daarom niet meer welk team het is.
+  De plaats op het veld en de teamnamen doen dat, ook bij een blauwe tegenstander.
+  Een lichte kleur zoals geel steekt weinig af tegen het lichte veld (1,3:1).
+  Dat aanvaarden we: het rugnummer blijft leesbaar en de ring toont de vorm.
+- **Alternatieven:** een open rondje met een dikke rand in de clubkleur en een dunne lijn in de tekstkleur.

@@ -301,6 +301,8 @@ async function mergeClubInto(db: MergeDatabase, plan: ClubMergePlan): Promise<vo
       ...(kept.country === null && other.country !== null
         ? { country: other.country, countrySource: other.countrySource }
         : {}),
+      // The choice of a colour of the editors stays; without one, that of the club that goes.
+      ...(kept.colourChoice === null && other.colourChoice !== null ? { colourChoice: other.colourChoice } : {}),
       ...(kept.homeGroundsSource === null && plan.groundsMoved > 0
         ? { homeGroundsSource: other.homeGroundsSource }
         : {}),

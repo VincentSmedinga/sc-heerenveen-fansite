@@ -54,9 +54,14 @@ export type PitchPlayerGoal = {
 
 export type PitchPlayerProps = Omit<ComponentPropsWithoutRef<'li'>, 'children'> &
   PitchPlayerData & {
+    /**
+     * The colour of the opponent's club as `#rrggbb`: his disc is filled with it. It does
+     * nothing for a player of sc Heerenveen.
+     */
+    colour?: string | undefined
     /** Whether the match went into extra time: the ring then runs to 120 minutes, not 90. */
     extraTime?: boolean | undefined
-    /** Whether he plays for sc Heerenveen: the disc is filled for them, open for the others. */
+    /** Whether he plays for sc Heerenveen: the disc is filled in our blue for them. */
     ours: boolean
   }
 
@@ -145,6 +150,7 @@ export const PitchPlayer = ({
   captain,
   card,
   className,
+  colour,
   extraTime = false,
   goals,
   lead,
@@ -181,7 +187,7 @@ export const PitchPlayer = ({
     >
       <span className="hf-visually-hidden">{pitchPlayerSentence(player)}</span>
       <span aria-hidden="true" className="hf-pitch-player-drawing">
-        <PlayerDisc arc={arc} ours={ours} shirtNumber={shirtNumber}>
+        <PlayerDisc arc={arc} colour={colour} ours={ours} shirtNumber={shirtNumber}>
           {goals !== undefined && goals.length > 0 ? (
             <span className="hf-pitch-player-mark hf-pitch-player-mark-goal">
               <MatchEventIcon kind={goalKind(goals)} />

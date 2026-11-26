@@ -80,6 +80,7 @@ export function matchPageDataOf(
       round: kick.round,
     })),
     opponent: match.opponent,
+    opponentColour: reported.opponentColour,
     opponentComplete: stored.report.opponentComplete,
     penalties:
       match.penaltiesFor !== null && match.penaltiesAgainst !== null

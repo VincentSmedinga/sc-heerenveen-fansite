@@ -26,11 +26,16 @@ export type MatchSubstitute = {
 }
 
 export type MatchSubstitutesProps = Omit<ComponentPropsWithoutRef<'section'>, 'children'> & {
+  /**
+   * The colour of the opponent's club as `#rrggbb`: the discs are filled with it. Without it,
+   * and for sc Heerenveen, they look as they do without it.
+   */
+  colour?: string | undefined
   /** Whether the match went into extra time: the rings then run to 120 minutes, not 90. */
   extraTime?: boolean | undefined
   /** The level of the heading "Wissels <team>" in the structure of the page. */
   headingLevel: Exclude<HeadingLevel, 1>
-  /** Whether the team is sc Heerenveen: the disc is filled for them, open for the others. */
+  /** Whether the team is sc Heerenveen: the disc is filled for them. */
   ours: boolean
   /**
    * The substitutes who came on, in any order: the list puts them in the order of the clock. A
@@ -105,6 +110,7 @@ const Line = ({ children, href }: { children: ReactNode; href: string | undefine
  */
 export const MatchSubstitutes = ({
   className,
+  colour,
   extraTime = false,
   headingLevel,
   ours,
@@ -140,6 +146,7 @@ export const MatchSubstitutes = ({
                       },
                       extraTime,
                     )}
+                    colour={colour}
                     ours={ours}
                     shirtNumber={substitute.shirtNumber}
                   />

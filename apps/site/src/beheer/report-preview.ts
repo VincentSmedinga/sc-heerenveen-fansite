@@ -56,6 +56,8 @@ export type ReportPreviewMatch = {
   facts: { label: string; value: string }[]
   home: boolean
   opponent: string
+  /** The colour of the opponent as `#rrggbb`, or null for none. */
+  opponentColour?: null | string
   /** The score of the shoot-out. */
   penalties: null | { against: number; for: number }
   /** `live` or `upcoming` for a match that is still being played; none for a played one. */
@@ -273,6 +275,7 @@ export function previewDataOf(
     incidents,
     kicks,
     opponent: match.opponent,
+    opponentColour: match.opponentColour ?? null,
     opponentComplete: values.tegenstander === 'ja',
     penalties: match.penalties,
     ...(match.phase === undefined ? {} : { phase: match.phase }),

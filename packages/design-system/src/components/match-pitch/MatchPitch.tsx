@@ -6,6 +6,7 @@ import { Heading, type HeadingLevel } from '../heading/Heading'
 import { MatchEventIcon } from '../match-event-icon/MatchEventIcon'
 import { PlayerName } from '../player-name/PlayerName'
 import { Tag } from '../tag/Tag'
+import { checkedClubColour } from './club-colour'
 import { isCrowdedFormation, parseFormation, pitchSpots } from './pitch-layout'
 import { PitchPlayer, type PitchPlayerData } from './PitchPlayer'
 
@@ -31,6 +32,11 @@ export type MatchPitchProps = ComponentPropsWithoutRef<'div'> & {
 
 /** One of the two teams on the pitch. */
 export type MatchPitchTeam = {
+  /**
+   * The colour of the club as `#rrggbb`, for the opponent: his discs on the pitch and the one
+   * by his name are filled with it. Without it they are open. It does nothing for `ours`.
+   */
+  colour?: string | undefined
   /**
    * The formation, such as `4-3-3`. Leave it out when the report has none: the team is then not
    * on the pitch, and the list under the pitch names its players.
@@ -95,6 +101,7 @@ function Team({ extraTime, half, ours, placed }: { extraTime: boolean; half: boo
         return (
           <PitchPlayer
             {...player}
+            colour={placed.team.colour}
             extraTime={extraTime}
             key={player.shirtNumber ?? `no-number-${index}`}
             ours={ours}
@@ -120,9 +127,10 @@ function Team({ extraTime, half, ours, placed }: { extraTime: boolean; half: boo
  * circle, the penalty areas and the goal areas, and on it the eleven players of each team in
  * the place of their formation (see `pitchSpots`). It stands upright on a phone, with sc
  * Heerenveen at the bottom, and lies down from 40 rem wide, with sc Heerenveen on the left.
- * Above the pitch stand the teams on it with the colour of their disc (filled for sc
- * Heerenveen, open for the opponent) and their formation; under it the explanation of the
- * marks, and under that the disclosure "Opstelling als lijst" with the players of each team.
+ * Above the pitch stand the teams on it with their disc (filled for sc Heerenveen; the
+ * opponent filled with the colour of his club, or open without one) and their formation;
+ * under it the explanation of the marks, and under that the disclosure "Opstelling als lijst"
+ * with the players of each team.
  *
  * The pitch is as big as the number of teams on it. With two teams it is the whole pitch. With
  * one it is the half of that team, at the same scale, so the players are as big and as far
@@ -170,16 +178,25 @@ export const MatchPitch = ({
       {drawn.length === 0 ? null : (
         <>
           <div className="hf-match-pitch-teams">
-            {drawn.map(({ ours: isOurs, placed }) => (
-              <span className="hf-match-pitch-team-name" key={placed.team.name}>
-                <span
-                  aria-hidden="true"
-                  className={classNames('hf-match-pitch-swatch', isOurs && 'hf-match-pitch-swatch-ours')}
-                />
-                {placed.team.name}
-                <Tag>{placed.formation ?? ''}</Tag>
-              </span>
-            ))}
+            {drawn.map(({ ours: isOurs, placed }) => {
+              const club = isOurs ? undefined : checkedClubColour(placed.team.colour)
+
+              return (
+                <span className="hf-match-pitch-team-name" key={placed.team.name}>
+                  <span
+                    aria-hidden="true"
+                    className={classNames(
+                      'hf-match-pitch-swatch',
+                      isOurs && 'hf-match-pitch-swatch-ours',
+                      club !== undefined && 'hf-match-pitch-swatch-club',
+                    )}
+                    style={club === undefined ? undefined : ({ '--hf-club-colour': club } as CSSProperties)}
+                  />
+                  {placed.team.name}
+                  <Tag>{placed.formation ?? ''}</Tag>
+                </span>
+              )
+            })}
           </div>
           <div
             className={classNames(

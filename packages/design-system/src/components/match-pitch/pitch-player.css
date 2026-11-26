@@ -57,7 +57,10 @@
     position: absolute;
   }
 
-  /* The disc is filled for sc Heerenveen and open, with a rim, for the opponent. */
+  /*
+   * The disc is filled for sc Heerenveen and open, with a rim, for an opponent without a
+   * colour.
+   */
   .hf-pitch-player-number {
     align-items: center;
     border-radius: 50%;
@@ -80,6 +83,13 @@
     background-color: var(--hf-colour-background-surface);
     box-shadow: inset 0 0 0 2px var(--hf-colour-background-button);
     color: var(--hf-colour-text-default);
+  }
+
+  /* An opponent whose club has a colour: filled with it, without the rim. */
+  .hf-pitch-player-disc-theirs.hf-pitch-player-disc-club .hf-pitch-player-number {
+    background-color: var(--hf-club-colour);
+    box-shadow: none;
+    color: var(--hf-club-figure);
   }
 
   /* A mark is a small disc of the surface with a rim, so its icon stands out from the pitch. */
@@ -174,7 +184,8 @@
       background: conic-gradient(from var(--hf-ring-start, 0deg), Highlight var(--hf-ring-length, 360deg), GrayText 0);
     }
 
-    .hf-pitch-player-number {
+    .hf-pitch-player-number,
+    .hf-pitch-player-disc-theirs.hf-pitch-player-disc-club .hf-pitch-player-number {
       background-color: Canvas;
       box-shadow: inset 0 0 0 2px CanvasText;
       color: CanvasText;

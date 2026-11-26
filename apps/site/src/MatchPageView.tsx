@@ -189,6 +189,7 @@ function Substitutes({
       <MatchSubstitutes extraTime={data.extraTime} headingLevel={headingLevel} ours substitutes={ours} team={ourClub} />
       {opponent === undefined ? null : (
         <MatchSubstitutes
+          colour={data.opponentColour ?? undefined}
           extraTime={data.extraTime}
           headingLevel={headingLevel}
           ours={false}

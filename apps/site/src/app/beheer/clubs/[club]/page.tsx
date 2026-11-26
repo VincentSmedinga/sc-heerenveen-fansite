@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { clubColourOf } from '@fansite/db/club-colours'
 import { seasonOf } from '@fansite/db/season'
 import {
   Button,
@@ -34,8 +35,10 @@ import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
 import { submitNames, submitReset } from '../actions'
+import { ClubColourForm } from '../ClubColourForm'
 import { ClubCountryForm } from '../ClubCountryForm'
 import { ClubNameForm } from '../ClubNameForm'
+import { submitClubColour } from '../colour-actions'
 import { clubsPath, mergePagePath } from '../paths'
 
 // Render on each request: the list changes with every save.
@@ -129,6 +132,16 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
           source={
             club.countrySource === null ? null : club.countrySource === 'manual' ? 'van de redactie' : 'uit Wikidata'
           }
+        />
+        <ClubColourForm
+          action={submitClubColour.bind(null, slug)}
+          choice={club.colourChoice}
+          colour={clubColourOf(club.slug, club.colourChoice)}
+          // Not the choice: without JavaScript React finds the answer of the form back by this
+          // key, and the choice has changed by then.
+          key={`kleur-${club.id}`}
+          name={club.name}
+          showDelay={showDelay}
         />
         <Card aria-labelledby="schrijfwijzen-kop" surface="soft">
           <Heading id="schrijfwijzen-kop" level={2}>
