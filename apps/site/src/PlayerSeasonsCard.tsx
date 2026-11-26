@@ -192,9 +192,7 @@ export function playerSeasonsNotes(
   // A season with minutes has its line-ups, also when its reports are not all finished (#1674),
   // so its lines say where the minutes come from.
   const seasonsFrom = (source: PlayerSeason['source'], withMinutes: boolean) =>
-    seasons
-      .filter((season) => season.source === source && (season.minutes !== undefined) === withMinutes)
-      .map(({ season }) => season)
+    seasons.filter((season) => season.source === source && (season.minutes !== undefined) === withMinutes)
   // Under the Eredivisie a season of the Wikipedia table has dashes, for the reason below.
   const dashed = seasons.filter(
     (season) =>
@@ -219,7 +217,8 @@ export function playerSeasonsNotes(
 
   if (some.length > 0) {
     const counted = ({ matchesInSeason, minutes, reportedMatches }: PlayerSeason) => {
-      const all = minutes === undefined ? '' : `, de minuten uit alle ${matchesInSeason}`
+      // With one competition chosen the minutes count its matches only, so not all of them.
+      const all = league || minutes === undefined ? '' : `, de minuten uit alle ${matchesInSeason}`
 
       return `${reportedMatches} van ${matchesInSeason}${all}`
     }
@@ -229,18 +228,19 @@ export function playerSeasonsNotes(
   const wikipedia = league
     ? ['Geen cijfers per competitie', 'Per competitie alleen de doelpunten en de minuten']
     : ['Cijfers van Wikipedia', 'Cijfers van Wikipedia, de minuten uit onze opstellingen']
+  // A season without a finished report and without a goal of his has a dash for the goals.
+  const noneWithMinutes = seasonsFrom('none', true)
   const lines = [
-    ['none', false, 'Alleen de doelpunten'],
-    ['none', true, 'Alleen de doelpunten en de minuten'],
-    ['wikipedia', false, wikipedia[0]],
-    ['wikipedia', true, wikipedia[1]],
+    ['Alleen de doelpunten', seasonsFrom('none', false)],
+    ['Alleen de doelpunten en de minuten', noneWithMinutes.filter((season) => season.goals !== undefined)],
+    ['Alleen de minuten', noneWithMinutes.filter((season) => season.goals === undefined)],
+    [wikipedia[0], seasonsFrom('wikipedia', false)],
+    [wikipedia[1], seasonsFrom('wikipedia', true)],
   ] as const
 
-  for (const [source, withMinutes, words] of lines) {
-    const found = seasonsFrom(source, withMinutes)
-
+  for (const [words, found] of lines) {
     if (found.length > 0) {
-      notes.push(`${words}: ${seasonRanges(found)}.`)
+      notes.push(`${words}: ${seasonRanges(found.map(({ season }) => season))}.`)
     }
   }
   if (shown.some((id) => !table.complete[id])) {

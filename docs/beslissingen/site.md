@@ -8383,6 +8383,8 @@
     Liet de import een rode kaart zonder minuut weg, dan telt de speler de hele wedstrijd.
   - **De regels onder de tabel** zeggen waar de minuten vandaan komen bij een seizoen met minuten waarvan niet elk verslag af is.
     Dat is "(36 van 42, de minuten uit alle 42)" achter de opstellingen, "Cijfers van Wikipedia, de minuten uit onze opstellingen" of "Alleen de doelpunten en de minuten".
+    Zonder doelpunt van de speler is het "Alleen de minuten".
+    Met één competitie gekozen valt "de minuten uit alle 42" weg, want dan tellen alleen de minuten van die competitie.
     Bij alleen de Eredivisie is het "Per competitie alleen de doelpunten en de minuten".
     Heeft zo'n seizoen een streepje, dan staat er "Een streepje: dat cijfer hebben we niet van dat seizoen."
   - **Eredivisie:** met alleen de Eredivisie tellen de minuten van die wedstrijden, en moet nog steeds elke wedstrijd van het seizoen een opstelling hebben.

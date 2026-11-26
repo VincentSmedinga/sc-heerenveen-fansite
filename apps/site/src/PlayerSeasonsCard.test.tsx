@@ -360,4 +360,29 @@ describe('the lines under the table for a season with minutes and reports that a
     expect(html).toContain('Per competitie alleen de doelpunten en de minuten: 2001/02.')
     expect(html).not.toContain('Geen cijfers per competitie')
   })
+
+  it('says only the minutes for a season without a finished report and without a goal', () => {
+    const html = render([
+      season('1995/96', { ...withoutFigures, ...minutes, goals: undefined, source: 'none' }),
+      season('1994/95'),
+    ])
+
+    expect(html).toContain('Alleen de minuten: 1995/96.')
+    expect(html).not.toContain('Alleen de doelpunten')
+  })
+
+  it('does not say that the minutes count every line-up when one competition is chosen', () => {
+    const html = renderToStaticMarkup(
+      <PlayerSeasonsCard
+        address={(value) => value}
+        competition="league"
+        goalkeeper={false}
+        name="Test Speler"
+        seasons={[season('2001/02', { ...minutes, matchesInSeason: 42, reportedMatches: 36, source: 'some-lineups' })]}
+      />,
+    )
+
+    expect(html).toContain('Opstellingen: 2001/02 (36 van 42).')
+    expect(html).not.toContain('de minuten uit alle')
+  })
 })
