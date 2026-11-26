@@ -1448,6 +1448,7 @@
   - **De zoekterm** is het voorvoegsel met de achternaam van de persoon, en zonder achternaam `players.search_term`.
   - **De doelpuntenregel** toont de achternaam uit de persoon, met een hoofdletter vooraan, omdat hij alleen staat: "Van Aken".
   - **Het verslag:** het formulier toont de namen van de personen, en opslaan houdt bij een regel die er al was de naam van de bron en de persoon.
+  - **Een speler zonder persoon** die in het beheer een andere naam krijgt, krijgt daarvoor een persoon, want de naam van de bron verandert niet.
 - **Alternatieven:** de naam van onze regels weghalen (migraties, een nieuwe sleutel voor de import, meer pull requests, en de schrijfwijze van de bron is weg); de naam bij een wijziging naar alle regels kopiëren (elke nieuwe koppeling of import kan weer afwijken); alleen onze spelers de persoon laten volgen (tegenstanders houden dan twee schrijfwijzen).
 
 ## Een persoon op een regel is niet verplicht

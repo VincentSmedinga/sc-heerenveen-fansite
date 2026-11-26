@@ -616,3 +616,17 @@ describe('a number that two players of the season have (#1076)', () => {
     }
   })
 })
+
+describe('a player whose person has another name (#1697)', () => {
+  const renamed: ReportSquadPlayer[] = [
+    { id: 1, name: 'Jan Nieuwman', searchTerm: 'Nieuwman', shirtNumber: null, sourceName: 'Jan Oudman' },
+  ]
+
+  it('is found in a pasted report by the name of the source and by the name of the person', () => {
+    for (const written of ['Jan Oudman', 'Oudman', 'Jan Nieuwman', 'Nieuwman']) {
+      const result = readPastedReport(`Opstelling\n${written}`, renamed)
+
+      expect(result.values.wij.speler[0]?.keuze, written).toBe('1')
+    }
+  })
+})

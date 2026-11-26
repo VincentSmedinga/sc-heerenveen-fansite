@@ -125,6 +125,21 @@ describe('linkOpponentPersons (#1544)', () => {
     expect(await personOf(row)).toBe(wanted)
   })
 
+  it('finds a player of the squad by the name of his person too (#1697)', async () => {
+    const wanted = await addPerson('Jan Nieuwman')
+
+    // Two persons carry the name, so only the squad of the club can say who it is.
+    await addPerson('Jan Nieuwman')
+    await database.db
+      .insert(clubSquadPlayers)
+      .values({ clubId, personId: wanted, readAt: new Date('2026-11-20T10:00:00Z'), sourceName: 'Jan Oudman' })
+
+    const row = await addAppearance('Jan Nieuwman')
+
+    expect(await linkOpponentPersons(database.db)).toMatchObject({ squad: 1 })
+    expect(await personOf(row)).toBe(wanted)
+  })
+
   it('does not use the squad of another club, or a squad player without a person', async () => {
     const person = await addPerson('Jan Jansen')
     const [other] = await database.db.insert(clubs).values({ name: 'Ajax', slug: 'ajax' }).$returningId()
