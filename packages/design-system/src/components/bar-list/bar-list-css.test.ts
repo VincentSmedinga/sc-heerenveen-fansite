@@ -87,3 +87,29 @@ describe('a marked row of a bar list', () => {
     expect(contrast(fill, surface)).toBeGreaterThanOrEqual(3)
   })
 })
+
+describe('a bar list with little room', () => {
+  const css = read('bar-list/bar-list.css')
+  const narrow = css.match(/@container hf-bar-list \(inline-size < 13rem\) \{(?:[^{}]*\{[^{}]*\})*\s*\}/)?.[0] ?? ''
+  const rule = (selector: string) =>
+    narrow.match(new RegExp(`${selector.replaceAll('.', '\\.')} \\{[^}]*\\}`))?.[0] ?? ''
+
+  it('asks for its own width', () => {
+    expect(css).toContain('container: hf-bar-list / inline-size;')
+  })
+
+  it('puts the name and the number on the first line, with a row gap smaller than the space between rows', () => {
+    const row = rule('.hf-bar-list .hf-bar-list-row')
+
+    expect(row).toContain('grid-template-columns: minmax(0, 1fr) fit-content(50%);')
+    expect(row).toContain('padding-block: var(--hf-space-s);')
+    expect(row).toContain('gap: var(--hf-space-xs) var(--hf-space-s);')
+    expect(rule('.hf-bar-list-value')).toContain('grid-column: 2;')
+    expect(rule('.hf-bar-list-value')).toContain('grid-row: 1;')
+  })
+
+  it('puts the bar below them, over the whole width of the row', () => {
+    expect(rule('.hf-bar-list-track')).toContain('grid-column: 1 / -1;')
+    expect(rule('.hf-bar-list-track')).toContain('grid-row: 2;')
+  })
+})

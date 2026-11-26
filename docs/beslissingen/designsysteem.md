@@ -4798,3 +4798,21 @@
   Een kleur voor goed of fout zou lezen als winst of verlies.
   Zonder spoor in de kleur van de kaart haalt de staaf in licht 2,98:1 tegen de band, en is het grijze spoor bijna niet te zien.
 - **Alternatieven:** een staaf in een eigen kleur (lijkt op winst of verlies); een label "Uitslag" (kost breedte op een telefoon); een zachtere tint (in donker gelijk aan de kaart, dus een nieuw token); ook nadruk in de regel boven de lijst (twee opvallende punten in één kaart).
+
+## Bij weinig ruimte staat de balk van `BarList` onder de naam en het getal
+
+- **Datum:** 26 november 2026
+- **Besluit:** heeft een `BarList` weinig ruimte, dan staan de naam en het getal op één regel en de balk eronder over de volle breedte (#1699).
+  De balk blijft te zien.
+  Het getal neemt hoogstens de helft van de eerste regel, zodat een lange eenheid naar een tweede regel gaat.
+  De grens is 13rem eigen breedte van de lijst (een container query), dezelfde als die van `PredictionList` en `ScoreGrid`.
+  Met gewone tekst is een lijst op 320 pixels breder dan die grens, met tekst op 200% op 320 en 360 pixels smaller.
+- **Waarom:** zo houdt de naam de meeste ruimte, past het getal binnen de kaart en kun je de lengtes nog vergelijken.
+- **Alternatieven:** de balk verbergen (mag, want hij is versiering, maar dan verlies je het overzicht); de naam boven, met balk en getal eronder (de balk is dan korter); alleen de vaste kolommen laten krimpen (de balk houdt dan bijna niets over).
+
+## Grote tekst in `BarList` bewaken we met een test van de CSS
+
+- **Datum:** 26 november 2026
+- **Besluit:** een kleine test van de CSS en een verhaal, en we kijken het na met de hand in Storybook (#1699).
+- **Waarom:** dat volgt _We kijken grote tekst met de hand na_: geen nieuw gereedschap, en maten krijgen geen test in de browser.
+- **Alternatieven:** een test in de browser die de breedte van de balk meet.
