@@ -31,7 +31,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Wat een groep fans voorspelde voor één wedstrijd, zonder een naam: hoeveel het er waren en, vanaf de aftrap, de verdeling over winst, gelijk en verlies en de meest voorspelde eindstanden.',
-          'Kies hem in de kaart van een spel, op de pagina van een wedstrijd. De uitslag staat in woorden bij de verdeling, niet alleen in kleur. Hij heeft geen kaart of kop van zichzelf.',
+          'Kies hem in de kaart van een spel, op de pagina van een wedstrijd. De gespeelde score valt op in de lijst. De uitslag staat er ook in woorden, niet alleen in kleur. Hij heeft geen kaart of kop van zichzelf.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

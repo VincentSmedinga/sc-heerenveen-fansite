@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { fallback, role, scale } from '../../tokens/colourRoles'
+import { contrast, fallback, role, scale } from '../../tokens/colourRoles'
 
 // jsdom doesn't apply rules in a cascade layer, so the test reads the files' text, without the
 // comments.
@@ -57,5 +57,33 @@ describe('the bars', () => {
     expect(read('outcome-line/outcome-line.css')).toContain('block-size: var(--hf-size-bar-thin)')
     expect(read('match-score-bar/match-score-bar.css')).toContain('block-size: var(--hf-size-bar-thin)')
     expect(read('match-score-bar/match-score-bar.css')).toContain('border-radius: var(--hf-radius-bar)')
+  })
+})
+
+describe('a marked row of a bar list', () => {
+  const css = read('bar-list/bar-list.css')
+
+  it('has the colours of a marked row in a table, and a track in the colour of the card', () => {
+    const band = css.match(/\.hf-bar-list-highlight \{[^}]*\}/s)?.[0] ?? ''
+    const track = css.match(/\.hf-bar-list-highlight \.hf-bar-list-track \{[^}]*\}/s)?.[0] ?? ''
+
+    expect(band).toContain('background-color: var(--hf-colour-background-highlight);')
+    expect(band).toContain('color: var(--hf-colour-text-highlight);')
+    expect(track).toContain('background-color: var(--hf-colour-background-surface);')
+  })
+
+  it.each(['light', 'dark'] as const)('keeps its text and its bar readable in %s', (theme) => {
+    // The bar is the green of a count at 70% on its track (see chart.css).
+    const surface = role('background-surface')[theme]
+    const parts = [1, 3, 5].map((start) => {
+      const of = (hex: string) => Number.parseInt(hex.slice(start, start + 2), 16)
+
+      return Math.round(of(role('outcome-win')[theme]) * 0.7 + of(surface) * 0.3)
+    })
+    const fill = `#${parts.map((part) => part.toString(16).padStart(2, '0')).join('')}`
+    const text = contrast(role('text-highlight')[theme], role('background-highlight')[theme])
+
+    expect(text).toBeGreaterThanOrEqual(7)
+    expect(contrast(fill, surface)).toBeGreaterThanOrEqual(3)
   })
 })

@@ -43,6 +43,24 @@ describe('PredictionCrowd', () => {
     const rows = within(screen.getByRole('list', { name: /Meest voorspelde eindstanden/ })).getAllByRole('listitem')
 
     expect(rows.map((row) => row.textContent)).toEqual(['2–1 (uitslag)14', '1–09', 'anders5'])
+    expect(rows.map((row) => row.classList.contains('hf-bar-list-highlight'))).toEqual([true, false, false])
+    expect(rows[0]?.querySelector('strong')?.textContent).toBe('2–1')
+  })
+
+  it('marks no row when the score that was played is not in the list', () => {
+    const { container } = render(
+      <PredictionCrowd
+        outcomes={{ actual: 'win', draws: 13, losses: 8, wins: 33 }}
+        scores={[
+          { count: 9, label: '1–0' },
+          { count: 5, label: 'anders' },
+        ]}
+      >
+        54 fans voorspelden deze wedstrijd.
+      </PredictionCrowd>,
+    )
+
+    expect(container.querySelector('.hf-bar-list-highlight, strong')).toBeNull()
   })
 
   it('puts the key figures above the line and the list under a heading of the level asked', () => {
