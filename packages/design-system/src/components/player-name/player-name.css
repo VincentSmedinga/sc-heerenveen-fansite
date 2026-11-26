@@ -69,12 +69,13 @@
   }
 
   /*
-   * With `lineBehind` the line stands behind the name, in the same text, and breaks where the
-   * text breaks. With a shirt number the flag, the name and the line are one column beside the
+   * With `lineBehind` the line stands behind the name, in the same text. It is a short line, so
+   * it stays together and goes to the next line as a whole. With a shirt number the flag, the name and the line are one column beside the
    * number.
    */
   .hf-player-name-behind .hf-player-name-meta {
     display: inline;
+    white-space: nowrap;
   }
 
   .hf-player-name-line {
