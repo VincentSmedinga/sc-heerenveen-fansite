@@ -168,6 +168,9 @@ De tweede opdracht blijft draaien, dus geef de derde in een tweede terminal.
 Een pad begint met een schuine streep, al het andere is het id van een story.
 Het script volgt de kleurkeuze van de browser (`prefers-color-scheme`), dus het werkt voor de site en voor Storybook.
 Een pagina die niet met 200 antwoordt, laat het commando falen, zodat een tikfout in het adres geen plaatje van een foutpagina geeft.
+Van een story maakt het script pas een foto als Storybook ermee klaar is, ook met de play-functie.
+Toont Storybook een foutmelding, bestaat de story niet of is hij na 30 seconden niet klaar, dan stopt het commando.
+De melding noemt de story en de reden, en van die story komt er geen PNG.
 
 ## Sjablonen
 
