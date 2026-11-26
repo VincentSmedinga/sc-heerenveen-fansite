@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { Field } from '../field/Field'
@@ -75,5 +77,28 @@ describe('CodeInput', () => {
     expect(input.name).toBe('code')
     expect(input.value).toBe('123456')
     expect(input.closest('.hf-code-input')?.className).toContain('extra')
+  })
+})
+
+describe('the look of the code field', () => {
+  const css = readFileSync(join(import.meta.dirname, 'code-input.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+
+  it('lets the boxes and the gaps shrink with the room of the field itself', () => {
+    expect(css).toContain('container: hf-code-input / inline-size;')
+    expect(css).toContain('inline-size: min(100%, calc(6 * var(--hf-code-box-max) + 5 * var(--hf-space-s)));')
+    expect(css).toContain('--hf-code-gap: min(var(--hf-space-s), 3cqi);')
+    expect(css).toContain('--hf-code-box: min(var(--hf-code-box-max), calc((100cqi - 5 * var(--hf-code-gap)) / 6));')
+  })
+
+  it('spaces the digits by the width of a tabular digit, so the sixth is in its box too', () => {
+    expect(css).toContain('--hf-code-digit: 0.632em;')
+    expect(css).toContain('letter-spacing: calc(var(--hf-code-box) + var(--hf-code-gap) - var(--hf-code-digit));')
+    expect(css).toContain('padding-inline: calc((var(--hf-code-box) - var(--hf-code-digit)) / 2) 0;')
+    expect(css).not.toMatch(/\dch\b/)
+  })
+
+  it('keeps the borders thin enough that a digit stays in a narrow box', () => {
+    expect(css).toContain('border: min(0.125rem, 1cqi) solid')
+    expect(css.match(/border-width: min\(0\.25rem, 2cqi\);/g)).toHaveLength(2)
   })
 })

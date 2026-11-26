@@ -8,6 +8,7 @@ import { matchGoalPlayerMaxLength, standingsClubMaxLength } from '@fansite/db/sc
 import type { ReadGoal, ReadMatch, ReadResult } from './read-wikipedia.ts'
 
 import { clean, clubName, cupRoundName, linkedPage, months, plain, readMatch, withoutRefn } from './read-wikipedia.ts'
+import { findHeadingAbove, findHeadingStart, findSectionHeadings } from './wikitext-headings.ts'
 
 export type ReadCupTables = { kind: 'error'; message: string } | { kind: 'read'; matches: ReadMatch[] }
 
@@ -44,7 +45,7 @@ export function readCupTables(
 ): ReadCupTables {
   const cleaned = withoutRefn(clean(text))
   const name = `the page '${title}'`
-  const headings = [...cleaned.matchAll(/^==[ \t]*([^=\n].*?)[ \t]*==[ \t]*$/gmu)]
+  const headings = findSectionHeadings(cleaned)
   const matches: ReadMatch[] = []
   const problems: string[] = []
 
@@ -58,7 +59,7 @@ export function readCupTables(
       continue
     }
 
-    const heading = headings.findLast((candidate) => candidate.index < found.index)?.[1]
+    const heading = findHeadingAbove(headings, found.index)?.title
     const round = cupRoundName(heading === undefined ? null : plain(heading))
 
     for (const lines of rows) {
@@ -135,9 +136,9 @@ export function readProgrammeTables(
 ): ReadProgrammeTables {
   const cleaned = withoutRefn(clean(text))
   const name = `the page '${title}'`
-  const start = /^==[ \t]*Programma[ \t]*==[ \t]*$/mu.exec(cleaned)
-  const after = start === null ? '' : cleaned.slice(start.index + start[0].length)
-  const table = /^\{\|[\s\S]*?^\|\}/mu.exec(after.split(/^==[^=]/mu)[0] ?? '')?.[0]
+  const start = findSectionHeadings(cleaned).find(({ title }) => title === 'Programma')
+  const after = start === undefined ? '' : cleaned.slice(start.end)
+  const table = /^\{\|[\s\S]*?^\|\}/mu.exec(after.slice(0, findHeadingStart(after, 2)))?.[0]
 
   if (table === undefined) {
     return { kind: 'error', message: `${name} has no table under Programma` }

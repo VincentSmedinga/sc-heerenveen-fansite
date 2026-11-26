@@ -157,9 +157,12 @@ Op de donkerblauwe header en wedstrijdband gelden eigen tokens voor de focusrand
 - [ ] Bij 400% zoom, in een venster van 1280 pixels breed, past alles zonder horizontaal te scrollen.
       Alleen een tabel, zoals de stand, mag opzij scrollen (1.4.10).
 - [ ] Er valt geen tekst weg, niets komt over elkaar, en alles blijft bruikbaar (1.4.4).
+- [ ] Zet de tekst op 200% in een venster van 360 pixels breed: er valt niets weg, niets komt over elkaar en niets schuift opzij (1.4.4).
 - [ ] Meer regelafstand, letterafstand en woordafstand breekt niets (1.4.12).
 
 Zo test je het: zoom in de browser tot 400%, of zet de responsieve weergave in de ontwikkelhulpmiddelen op 320 pixels breed.
+Voor grote tekst open je een verhaal in Storybook los, via "Open canvas in new tab", en zet je de responsieve weergave op 360 pixels breed.
+Typ dan in de console `document.documentElement.style.fontSize = '200%'`.
 
 ### Minder beweging
 
