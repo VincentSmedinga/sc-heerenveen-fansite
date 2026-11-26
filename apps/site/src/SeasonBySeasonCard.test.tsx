@@ -138,7 +138,7 @@ describe('SeasonBySeasonCard', () => {
     expect(render({ seasons: [] })).toBe('')
   })
 
-  it('hides the chart from a screen reader and shows the latest five seasons in a table, the newest first', () => {
+  it('hides the chart from a screen reader and has the seasons in a table, the newest first', () => {
     const html = render()
     const table = html.slice(html.indexOf('<table'), html.indexOf('</table>'))
 
@@ -149,21 +149,24 @@ describe('SeasonBySeasonCard', () => {
       '2024/25',
       '2023/24',
       '2022/23',
+      '2021/22',
+      '2009/10',
     ])
   })
 
-  it('has the other seasons in a closed Disclosure that says how many there are, without JavaScript', () => {
+  it('has every season in one table, with a button that says how many there are', () => {
     const html = render()
-    const fold = html.indexOf('<details class="hf-disclosure"><summary>Toon alle 7 seizoenen')
 
-    expect(fold).toBeGreaterThan(html.indexOf('</table>'))
-    expect(html).not.toMatch(/<details[^>]* open/)
-    expect(html.slice(fold, html.indexOf('</details>'))).toMatch(/2021\/22[\s\S]*2009\/10/)
+    expect(html.match(/<table/g)).toHaveLength(1)
+    expect(html).toMatch(/2021\/22[\s\S]*2009\/10/)
+    expect(html).toContain('nth-child(n + 6)')
+    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Toon alle 7 seizoenen<\/button>/)
+    expect(html).not.toContain('<details')
     expect(html).not.toContain('<script')
   })
 
-  it('has no Disclosure when the table holds every season', () => {
-    expect(render({ seasons: seasons.slice(0, 5) })).not.toContain('<details')
+  it('has no button when the table shows every season', () => {
+    expect(render({ seasons: seasons.slice(0, 5) })).not.toContain('<button')
   })
 
   it('counts won, drawn and lost and the goals for and against, with short headers and a legend', () => {

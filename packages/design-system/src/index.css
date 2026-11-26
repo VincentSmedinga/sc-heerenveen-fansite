@@ -40,6 +40,7 @@
 @import url('./components/tile/tile.css');
 @import url('./components/notice/notice.css');
 @import url('./components/disclosure/disclosure.css');
+@import url('./components/show-all/show-all.css');
 @import url('./components/filter-list/filter-list.css');
 @import url('./components/chip/chip.css');
 @import url('./components/code-input/code-input.css');

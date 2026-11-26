@@ -133,6 +133,10 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
 - [ ] Na een klik zegt een beleefde regel (`role="status"`, niet te zien) wat er gebeurde, zoals "Gesorteerd op Gespeeld, van hoog naar laag" (4.1.3).
       Na de derde klik zegt hij "Niet meer gesorteerd, in de volgorde van de pagina".
       De regio is er al voor de klik, en de focus blijft op de knop (2.4.3).
+- [ ] Een knop die de rest van een tabel of lijst toont (`ShowAll`) is een `button` met `aria-expanded` en houdt de focus; er is geen aparte melding (4.1.2, 2.4.3).
+      Een verborgen regel is ook weg voor een schermlezer en het toetsenbord, zodat de focus niet op een link erin komt.
+      Na "Toon minder" is de knop met de focus in beeld (2.4.11).
+      Zonder JavaScript staan alle regels er en is er geen knop.
 - [ ] De knop in de kop is minstens 24 bij 24 pixels (2.5.8), en de tabel past op 320 pixels zonder zijwaarts scrollen (1.4.10).
       Een tabel die niet past met hele woorden, krijgt pictogrammen.
 

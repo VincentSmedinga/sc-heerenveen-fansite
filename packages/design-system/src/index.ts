@@ -280,6 +280,8 @@ export { ShortFact } from './components/short-fact/ShortFact'
 export type { ShortFactProps } from './components/short-fact/ShortFact'
 export { ShortStaff } from './components/short-staff/ShortStaff'
 export type { ShortStaffProps } from './components/short-staff/ShortStaff'
+export { ShowAll } from './components/show-all/ShowAll'
+export type { ShowAllProps } from './components/show-all/ShowAll'
 export { SideBySide } from './components/side-by-side/SideBySide'
 export type {
   SideBySideAsideProps,

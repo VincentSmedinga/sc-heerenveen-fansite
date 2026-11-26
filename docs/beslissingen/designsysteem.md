@@ -3576,6 +3576,7 @@
     De `P` was al punten, dus de strafschoppen hebben de `S`.
 - **Waarom:** de topscorers aller tijden willen de jaren bij de club zien, en een tweede tabel onder een `Disclosure` met balken die naar zijn eigen top schalen zou de elfde plek net zo lang maken als de eerste.
 - **Alternatieven:** de jaren achter de naam in dezelfde cel (breekt af op een telefoon, en een schermlezer leest ze dan als deel van de naam); één tabel van 25 rijen in de `Disclosure`, met de eerste tien dubbel.
+- **Later:** zie _De rest van een lijst komt met een knop in dezelfde tabel of lijst erbij_ in `site.md` (26 november 2026): de site gebruikt `scaleTo` niet meer, want de 25 plaatsen staan in één tabel; de optie blijft bestaan.
 
 ## Een groep kaarten is een onderdeel, en een rij van vier kerngetallen kan op een breed scherm in één rij
 
@@ -4766,3 +4767,20 @@
   De link heet zo naar de naam alleen.
 - **Alternatieven:** de bestaande regel onder de naam.
   Het nummer van het seizoen in de naam zelf (dan hoort het bij de link).
+
+## `ShowAll` toont de eerste regels van een tabel of lijst, met een knop voor de rest
+
+- **Datum:** 26 november 2026
+- **Besluit:** het designsysteem krijgt `ShowAll` (#1690): een blok om een `DataTable`, een `TopScorersTable` of een `PredictionList` heen, met `shown`, `total` en de tekst van de knop.
+  De knop staat onder de lijst en haar legenda, wisselt tussen "Toon alle …" en "Toon minder", zegt met `aria-expanded` of de lijst open is en houdt de focus.
+  Na "Toon minder" schuift de knop in beeld (`scrollIntoView` met `nearest`).
+  - **Zonder JavaScript** staan alle regels er en is er geen knop: de server stuurt alles, en CSS toont de knop alleen bij `@media (scripting: enabled)`.
+  - **Met JavaScript** verbergt een `style` in het blok de regels na de eerste `shown`, ook onder `@media (scripting: enabled)`, dus al bij de eerste weergave.
+    Het aantal verschilt per kaart, en bij de topscorers per telling, dus de regel staat bij het blok en niet in een vaste stylesheet.
+    De CSP van de site staat een inline stijl toe.
+  - **Sorteren:** `nth-child` telt de regels zoals ze nu staan, dus een tabel die sorteert toont gesloten de eerste regels van die volgorde.
+- **Waarom:** vijf kaarten met drie soorten lijsten gebruiken hetzelfde patroon, en niets is onbereikbaar of verspringt.
+- **Nadeel:** zonder JavaScript is de kaart lang.
+  Laadt het script niet terwijl JavaScript aanstaat, dan blijven de regels verborgen en doet de knop niets.
+  Zoeken in de pagina vindt verborgen regels niet.
+- **Alternatieven:** een link met `?alle=1` (herlaadt de pagina); een selectievakje met `:has()` (een schermlezer hoort geen knop); verbergen pas als het script draait, zoals `DataTable.More` (de lange lijst klapt na het laden dicht); een optie op elke tabel en lijst (drie keer gebouwd); een knop die na de klik verdwijnt en de focus verplaatst (meer code en niet te sluiten); vaste CSS-regels per aantal.

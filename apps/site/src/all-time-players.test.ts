@@ -86,17 +86,16 @@ describe('allTimeScorersOf', () => {
     ])
   })
 
-  it('splits the list at place ten: places 11 to 25 are for the block that opens, and nobody is in both', () => {
+  it('splits the list at place ten: places 11 to 25 are for the button, and nobody is in both', () => {
     const goals = Array.from({ length: 30 }, (_, index) =>
       Array.from({ length: 31 - index }, () => goal(`Speler ${String(index).padStart(2, '0')}`)),
     ).flat()
-    const { more, top, topGoals, total } = allTimeScorersOf([inSeason('2010/11', goals)], 'all', noSeasons)
+    const { more, top, total } = allTimeScorersOf([inSeason('2010/11', goals)], 'all', noSeasons)
 
     expect(total).toBe(30)
     expect(top.map((place) => place.position)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     expect(more.map((place) => place.position)[0]).toBe(11)
     expect(more.at(-1)?.position).toBe(25)
-    expect(topGoals).toBe(31)
   })
 
   it('gives players who share a place one place, and the place of the tenth belongs to all who share it', () => {
