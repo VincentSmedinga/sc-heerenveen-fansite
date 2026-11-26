@@ -30,6 +30,7 @@ import {
 } from '@fansite/db/schema'
 import { listAdminStadiums } from '@fansite/db/stadium-admin'
 import { hasChosenStadium, linkMatchToStadium } from '@fansite/db/stadiums'
+import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
@@ -372,6 +373,9 @@ export async function saveEntry(
           .insert(matchGoals)
           .values(keepStoredLinks(goals, entry.goals).map((goal) => ({ ...goal, matchId: id })))
       }
+
+      // The scorers decide whether the squad of the season can be complete (#1675).
+      await storeCompleteness(transaction, match.season, undefined, now)
     }
 
     const marks = {
@@ -479,7 +483,11 @@ export async function undoEntry(
   now = new Date(),
 ): Promise<RemoveOutcome> {
   return db.transaction(async (transaction) => {
-    const [match] = await transaction.select({ id: matches.id }).from(matches).where(eq(matches.id, id)).for('update')
+    const [match] = await transaction
+      .select({ season: matches.season })
+      .from(matches)
+      .where(eq(matches.id, id))
+      .for('update')
 
     if (match === undefined) {
       return 'missing'
@@ -517,6 +525,9 @@ export async function undoEntry(
         resultEdited: false,
       })
     }
+
+    // The goals may be back as they were, and with them the scorers of the season (#1675).
+    await storeCompleteness(transaction, match.season, undefined, now)
 
     // The differences with the entry have nothing left to decide.
     await transaction

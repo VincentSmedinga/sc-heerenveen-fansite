@@ -10,7 +10,10 @@ import {
   matchReports,
   persons,
   players,
+  squadCompleteMarks,
+  squadCompleteness,
 } from '@fansite/db/schema'
+import { seasonOf } from '@fansite/db/season'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -20,7 +23,14 @@ import { emptyPlayerValues, type PlayerFormState, type PlayerValues } from '#src
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 
-import { submitAddPlayer, submitMergePersons, submitPlayer, submitRemovePlayer } from './actions'
+import {
+  submitAddPlayer,
+  submitMarkSquad,
+  submitMergePersons,
+  submitPlayer,
+  submitRemovePlayer,
+  submitUnmarkSquad,
+} from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -436,5 +446,112 @@ describe('submitMergePersons', () => {
 
     await expect(merge(old, renamed)).rejects.toThrow('not found')
     expect(await database.db.select().from(persons)).toHaveLength(2)
+  })
+})
+
+describe('submitMarkSquad and submitUnmarkSquad (#1675)', () => {
+  const mark = (of: unknown = season) => resultOf(() => submitMarkSquad(of as string))
+  const unmark = (of: unknown = season) => resultOf(() => submitUnmarkSquad(of as string))
+  const marks = () => database.db.select().from(squadCompleteMarks)
+  const outcome = async () => (await database.db.select().from(squadCompleteness))[0]
+
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM squad_complete_marks')
+    await database.pool.query('DELETE FROM squad_completeness')
+    await add(form())
+    await database.pool.query('DELETE FROM audit_log')
+  })
+
+  it('marks the season, works it out again, writes the log and ends on the list with a notice', async () => {
+    expect(await mark()).toEqual({ redirect: '/beheer/spelers?seizoen=2019-20&gedaan=compleet' })
+
+    expect(await marks()).toMatchObject([{ markedBy: userId, season }])
+    expect(await outcome()).toMatchObject({ level: 'compleet', probability: 95 })
+    expect(await log()).toMatchObject([
+      { action: 'squad.mark-complete', detail: 'Selectie 2019/20 gemarkeerd als compleet', itemId: 2019, userId },
+    ])
+  })
+
+  it('keeps the mark when a player is added, changed or taken out afterwards', async () => {
+    await mark()
+    await add(form({ achternaam: 'Anders', rugnummer: '15', voornaam: 'Iemand' }))
+    const id = (await stored()).at(-1)?.id ?? 0
+    await remove(id)
+
+    expect(await marks()).toHaveLength(1)
+    expect(await outcome()).toMatchObject({ level: 'compleet', playerCount: 2 })
+  })
+
+  it('takes the mark back, gives the old outcome and writes the log', async () => {
+    const before = await outcome()
+    await mark()
+
+    expect(await unmark()).toEqual({ redirect: '/beheer/spelers?seizoen=2019-20&gedaan=ingetrokken' })
+
+    expect(await marks()).toEqual([])
+    expect(await outcome()).toMatchObject({ level: before?.level, probability: before?.probability })
+    expect((await log()).map((row) => row.action)).toEqual(['squad.mark-complete', 'squad.unmark-complete'])
+  })
+
+  it('changes nothing the second time', async () => {
+    await mark()
+
+    expect(await mark()).toEqual({ redirect: '/beheer/spelers?seizoen=2019-20&gedaan=was-al-compleet' })
+    await unmark()
+    expect(await unmark()).toEqual({ redirect: '/beheer/spelers?seizoen=2019-20&gedaan=was-al-ingetrokken' })
+    expect(await log()).toHaveLength(2)
+  })
+
+  it.each([
+    ['the running season', seasonOf(new Date())],
+    ['a later season', '2099/00'],
+    ['a season without players', '2018/19'],
+    ['something that is no season', "2019/20' OR 1"],
+    ['no text', 2019],
+  ])('refuses %s', async (_name, refused) => {
+    // The season without players has a match, so the admin knows it.
+    await database.db.insert(matches).values(
+      await withClubs(database.db, [
+        {
+          competition: 'Eredivisie',
+          dateText: 'Ergens in september',
+          home: true,
+          matchDate: '2018-09-01',
+          opponent: 'Oefenstad AZ',
+          round: 'Speelronde 1',
+          season: '2018/19',
+          status: 'scheduled',
+        },
+      ]),
+    )
+    await database.db.insert(players).values({ name: 'Nu', searchTerm: 'Nu', season: seasonOf(new Date()) })
+
+    expect(await mark(refused)).toEqual({ redirect: '/beheer/spelers?fout=markeren' })
+    expect(await marks()).toEqual([])
+    expect(await log()).toEqual([])
+  })
+
+  it('is not for an author', async () => {
+    await database.db.update(adminUsers).set({ role: 'author' }).where(eq(adminUsers.id, userId))
+
+    await expect(submitMarkSquad(season)).rejects.toThrow('not found')
+    await expect(submitUnmarkSquad(season)).rejects.toThrow('not found')
+    expect(await marks()).toEqual([])
+  })
+
+  it('says that it failed, and leaves no mark and no line in the log', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    await database.pool.query('RENAME TABLE squad_completeness TO squad_completeness_gone')
+
+    try {
+      expect(await submitMarkSquad(season)).toEqual({
+        error: 'De selectie is niet gemarkeerd. Er is niets veranderd. Probeer het nog eens.',
+      })
+      expect(await marks()).toEqual([])
+      expect(await log()).toEqual([])
+    } finally {
+      await database.pool.query('RENAME TABLE squad_completeness_gone TO squad_completeness')
+      vi.restoreAllMocks()
+    }
   })
 })

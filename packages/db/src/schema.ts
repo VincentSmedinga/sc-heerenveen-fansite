@@ -636,6 +636,8 @@ export const auditActions = [
   'quiz.create',
   'quiz.edit',
   'quiz.publish',
+  'squad.mark-complete',
+  'squad.unmark-complete',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -688,6 +690,9 @@ export const auditDetailMaxLength = 1000
  * the number of the account in `item_id` and, for a block, the reason in `reason`; the old and
  * the new name and the address are never in the log. `supporter.forget-address` is the owner
  * removing the hash of an address that was blocked, with the number of that row in `item_id`.
+ * `squad.mark-complete` and `squad.unmark-complete` are the editors marking the squad of a
+ * season as complete or taking that back (issue 1675), with the year the season starts in
+ * `item_id` and the season in `detail`.
  */
 export const auditLog = mysqlTable(
   'audit_log',
@@ -3084,6 +3089,20 @@ export const squadCompleteness = mysqlTable(
 )
 
 export type SquadCompletenessRow = typeof squadCompleteness.$inferSelect
+
+/**
+ * The seasons whose squad the editors marked as complete in the admin (issue 1675), one row per
+ * season: who marked it and when. The mark belongs to the season and to no player, so no import
+ * touches it, and the calculation of `squad_completeness` reads it. `marked_by` is empty when
+ * the account is gone. Taking the mark back removes the row.
+ */
+export const squadCompleteMarks = mysqlTable('squad_complete_marks', {
+  season: varchar('season', { length: matchLimits.season }).primaryKey(),
+  markedBy: int('marked_by', { unsigned: true }).references(() => adminUsers.id, { onDelete: 'set null' }),
+  markedAt: datetime('marked_at').notNull(),
+})
+
+export type SquadCompleteMarkRow = typeof squadCompleteMarks.$inferSelect
 
 /**
  * What a person of the staff does. The list grows with the roles we keep, such as

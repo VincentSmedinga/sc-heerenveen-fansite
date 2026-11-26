@@ -1,15 +1,17 @@
 // Works out the chance that the list of players of a season is the whole squad
 // (`squadCompleteness`, #745) from what the database holds, and stores it in
 // `squad_completeness` (#746). It lives here so that the importer and the admin of the site
-// (#1040) calculate the row the same way. A second calculation with nothing new writes nothing.
+// (#1040) calculate the row the same way. It reads the mark of the editors that the squad is
+// complete (#1675), so all of them agree on that too. A second calculation with nothing new
+// writes nothing.
 import { and, asc, eq, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { PlayerSource, SquadCompletenessRow } from './schema.ts'
 import type { CompletenessScorer } from './squad-completeness.ts'
 
-import { matches, matchGoals, players, playerSources, squadCompleteness } from './schema.ts'
-import { squadCompleteness as calculate, nameKey } from './squad-completeness.ts'
+import { matches, matchGoals, players, playerSources, squadCompleteMarks, squadCompleteness } from './schema.ts'
+import { squadCompleteness as calculate, missingScorers, nameKey } from './squad-completeness.ts'
 
 /** What a calculation did to the row of a season. */
 export type CompletenessChange =
@@ -19,6 +21,19 @@ export type CompletenessChange =
 
 /** What the sums of the table of a season were, or null where the page gave none. */
 export type CompletenessTotals = { goalsTotal: null | number; matchesTotal: null | number }
+
+/**
+ * The names of those who scored for us this season and are not in its list of players, as the
+ * check of the scorers sees them. The admin names them next to a mark of the editors (#1675).
+ */
+export async function findMissingScorers(db: Pick<Database, 'select'>, season: string): Promise<string[]> {
+  const list = await db
+    .select({ name: players.name, personId: players.personId })
+    .from(players)
+    .where(eq(players.season, season))
+
+  return missingScorers(list, (await scorersOf(db, season)) ?? []).map((scorer) => scorer.name)
+}
 
 /**
  * Works out the chance of one season and stores it when it differs from the row that is there.
@@ -54,10 +69,15 @@ export async function storeCompleteness(
     playersPerSource[player.source] = (playersPerSource[player.source] ?? 0) + 1
   }
 
+  const [mark] = await db
+    .select({ season: squadCompleteMarks.season })
+    .from(squadCompleteMarks)
+    .where(eq(squadCompleteMarks.season, season))
   const matchesTotal = totals === undefined ? (was?.matchesTotal ?? null) : totals.matchesTotal
   const goalsTotal = totals === undefined ? (was?.goalsTotal ?? null) : totals.goalsTotal
   const result = calculate({
     goalsTotal,
+    markedComplete: mark !== undefined,
     matchesTotal,
     players: list,
     playersPerSource,

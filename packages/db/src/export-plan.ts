@@ -173,6 +173,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   robots_txt: 'copy',
   source_clubs: 'copy',
   sources: 'copy',
+  squad_complete_marks: 'copy',
   squad_completeness: 'copy',
   squad_imports: 'copy',
   stadium_names: 'copy',

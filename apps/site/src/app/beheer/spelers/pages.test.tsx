@@ -10,6 +10,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createAccount } from '#src/beheer/accounts'
 import { addPlayer } from '#src/beheer/players'
+import { markSquadComplete } from '#src/beheer/squad-mark'
 
 import PlayerPage, { metadata as playerMetadata } from './[id]/page'
 import AddPage, { metadata as addMetadata } from './nieuw/page'
@@ -290,6 +291,75 @@ describe('the list of the players', () => {
     expect(await list({ fout: '__proto__' })).not.toContain('role="status"')
     expect(await list({ gedaan: 'constructor' })).not.toContain('role="status"')
     expect(await playerForm(pelleId, { gedaan: '__proto__' })).not.toContain('role="status"')
+  })
+})
+
+describe('the mark that a squad is complete, on the list of the players (#1675)', () => {
+  beforeEach(async () => {
+    await database.pool.query('DELETE FROM squad_complete_marks')
+    await database.pool.query('DELETE FROM squad_completeness')
+  })
+
+  it('has a button that names the season, for a season that is over', async () => {
+    const html = await list({ seizoen: '2019-20' })
+
+    expect(html).toContain('Markeer de selectie van 2019/20 als compleet')
+    expect(html).not.toContain('Trek de markering')
+  })
+
+  it('has no card for the running season, also when it has players', async () => {
+    await database.db.insert(players).values({ name: 'Nu', searchTerm: 'Nu', season: current })
+
+    expect(await list()).not.toContain('Selectie compleet')
+  })
+
+  it('says who marked it and on which day, with the button that takes it back', async () => {
+    await database.db.update(adminUsers).set({ firstName: 'Sanne' })
+    await markSquadComplete(database.db, userId, season, new Date('2026-11-26T12:00:00Z'))
+
+    const html = await list({ gedaan: 'compleet', seizoen: '2019-20' })
+
+    expect(html).toContain('Gemarkeerd als compleet door Sanne op 26 november 2026.')
+    expect(html).toContain('Trek de markering van de selectie van 2019/20 in')
+    expect(html).not.toContain('Markeer de selectie')
+    expect(html).not.toContain('telt nu niet')
+    expect(html).toContain('De selectie van 2019/20 is gemarkeerd als compleet. De site toont dat binnen vijf minuten.')
+    expect(html).toMatch(/<p[^>]*id="gedaan"[^>]*tabindex="-1"/iu)
+  })
+
+  it('keeps the mark and the date when the account is gone', async () => {
+    await markSquadComplete(database.db, userId, season, new Date('2026-11-26T12:00:00Z'))
+    await database.pool.query('DELETE FROM audit_log')
+    await database.db.delete(adminUsers)
+
+    expect(await list({ seizoen: '2019-20' })).toContain(
+      'Gemarkeerd als compleet op 26 november 2026, door een account dat niet meer bestaat.',
+    )
+  })
+
+  it('says that the mark does not count and who is missing, when a scorer is not in the list', async () => {
+    await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, player: 'Niet Erbij' })
+    await markSquadComplete(database.db, userId, season)
+
+    expect(await list({ seizoen: '2019-20' })).toContain(
+      'De markering telt nu niet op de site. In de lijst ontbreekt wie voor ons scoorde: Niet Erbij.',
+    )
+  })
+
+  it('does not promise in the notice that the site shows a mark that does not count', async () => {
+    await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, player: 'Niet Erbij' })
+    await markSquadComplete(database.db, userId, season)
+
+    const html = await list({ gedaan: 'compleet', seizoen: '2019-20' })
+
+    expect(html).toContain(
+      'is gemarkeerd als compleet. De markering telt nu niet op de site, omdat in de lijst een doelpuntenmaker ontbreekt.',
+    )
+    expect(html).not.toContain('De site toont dat')
+  })
+
+  it('explains a season that can not be marked', async () => {
+    expect(await list({ fout: 'markeren' })).toContain('Dit seizoen kun je niet als compleet markeren.')
   })
 })
 

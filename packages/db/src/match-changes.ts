@@ -13,6 +13,7 @@ import { recordAction } from './audit-log.ts'
 import { dropHalfTimeThatNoLongerFits } from './match-edits.ts'
 import { matchChanges, matches, matchGoals } from './schema.ts'
 import { linkMatchToStadium } from './stadiums.ts'
+import { storeCompleteness } from './store-completeness.ts'
 
 /**
  * A decision about a held change. `take-over` makes the match what the change proposes (or
@@ -166,6 +167,9 @@ export async function decideChange(
 
       await updateMatch(db, match, proposal, true, now)
     }
+
+    // The goals may have changed, and with them the scorers of the season (#1675).
+    await storeCompleteness(db, change.season, undefined, now)
   }
 
   await db

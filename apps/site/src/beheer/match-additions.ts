@@ -7,6 +7,7 @@ import { describeEntryKickoff, describeEntryResult } from '@fansite/db/match-edi
 import { findMatchByDate } from '@fansite/db/match-lookup'
 import { clubs, competitions, matches, matchLimits } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, eq } from 'drizzle-orm'
 
 import { type AddErrors, type AddValues, emptyAddValues, newClubChoice } from './match-add-fields'
@@ -97,6 +98,8 @@ export async function deleteAddedMatch(
     }
 
     await transaction.delete(matches).where(eq(matches.id, id))
+    // Its goals went with it, and with them perhaps a scorer of the season (#1675).
+    await storeCompleteness(transaction, match.season, undefined, now)
     await recordAction(
       transaction,
       {

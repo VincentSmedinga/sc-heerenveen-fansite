@@ -34,7 +34,7 @@ import {
 } from './person-checks'
 import { type PersonErrors, personFieldNames, type PersonPart, type PersonValues } from './person-fields'
 import { personLabels } from './person-labels'
-import { type MergeOffer, nameValuesOf, refreshPlayerAddresses, searchTermOf } from './players'
+import { type MergeOffer, nameValuesOf, refreshCompleteness, refreshPlayerAddresses, searchTermOf } from './players'
 
 /** The person an editor opens, with his player in each season, the oldest season first. */
 export type AdminPerson = {
@@ -83,7 +83,9 @@ class Refusal extends Error {
 
 /**
  * Changes a person (see `storePersonEdit`) and gives the players the addresses of their pages
- * again, as a new name or birth year changes them.
+ * again, as a new name or birth year changes them. A name can decide whether a scorer is in the
+ * list of a season, so the completeness of each season of the person is worked out again
+ * (#1675).
  */
 export async function editPerson(
   db: Database,
@@ -95,6 +97,11 @@ export async function editPerson(
   const outcome = await storePersonEdit(db, userId, id, entry, now)
 
   if (outcome.status === 'changed') {
+    const rows = await db.selectDistinct({ season: players.season }).from(players).where(eq(players.personId, id))
+
+    for (const { season } of rows) {
+      await refreshCompleteness(db, season, now)
+    }
     await refreshPlayerAddresses(db)
   }
 

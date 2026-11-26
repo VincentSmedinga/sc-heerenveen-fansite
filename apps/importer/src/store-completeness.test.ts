@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { clubs, matches, matchGoals, players, squadCompleteness } from '@fansite/db/schema'
+import { clubs, matches, matchGoals, players, squadCompleteMarks, squadCompleteness } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -32,7 +32,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['match_goals', 'matches', 'players', 'squad_completeness']) {
+  for (const table of ['match_goals', 'matches', 'players', 'squad_complete_marks', 'squad_completeness']) {
     await database.pool.query(`DELETE FROM ${table}`)
   }
 })
@@ -192,6 +192,47 @@ describe('storeCompleteness', () => {
     expect(change.kind).toBe('unchanged')
     expect((await rowOf())?.calculatedAt).toEqual(first)
     expect(describeChange(season, change)).toBe('Completeness 2013/14: 95% compleet, 26 players, unchanged')
+  })
+})
+
+describe('a season the editors marked as complete (#1675)', () => {
+  const mark = () => database.db.insert(squadCompleteMarks).values({ markedAt: first, season })
+
+  it('is complete with 95 for every caller, and keeps the mark and the outcome when the players change', async () => {
+    await twoSources()
+    await mark()
+
+    await storeCompleteness(database.db, season, { goalsTotal: 0, matchesTotal: 1 }, first)
+    await database.db.insert(players).values({ name: 'Nieuw', searchTerm: 'Nieuw', season, source: 'verslag' })
+    // The import command works out every season again, from the database alone.
+    await recalculateCompleteness(database.db, later)
+
+    expect(await rowOf()).toMatchObject({ level: 'compleet', playerCount: 27, probability: 95 })
+    expect(await database.db.select().from(squadCompleteMarks)).toHaveLength(1)
+  })
+
+  it('is lowered by a scorer who is missing, and has the old outcome again once the mark is gone', async () => {
+    await database.db.insert(players).values({ name: 'Speler 0', searchTerm: 'Speler 0', season, source: 'doelpunten' })
+    await storeCompleteness(database.db, season, undefined, first)
+    const before = await rowOf()
+
+    await mark()
+    await storeCompleteness(database.db, season, undefined, later)
+    expect(await rowOf()).toMatchObject({ level: 'compleet', probability: 95 })
+
+    await goal('Niet Erbij', 'Speelronde 1')
+    await storeCompleteness(database.db, season, undefined, later)
+    expect(await rowOf()).toMatchObject({ level: 'weinig', probability: 5 })
+
+    await database.db.delete(squadCompleteMarks)
+    await database.pool.query('DELETE FROM matches')
+    await storeCompleteness(database.db, season, undefined, later)
+
+    expect(await rowOf()).toMatchObject({
+      checks: before?.checks,
+      level: before?.level,
+      probability: before?.probability,
+    })
   })
 })
 

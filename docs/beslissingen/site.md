@@ -4074,6 +4074,7 @@
   - Een seizoen zonder rij blijft "onbekend" zonder lijst.
 - **Waarom:** een seizoen met verslagen mag geen leeg vak hebben, maar een lijst uit de zwakste bron mag niet naast een echte selectie staan: een gemengde lijst zegt niet meer waar de spelers vandaan komen.
 - **Alternatieven:** spelers uit verslagen onder een echte selectie bijvoegen; spelers groeperen naar wat de verslagen zeggen, zoals doelmannen uit de opstelling (gokwerk).
+- **Later:** zie _De kaart zegt dat de redactie het zegt_ (26 november 2026): bij een selectie die volgens de redactie compleet is, toont de kaart alle spelers.
 
 ## De homepage kiest zijn kaartvlakken op soort inhoud, en dit geldt alleen voor de homepage
 
@@ -4282,6 +4283,7 @@
   De zin van `weinig` ("vooral wie scoorde of overkwam") klopt niet voor spelers die de redactie toevoegde.
   De kaart leest alleen de rij (_De kaart Selectie toont de spelers uit de verslagen alleen als ze de beste bron zijn_): de fix zit in de beoordeling.
 - **Alternatieven:** de bestaande zin van `weinig` houden; Beheer laten falen als de rij niet lukt (een speler die de redactie niet kan toevoegen om een reden die haar niet raakt).
+- **Later:** zie _De kaart zegt dat de redactie het zegt_ (26 november 2026): telt de markering van de redactie, dan geldt haar zin, bij elke beste bron.
 
 ## De kaart Selectie toont de positie en het land van het seizoen, en anders die van de persoon
 
@@ -8396,3 +8398,53 @@
   Met alleen de verslagen die af zijn, had in de kopie van acceptatie van 25 november 2026 alleen 2026/27 minuten.
   In 1998/99 tot en met 2002/03 en 2005/06 heeft daar elke wedstrijd een opstelling, maar zijn enkele verslagen niet af.
 - **Alternatieven:** alleen de verslagen die af zijn (bijna overal een streepje); altijd het getal tonen met "uit N van M wedstrijden"; de kolom alleen tonen als elk seizoen van de speler compleet is; geen kolom.
+
+## De redactie zet een eigen markering, geen niveau
+
+- **Datum:** 26 november 2026
+- **Besluit:** per seizoen staat er een markering "compleet volgens de redactie" los van de spelers (#1675).
+  De berekening leest haar en geeft `compleet` met kans 95.
+  - De markering staat in de tabel `squad_complete_marks`, met wie haar zette en wanneer.
+  - `storeCompleteness` leest haar, dus het beheer, de import en `import:completeness` komen op dezelfde uitkomst.
+- **Waarom:** de redactie weet soms dat een lijst heel is terwijl de bron dat niet kan weten.
+  Een eigen markering overleeft elke import, en er blijft één regel die het niveau uitrekent.
+- **Alternatieven:** de redactie kiest zelf een niveau (een tweede regel naast de berekening).
+  Een nieuwe bron bovenaan de lijst (een bron hoort bij een speler, niet bij een seizoen).
+
+## Alleen een ontbrekende doelpuntenmaker gaat boven de markering
+
+- **Datum:** 26 november 2026
+- **Besluit:** bij een gemarkeerd seizoen verlaagt alleen de controle `scorers` de kans.
+  De markering blijft staan, ook als de lijst daarna verandert (#1675).
+  - Beheer > Spelers noemt wie ontbreekt.
+  - Elke wijziging van doelpunten in het beheer rekent het seizoen meteen opnieuw uit, in dezelfde transactie.
+    Dat geldt ook voor een verslag, een live verslag, een verwijderde wedstrijd en het overnemen van Wikipedia.
+    De uurlijkse import rekent alleen het lopende seizoen uit, dus een afgelopen seizoen wacht niet op haar.
+  - Personen samenvoegen en een persoon aanpassen rekenen elk seizoen van die persoon opnieuw uit.
+- **Waarom:** een doelpuntenmaker die ontbreekt is een bewezen gat.
+  Het aantal spelers en de sommen van een tabel zijn vermoedens, en die weet de redactie beter.
+- **Alternatieven:** de markering wint altijd (de site kan dan iets zeggen dat aantoonbaar niet klopt).
+  Alle controles blijven gelden (een kleine selectie is dan nooit te markeren).
+  De markering vervalt bij elke wijziging van de lijst (steeds opnieuw markeren).
+
+## Alleen een afgelopen seizoen, door eigenaar of redacteur
+
+- **Datum:** 26 november 2026
+- **Besluit:** markeren kan vanaf 1 juli na het seizoen, op Beheer > Spelers, door eigenaar en redacteur (#1675).
+  De pagina toont wie en wanneer, en beide acties komen in het logboek.
+- **Waarom:** de selectie van het lopende seizoen kan nog veranderen.
+  De rollen zijn dezelfde als bij het toevoegen van een speler.
+- **Alternatieven:** ook het lopende seizoen (de markering veroudert bij een transfer).
+  Alleen de eigenaar.
+  Alleen het logboek zonder naam en datum op de pagina.
+
+## De kaart zegt dat de redactie het zegt
+
+- **Datum:** 26 november 2026
+- **Besluit:** de zin is "We kennen N spelers van dit seizoen.
+  Volgens de redactie is de selectie compleet.", en de kaart toont alle spelers van het seizoen (#1675).
+  Wie de markering zette, staat niet op de site.
+- **Waarom:** de lezer ziet waar de zekerheid vandaan komt.
+  Een lijst die compleet heet, mag geen spelers verbergen.
+- **Alternatieven:** "Dit is de hele selectie" (zegt niet wie dat weet).
+  De zin van `compleet` met "Waarschijnlijk" (zwakker dan wat de redactie weet).

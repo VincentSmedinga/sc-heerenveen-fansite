@@ -165,6 +165,8 @@ describe('recordAction', () => {
       'quiz.create',
       'quiz.edit',
       'quiz.publish',
+      'squad.mark-complete',
+      'squad.unmark-complete',
     ])
   })
 

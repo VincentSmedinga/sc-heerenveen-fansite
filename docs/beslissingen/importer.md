@@ -2528,6 +2528,7 @@
 - **Alternatieven:** een percentage van het aantal spelers tegenover een vast getal (zegt niets over wie ontbreekt).
   De kans uitrekenen met twee bronnen tegelijk, vangst en terugvangst (zwaar voor de eerste versie en onbetrouwbaar met twee bronnen die niet los van elkaar zijn).
 - **Later:** zie _De controle op de doelpunten van de tabel draait niet in het seizoen dat loopt_ (16 november 2026): de controle op de doelpunten is `unavailable` in het lopende seizoen.
+- **Later:** zie _De redactie zet een eigen markering, geen niveau_ en _Alleen een ontbrekende doelpuntenmaker gaat boven de markering_ in `site.md` (26 november 2026): een gemarkeerd seizoen begint bij 95, en alleen de controle van de doelpuntenmakers verlaagt dat.
 
 ## De importer berekent de volledigheid en bewaart hem, de site rekent niet
 

@@ -30,6 +30,7 @@ import {
   matchSubstitutions,
   players,
 } from '@fansite/db/schema'
+import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { createHash } from 'node:crypto'
 
@@ -555,7 +556,11 @@ export async function removeReport(
   now = new Date(),
 ): Promise<RemoveReportOutcome> {
   return db.transaction(async (transaction) => {
-    const [match] = await transaction.select({ id: matches.id }).from(matches).where(eq(matches.id, id)).for('update')
+    const [match] = await transaction
+      .select({ season: matches.season })
+      .from(matches)
+      .where(eq(matches.id, id))
+      .for('update')
 
     if (match === undefined) {
       return 'missing'
@@ -578,6 +583,8 @@ export async function removeReport(
       await insertGoals(transaction, id, JSON.parse(edit.beforeGoals) as GoalSnapshot[])
       await clearParts(transaction, edit, ['goals'])
       restored = true
+      // The scorers decide whether the squad of the season can be complete (#1675).
+      await storeCompleteness(transaction, match.season, undefined, now)
     }
 
     await rejectPending(transaction, id, now, ['goals'])
@@ -822,6 +829,8 @@ export async function saveReport(
     // The rows of the opponent were made again, so they get their person again (#1544): by
     // the goal of the report, or by the name.
     await linkOpponentPersons(transaction, { matchId: id })
+    // The scorers decide whether the squad of the season can be complete (#1675).
+    await storeCompleteness(transaction, match.season, undefined, now)
     await markGoalsEdited(transaction, match, oldGoals, userId, now)
     await rejectPending(transaction, id, now, ['goals'])
     await recordAction(

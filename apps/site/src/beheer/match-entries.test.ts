@@ -13,6 +13,8 @@ import {
   type NewMatch,
   persons,
   players,
+  squadCompleteMarks,
+  squadCompleteness,
   stadiumNames,
   stadiums,
   wikipediaPages,
@@ -28,6 +30,7 @@ import {
   countHeldChanges,
   countMatchesWithoutResult,
   countWaitingDifferences,
+  decideDifference,
   decideHeldChange,
   findHeldChange,
   findMatch,
@@ -52,6 +55,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM match_changes')
   await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM squad_complete_marks')
+  await database.pool.query('DELETE FROM squad_completeness')
   await database.pool.query('DELETE FROM club_home_grounds')
   await database.pool.query('DELETE FROM stadium_names')
   await database.pool.query('DELETE FROM stadiums')
@@ -912,6 +917,29 @@ describe('the changes of Wikipedia that are held back', () => {
     return inserted?.id ?? 0
   }
 
+  it('works out the completeness of the squad again when Wikipedia is taken over (#1675)', async () => {
+    const rated = async () => (await database.db.select().from(squadCompleteness)).map((row) => row.season)
+    const forget = () => database.pool.query('DELETE FROM squad_completeness')
+
+    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2026/27' })
+
+    // A held change that takes the match away, and then a difference about the goals.
+    const held = await addHeld(await addMatch(), { newValue: null })
+
+    await decideHeldChange(database.db, userId, held, 'take-over', 'Klopt', t1)
+    expect(await rated()).toEqual(['2026/27'])
+
+    await forget()
+
+    const difference = await addHeld(await addMatch(), {
+      part: 'goals',
+      proposal: JSON.stringify({ goals: [], part: 'goals' }),
+    })
+
+    expect(await decideDifference(database.db, userId, difference, 'take-over', 'Klopt', t1)).toBe('done')
+    expect(await rated()).toEqual(['2026/27'])
+  })
+
   it('counts nothing, and names no season, when no change is held back', async () => {
     expect(await countHeldChanges(database.db)).toEqual({ seasons: [], total: 0 })
   })
@@ -982,5 +1010,21 @@ describe('the changes of Wikipedia that are held back', () => {
     expect(await database.db.select().from(auditLog)).toMatchObject([
       { action: 'match.keep', itemId: matchId, reason: 'Het blijft staan', userId },
     ])
+  })
+})
+
+describe('the squad of a marked season after a change of the goals (#1675)', () => {
+  const level = async () => (await database.db.select().from(squadCompleteness))[0]?.level
+
+  it('drops below complete in the same save for a scorer who is not in the list, and comes back with an undo', async () => {
+    const id = await addMatch({ season: '2019/20' })
+    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2019/20' })
+    await database.db.insert(squadCompleteMarks).values({ markedAt: t0, season: '2019/20' })
+
+    await saveEntry(database.db, userId, id, entry({ goals: [goal({ player: 'Niet Erbij' })] }), undefined, t0)
+    expect(await level()).not.toBe('compleet')
+
+    await undoEntry(database.db, userId, id, undefined, t1)
+    expect(await level()).toBe('compleet')
   })
 })

@@ -511,6 +511,7 @@ Het land komt uit `persons.country`, en anders uit `players.country` (#946, #128
 De tabel van de pagina Spelers in het beheer volgt dezelfde regel (#1070): de linie van de persoon staat er als "Aanvaller (linie van de persoon)".
 Een speler met een land zonder tekening in het designsysteem toont de landcode in een kader van dezelfde breedte, een speler zonder land krijgt een lege plek, en een deel waarin niemand een land heeft, heeft geen plek voor een vlag.
 Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_completeness` (`completenessSentence` in `src/season-squad.ts`); bij `onbekend` of zonder spelers staat er alleen de kop en die zin.
+Telt de markering van de redactie (`markedComplete` en het niveau `compleet`, #1675), dan zegt de zin "Volgens de redactie is de selectie compleet." en toont de kaart alle spelers, ook die uit de verslagen.
 Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) zegt de zin dat de lijst uit de verslagen komt, en staat er één lijst met alleen namen; spelers uit verslagen staan niet op de kaart als een betere bron het seizoen heeft (`cardPlayers`).
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
@@ -1339,6 +1340,11 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Hebben twee of meer spelers die nog in de selectie staan hetzelfde nummer, dan zegt een `Notice` boven de tabel welk nummer en van wie (`doubleShirtNumbers`, #1076).
   Een vertrokken speler en een vorig nummer tellen niet mee, en opslaan wordt niet geweigerd.
   Ze opent op het lopende seizoen; de seizoenkiezer heeft elk seizoen met een wedstrijd (`listPlayerSeasons` in `src/beheer/players.ts`).
+- Bij een afgelopen seizoen met minstens één speler staat onder de lijst de kaart "Selectie compleet" (`SquadMarkCard.tsx`, de acties in `src/beheer/squad-mark.ts`, #1675).
+  Eigenaar en redacteur markeren de selectie daar als compleet, of trekken de markering in; elke knop noemt het seizoen.
+  De kaart toont wie de markering zette en wanneer, en noemt de doelpuntenmakers die ontbreken en de markering daarom laten wegvallen.
+  Een wijziging van doelpunten in het beheer rekent het seizoen meteen opnieuw uit, en personen samenvoegen of aanpassen elk seizoen van die persoon.
+  Markeren en intrekken rekenen het seizoen meteen uit en komen in het logboek (`squad.mark-complete` en `squad.unmark-complete`, met het beginjaar in `item_id`); de site volgt binnen vijf minuten.
 - `/beheer/spelers/nieuw?seizoen=<seizoen>` voegt een speler toe.
   Bovenaan staat een zoekformulier met methode GET (`q`): wat het vindt (`searchPersons`, hoogstens 25 personen), staat als lijst "Persoon" in het formulier, met "Een nieuwe persoon" als laatste keuze.
   Elke keuze noemt de seizoenen van de persoon en, als die anders is dan de naam, de titel van zijn artikel.
