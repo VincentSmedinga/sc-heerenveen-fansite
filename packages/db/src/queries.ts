@@ -1093,6 +1093,15 @@ export function listSeasonPlayerBirths(db: Database, season: string) {
 }
 
 /**
+ * Who each row of a season, such as `2026/27`, is: the name of the row (`name`, unique in a
+ * season) and the person behind it, or null. The card Veranderingen in de selectie compares
+ * two seasons with it. A row of every source counts, also one of a player who left.
+ */
+export function listSeasonPlayerPersons(db: Database, season: string) {
+  return db.select({ name: players.name, personId: players.personId }).from(players).where(eq(players.season, season))
+}
+
+/**
  * Every player of a season, such as `2026/27`, for the card Selectie on the page Spelers: the
  * name, the name kept for the person (`personGivenName`, `personFamilyNamePrefix` and
  * `personFamilyName`, null while the importer has not read the article), the position, the

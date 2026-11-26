@@ -5977,6 +5977,7 @@
 - **Alternatieven:** de kaart alleen tonen als alles bekend is (dan mist hij nu de leeftijd); een gemiddelde van de spelers die we kennen zonder zin (misleidend).
 - **Later:** deze kaart komt bij "`/spelers` toont alleen de selectie: de kaart Selectie en de bronvermelding" in _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_: de zijkolom heeft nu ook deze kaart, boven "Cijfers van dit seizoen".
 - **Later:** sinds 25 november 2026 heet de kaart "In het kort" en staat ze wit in de brede kolom boven de selectie (zie _Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie_, #1647).
+- **Later:** sinds 26 november 2026 staan op de kaart ook de aantallen per positie, alleen bij een selectie die `bijna` of `compleet` is (zie _De aantallen per positie staan in "In het kort"_, #788).
 
 ## Het land per regel blijft de vlag
 
@@ -8284,6 +8285,7 @@
   Zonder uitblinker en zonder open venster is er geen kaart.
 - **Waarom:** de uitblinker hoort bij de spelers van het seizoen, niet alleen bij de dagen waarop je cijfers kunt geven.
 - **Alternatieven:** "In het kort" onder de selectie; voor het lopende seizoen de koploper van het seizoen.
+- **Later:** sinds 26 november 2026 staat tussen de Uitblinker en de vier kleine kaarten de kaart "Veranderingen in de selectie" (zie _Veranderingen in de selectie staan in de zijkolom van Spelers_, #788).
 
 ## De ranglijst van de fans op Spelers › Cijfers toont de top 5
 
@@ -8506,3 +8508,46 @@
 - **Waarom:** er is een keuze per pagina, en de kaart toont nooit een ander seizoen dan de rest.
 - **Nadeel:** cijfers van een seizoen zonder wedstrijden in de database zijn op deze pagina niet meer te zien.
 - **Alternatieven:** de eigen keuze houden.
+
+## De veranderingen alleen bij twee selecties die bijna of helemaal compleet zijn
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kaart "Veranderingen in de selectie" verschijnt als het seizoen en het seizoen ervoor `bijna` of `compleet` zijn (#788).
+  Bij `bijna` zegt een regel dat een naam er ten onrechte kan staan.
+  Nieuw of weg is wie op de kaart Selectie van het ene seizoen staat en in geen enkele rij van het andere.
+  Een speler volgen we op zijn persoon, en op zijn naam als een van de twee rijen geen persoon heeft.
+- **Waarom:** een ontbrekende speler lijkt vertrokken of nieuw.
+  Deze grens geeft 19 van de 36 paren, en twee complete seizoenen geven er maar 6 (kopie van acceptatie van 25 november 2026).
+  Wie alleen uit de verslagen komt, staat niet op elke kaart Selectie, en telt daarom wel als aanwezig.
+- **Alternatieven:** alleen twee complete seizoenen.
+  Elk seizoen met een waarschuwing (bij een onvolledige selectie is de lijst dan vooral onjuist).
+
+## De kaart zegt "niet meer in de selectie", zonder datum of reden
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kaart vergelijkt twee seizoenen en toont geen vertrekdatum, geen bestemming en niet wie tijdens het lopende seizoen vertrok (#788).
+- **Waarom:** we slaan niet op waarom of waarheen iemand ging.
+  `left_squad_at` is het moment waarop de import een speler niet meer zag, niet het moment van vertrek.
+- **Alternatieven:** het woord "vertrokken".
+  Een derde lijst met wie in het lopende seizoen uit de selectie ging, met die datum.
+
+## Veranderingen in de selectie staan in de zijkolom van Spelers
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kaart staat zacht in de zijkolom van `/spelers` en van elk seizoen, onder de Uitblinker en boven de vier kleine kaarten (#788).
+  De bronvermelding noemt dan ook de pagina's van de selectie van het seizoen ervoor.
+- **Waarom:** de veranderingen horen bij de lijst zelf, en de selectie blijft de inhoud van de pagina.
+  De kaart "In het kort", waar ze eerst onder zou staan, is sinds #1647 in de brede kolom.
+  De vergelijking leunt op de pagina's van het vorige seizoen, en een bron noemen we altijd.
+- **Alternatieven:** op Spelers › Cijfers.
+  In de brede kolom onder "In het kort" (dan komt de selectie lager).
+
+## De aantallen per positie staan in "In het kort"
+
+- **Datum:** 26 november 2026
+- **Besluit:** onder "Spelers" staan vier regels per positie, en "Positie onbekend" als iemand er geen heeft, alleen bij een selectie die `bijna` of `compleet` is (#788).
+- **Waarom:** de kaart Selectie groepeert al per positie, dus alleen de aantallen zijn nieuw.
+  Bij een onvolledige selectie zegt een telling niets.
+- **Alternatieven:** een getal achter elke kop in de kaart Selectie.
+  Een eigen kaart.
+  Niet tellen.

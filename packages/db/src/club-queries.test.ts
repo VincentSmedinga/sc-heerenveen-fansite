@@ -10,6 +10,7 @@ import {
   listClubLastWins,
   listClubMatches,
   listClubRecords,
+  listSeasonPlayerPersons,
   listSquadPersonIds,
 } from './queries.ts'
 import { clubNames, clubs, matches, matchGoals, persons, players, stadiums } from './schema.ts'
@@ -320,6 +321,31 @@ describe('listSquadPersonIds', () => {
 
     await database.pool.query("DELETE FROM players WHERE search_term LIKE 'Test %'")
     await database.pool.query('DELETE FROM persons WHERE id IN (?, ?)', [person!.id, gone!.id])
+  })
+})
+
+describe('listSeasonPlayerPersons', () => {
+  it('gives every row of the season with its person or null, also of a player who left', async () => {
+    const [person] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Gebleven', givenName: 'Test', name: 'Test Gebleven', slug: 'test-gebleven-788' })
+      .$returningId()
+
+    await database.db.insert(players).values([
+      { inSquad: false, name: 'Test Gebleven', personId: person!.id, searchTerm: 'Test Gebleven', season: '2026/27' },
+      { name: 'Test Naamloos', searchTerm: 'Test Naamloos', season: '2026/27', source: 'verslag' },
+      { name: 'Test Vorig', searchTerm: 'Test Vorig', season: '2025/26' },
+    ])
+
+    const rows = await listSeasonPlayerPersons(database.db, '2026/27')
+
+    expect(rows.toSorted((a, b) => a.name.localeCompare(b.name))).toEqual([
+      { name: 'Test Gebleven', personId: person!.id },
+      { name: 'Test Naamloos', personId: null },
+    ])
+
+    await database.pool.query("DELETE FROM players WHERE search_term LIKE 'Test %'")
+    await database.pool.query('DELETE FROM persons WHERE id = ?', [person!.id])
   })
 })
 

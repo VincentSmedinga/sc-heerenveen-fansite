@@ -1266,12 +1266,14 @@ export function SourceCredit({
   source?: MatchSource
   /**
    * The pages the squad of the season was read from, for the page Spelers, and whether a player
-   * comes from Wikidata, which the credit then names with its licence (CC0).
+   * comes from Wikidata, which the credit then names with its licence (CC0). A page of the
+   * squad of another season, such as the one it is compared with, says its `season`.
    */
-  squad?: undefined | { pages: { readAt: Date; title: string }[]; wikidata: boolean }
+  squad?: undefined | { pages: { readAt: Date; season?: string; title: string }[]; wikidata: boolean }
 }) {
-  const squadPages = squad?.pages ?? []
-  const dutchPages = squadPages.filter((page) => !isEnglishPage(page.title)).length
+  const squadPages = (squad?.pages ?? []).map((page) => ({ ...page, season: page.season ?? season }))
+  const dutchPagesOf = (of: string) =>
+    squadPages.filter((page) => page.season === of && !isEnglishPage(page.title)).length
   const credited = [
     ...pages.map((page) => ({
       href: wikipediaUrl(page.title, page.language),
@@ -1280,7 +1282,7 @@ export function SourceCredit({
     })),
     ...squadPages.map((page) => ({
       href: `https://${isEnglishPage(page.title) ? 'en' : 'nl'}.wikipedia.org/wiki/${encodeURI(page.title.replaceAll(' ', '_'))}`,
-      name: squadPageName(page.title, season, dutchPages),
+      name: squadPageName(page.title, page.season, dutchPagesOf(page.season)),
       readAt: page.readAt,
     })),
   ]
