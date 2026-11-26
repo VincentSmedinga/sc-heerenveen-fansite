@@ -26,21 +26,29 @@ const render = (given: Partial<SquadChanges> = {}) =>
   renderToStaticMarkup(<SquadChangesCard changes={{ ...changes, ...given }} />)
 const plain = (html: string) => html.replaceAll(/<[^>]*>/g, ' ').replaceAll(/\s+/g, ' ')
 
-describe('the card Veranderingen in de selectie', () => {
-  it('is a soft card named by its h2, with the season it compares with and two lists named by their h3', () => {
+describe('the card Mutaties', () => {
+  it('is a white card named by its h2, with two lists named by their h3, each with its number', () => {
     const html = render()
 
-    expect(html).toContain('<section class="hf-card hf-card-soft" aria-labelledby="veranderingen-in-de-selectie">')
-    expect(html).toContain('id="veranderingen-in-de-selectie">Veranderingen in de selectie</h2>')
-    expect(plain(html)).toContain('Vergeleken met 2025/26.')
+    expect(html).toContain('<section class="hf-card" aria-labelledby="mutaties">')
+    expect(html).toContain('id="mutaties">Mutaties</h2>')
+    expect(plain(html)).not.toContain('Vergeleken met')
     expect(html.match(/<h3[^>]*>[^<]*<\/h3>/g)).toHaveLength(2)
 
-    for (const [id, name] of [
-      ['nieuw-in-de-selectie', 'Nina'],
-      ['niet-meer-in-de-selectie', 'Victor'],
+    for (const [id, heading, name] of [
+      ['erin', 'Erin \\(1\\)', 'Nina'],
+      ['eruit', 'Eruit \\(1\\)', 'Victor'],
     ]) {
-      expect(html).toMatch(new RegExp(`id="${id}">[^<]*</h3><ul[^>]*aria-labelledby="${id}"[^>]*>.*?${name}`))
+      expect(html).toMatch(new RegExp(`id="${id}">${heading}</h3><ul[^>]*aria-labelledby="${id}"[^>]*>.*?${name}`))
     }
+
+    expect(html.indexOf('id="erin"')).toBeLessThan(html.indexOf('id="eruit"'))
+  })
+
+  it('puts the two parts in the columns that stand side by side when the card is wide enough', () => {
+    expect(render()).toMatch(
+      /class="hf-card-columns"><div class="hf-card-columns-grid"><div class="hf-card hf-card-transparent"><h3[^>]*id="erin"/,
+    )
   })
 
   it('shows the names with a link to the page of a player who has one, without a number or a flag', () => {
@@ -55,7 +63,7 @@ describe('the card Veranderingen in de selectie', () => {
   it('keeps the heading of an empty part and says nobody', () => {
     const html = render({ departed: [] })
 
-    expect(plain(html)).toContain('Niet meer in de selectie Niemand.')
+    expect(plain(html)).toContain('Eruit (0) Niemand.')
     expect(html.match(/<ul/g)).toHaveLength(1)
   })
 

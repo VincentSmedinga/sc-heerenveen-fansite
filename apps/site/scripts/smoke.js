@@ -1538,19 +1538,21 @@ await withEmptyDatabase((database) =>
     // A player without a country, among others who have one, has an empty place for the flag.
     assert.match(squadCard, /<span class="hf-flag"><\/span><\/span><span class="hf-player-name-text">/)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer over de spelers"'))
-    // Above the squad, in the main column, is the white card "In het kort".
+    // The sidebar starts with the soft card "In het kort", after the squad in the order of the
+    // page.
     // The made-up squad has countries, so the card has Spelers and Landen, and no date of birth
     // (the age lines depend on how many made-up players have a date, so they are not asserted).
     const summaryCard =
-      /<section class="hf-card" aria-labelledby="in-het-kort">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
+      /aria-label="Meer over de spelers"><section class="hf-card hf-card-soft" aria-labelledby="in-het-kort">.*?<\/section>/s.exec(
+        playersHtml,
+      )?.[0] ?? ''
     assert.match(summaryCard.replaceAll(/<[^>]*>/g, ''), /In het kortSpelers\d+/)
     assert.match(
       summaryCard,
       /<dl class="hf-description-list hf-description-list-stacked hf-description-list-aligned">/,
     )
     assert.doesNotMatch(summaryCard, /\d{4}-\d{2}-\d{2}/)
-    assert.ok(playersHtml.indexOf('id="in-het-kort"') < playersHtml.indexOf('id="selectie"'))
-    // The sidebar has the small cards of the top of the season, each linking to its large card.
+    // Below it are the small cards of the top of the season, each linking to its large card.
     assert.doesNotMatch(playersHtml, /cijfers-van-dit-seizoen/)
     for (const [id, link] of [
       ['kort-topscorers', '/spelers/cijfers#doelpuntenmakers'],

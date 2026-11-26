@@ -121,16 +121,33 @@ describe('squadChanges', () => {
     expect(changes.departed).toEqual([])
   })
 
-  it('has the order of the card Selectie, from the goal to the front, with the link of a player who has a page', () => {
+  it('puts both lists in order of the family name without prefix, then of the given name', () => {
+    const person = (given: null | string, family: null | string, prefix: null | string = null) => ({
+      personFamilyName: family,
+      personFamilyNamePrefix: prefix,
+      personGivenName: given,
+    })
+    const rows: [string, number, Partial<Player>?][] = [
+      ['Piet de Vries', 1, { ...person('Piet', 'Vries', 'de'), position: 'doelman' }],
+      ['Zeno Alves', 2, { ...person('Zeno', 'Alves'), position: 'verdediger' }],
+      ['André Alves', 3, { ...person('André', 'Alves'), position: 'aanvaller' }],
+      // A person without a family name, and rows without a person: by the name as text.
+      ['Dinho', 4, person('Dinho', null)],
+      ['Joost van Aken', 5],
+      ['Ruud Visser', 6],
+    ]
+    const expected = ['Joost van Aken', 'André Alves', 'Zeno Alves', 'Dinho', 'Ruud Visser', 'Piet de Vries']
+
+    expect(names(squadChanges(compared('2026/27', rows), compared('2025/26', [])).arrived)).toEqual(expected)
+    expect(names(squadChanges(compared('2026/27', []), compared('2025/26', rows)).departed)).toEqual(expected)
+  })
+
+  it('gives the link of a player who has a page', () => {
     const changes = squadChanges(
-      compared('2026/27', [
-        ['Spits', 1, { position: 'aanvaller' }],
-        ['Doelman', 2, { personSlug: 'doelman', position: 'doelman' }],
-      ]),
+      compared('2026/27', [['Doelman', 2, { personSlug: 'doelman' }]]),
       compared('2025/26', []),
     )
 
-    expect(names(changes.arrived)).toEqual(['Doelman', 'Spits'])
     expect(changes.arrived[0]?.href).toBe('/spelers/doelman')
   })
 

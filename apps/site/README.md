@@ -130,7 +130,7 @@ Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
 De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/nieuws/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
-De kaart "Veranderingen in de selectie" op `/spelers` heeft de verzonnen selectie van het seizoen ervoor nodig (`e2e/earlier-squad.ts`).
+De kaart "Mutaties" op `/spelers` heeft de verzonnen selectie van het seizoen ervoor nodig (`e2e/earlier-squad.ts`).
 De werklijst `/beheer/spelers/kwaliteit/personen/snel` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
@@ -521,20 +521,21 @@ Telt de markering van de redactie (`markedComplete` en het niveau `compleet`, #1
 Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) zegt de zin dat de lijst uit de verslagen komt, en staat er één lijst met alleen namen; spelers uit verslagen staan niet op de kaart als een betere bron het seizoen heeft (`cardPlayers`).
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
-Boven de selectie, in de hoofdkolom, staat de witte kaart "In het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
-Mist er iets, dan staat er onder de regels "X van de Y spelers" (zie `DataLine`); kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
-Bij een selectie die `bijna` of `compleet` is, staan onder "Spelers" ook de aantallen Doelmannen, Verdedigers, Middenvelders en Aanvallers, en "Positie onbekend" als iemand er geen heeft (`positionCounts`, dezelfde delen als de kaart Selectie, #788).
-De zijkolom begint met de kaart "Uitblinker", wit met het watermerk en de kop in de kleur van het spel (`SeasonUitblinkerCard`, wat erop staat leest `readSeasonUitblinker` in `src/fans/season-uitblinker.ts`, #1647).
-Een voorbij seizoen toont de Uitblinker van het jaar, met de bronregel als het cijfer van de Fansite komt, en de link "Uitblinker van het jaar".
-Het lopende seizoen toont de Uitblinker van de laatste wedstrijd met een uitslag, met het aantal fans, en zolang het venster open is de link "Geef cijfers".
-Zonder uitblinker en zonder open venster, met de Uitblinker uit of bij een fout is er geen kaart.
-Daaronder staat de zachte kaart "Veranderingen in de selectie" (`SquadChangesCard` in `src/SquadChangesCard.tsx`, de vergelijking uit `getSquadChanges` in `src/squad-changes.ts`, #788), met de lijsten "Nieuw" en "Niet meer in de selectie".
+Onder de selectie, in de hoofdkolom, staat de witte kaart "Mutaties" (`SquadChangesCard` in `src/SquadChangesCard.tsx`, de vergelijking uit `getSquadChanges` in `src/squad-changes.ts`, #788), met de delen "Erin (x)" en "Eruit (y)" en het aantal namen in elke kop.
+De delen staan naast elkaar als de kaart breed genoeg is, en anders onder elkaar (`CardColumns`).
+Elke lijst staat op achternaam zonder voorvoegsel en dan op voornaam (`compareByName` in `src/player-name.ts`, dezelfde regel als de lijst op naam); een deel zonder spelers zegt "Niemand.".
 De kaart is er alleen als het opgeslagen niveau van het seizoen en van het seizoen ervoor `bijna` of `compleet` is.
 Nieuw of weg is wie op de kaart Selectie van het ene seizoen staat en in geen enkele rij van het andere: een speler volgen we op zijn persoon, en op zijn naam als een van de twee rijen geen persoon heeft.
 `in_squad` en `left_squad_at` tellen niet, en de kaart toont geen datum, bestemming of reden.
 Is een van de twee seizoenen `bijna`, dan zegt de laatste regel dat een naam er ten onrechte kan staan.
 Zolang de kaart er staat, noemt de bronvermelding ook de pagina's van de selectie van het seizoen ervoor, en Wikidata als die daaruit komt.
 Kan dat seizoen niet worden gelezen, dan valt alleen deze kaart weg en logt de site de fout.
+De zijkolom begint met de zachte kaart "In het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
+Mist er iets, dan staat er onder de regels "X van de Y spelers" (zie `DataLine`); kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
+Daaronder staat de kaart "Uitblinker", wit met het watermerk en de kop in de kleur van het spel (`SeasonUitblinkerCard`, wat erop staat leest `readSeasonUitblinker` in `src/fans/season-uitblinker.ts`, #1647).
+Een voorbij seizoen toont de Uitblinker van het jaar, met de bronregel als het cijfer van de Fansite komt, en de link "Uitblinker van het jaar".
+Het lopende seizoen toont de Uitblinker van de laatste wedstrijd met een uitslag, met het aantal fans, en zolang het venster open is de link "Geef cijfers".
+Zonder uitblinker en zonder open venster, met de Uitblinker uit of bij een fout is er geen kaart.
 Daarna staan vier kleine zachte kaarten (`src/PlayersTopCards.tsx`, #1286): Topscorers, Assists, Minuten en De nul gehouden, met de bronvermelding erna.
 De drie kaarten met een ranglijst tonen de eerste drie plaatsen als een regel per plaats (`BarList`): de naam of namen, het getal en een balk.
 Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen (`src/players-top.ts`).

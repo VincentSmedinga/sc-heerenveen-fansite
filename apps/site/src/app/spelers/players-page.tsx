@@ -57,12 +57,12 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * `/spelers/2025-26` for another, which is what the two routes render. It has the title row
  * and the season picker, and the card Selectie with every player of the season in parts by
  * position and, under the heading, how complete that list is. That card is white: the squad is
- * what the page is for. Above it stands the white card "In het kort" (`SquadSummaryCard`, when
- * the squad is known). The figures of the players are on their own page (Cijfers, see
- * `PlayerFiguresPage`), so the toolbar has no choice of competition. The sidebar has the soft
- * card "Uitblinker" (`SeasonUitblinkerCard`, when the season has one or the window is open),
- * the soft card "Veranderingen in de selectie" (`SquadChangesCard`, when this season and the
- * one before say enough), the four small soft cards Topscorers, Assists, Minuten and De nul
+ * what the page is for. Under it stands the white card "Mutaties" (`SquadChangesCard`, when
+ * this season and the one before say enough). The figures of the players are on their own page
+ * (Cijfers, see `PlayerFiguresPage`), so the toolbar has no choice of competition. The sidebar
+ * has the soft card "In het kort" (`SquadSummaryCard`, when the squad is known), the card
+ * "Uitblinker" (`SeasonUitblinkerCard`, when the season has one or the window is open), the
+ * four small soft cards Topscorers, Assists, Minuten and De nul
  * gehouden (`PlayersTopCards`), each with the first three places of its figure and a link to
  * its large card for the same season, and ends with the credit, which also names the pages of
  * the squad of the season before while the changes are shown. A card without figures is left
@@ -110,12 +110,12 @@ export async function PlayersPage({ season }: { season: string }) {
         <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} size="small" value={seasonSlug(season)} />
       </Page.Toolbar>
       <Page.Section area="main" aria-label="De selectie van het seizoen">
-        {summary === undefined ? null : <SquadSummaryCard summary={summary} />}
         <SeasonSquadCard squad={squad} />
+        {changes === undefined ? null : <SquadChangesCard changes={changes} />}
       </Page.Section>
       <Page.Section area="side" aria-label="Meer over de spelers">
+        {summary === undefined ? null : <SquadSummaryCard summary={summary} />}
         {uitblinker === undefined ? null : <SeasonUitblinkerCard uitblinker={uitblinker} />}
-        {changes === undefined ? null : <SquadChangesCard changes={changes} />}
         <TopScorersShortCard href={`${playerFigures}#doelpuntenmakers`} matches={data.matches} />
         {showsReports && <ReportShortCard figure="assists" figures={figures} href={`${playerFigures}#assists`} />}
         {showsReports && <ReportShortCard figure="minutes" figures={figures} href={`${playerFigures}#minuten`} />}

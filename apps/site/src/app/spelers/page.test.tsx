@@ -83,17 +83,17 @@ afterEach(() => {
 })
 
 describe('the page /spelers', () => {
-  it('has one h1, Spelers, the h2 Selectie with an h3 for each position, the h2 of the card with the squad in short and the h2 of the four small cards', async () => {
+  it('has one h1, Spelers, the h2 Selectie with an h3 for each position, then the h2 of the card with the squad in short and of the small cards', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Spelers</h1>',
-      '<h2 class="hf-heading-2" id="in-het-kort">In het kort</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="selectie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#selectie">Selectie</a></h2>',
       '<h3 class="hf-heading-3">Doelmannen</h3>',
       '<h3 class="hf-heading-3">Verdedigers</h3>',
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
+      '<h2 class="hf-heading-2" id="in-het-kort">In het kort</h2>',
       '<h2 class="hf-heading-2" id="kort-topscorers">Topscorers</h2>',
       '<h2 class="hf-heading-2" id="kort-de-nul-gehouden">De nul gehouden</h2>',
     ])
@@ -158,13 +158,16 @@ describe('the page /spelers', () => {
     )
   })
 
-  it('has the white card "In het kort" in the main column above the squad, with the figures of the summary', async () => {
-    const html = await render()
-    const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
+  it('has the soft card "In het kort" first in the sidebar, above the Uitblinker, with the figures of the summary', async () => {
+    vi.mocked(readSeasonUitblinker).mockResolvedValue({ kind: 'last-match', openMatch: 'sc Heerenveen – FC Twente' })
 
-    expect(main).toContain('<section class="hf-card" aria-labelledby="in-het-kort">')
-    expect(main.indexOf('in-het-kort')).toBeLessThan(main.indexOf('id="selectie"'))
-    expect(plain(main)).toContain('Spelers5Gemiddelde leeftijd24,3 jaarJongste17 jaarOudste34 jaarLanden3')
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
+
+    expect(sidebar).toMatch(/^[^>]*>\s*<section class="hf-card hf-card-soft" aria-labelledby="in-het-kort">/u)
+    expect(sidebar.indexOf('id="in-het-kort"')).toBeLessThan(sidebar.indexOf('id="uitblinker"'))
+    expect(sidebar.indexOf('id="uitblinker"')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
+    expect(plain(sidebar)).toContain('Spelers5Gemiddelde leeftijd24,3 jaarJongste17 jaarOudste34 jaarLanden3')
     expect(getSquadSummary).toHaveBeenCalledWith(squadData, '2026/27', now)
   })
 
@@ -177,7 +180,8 @@ describe('the page /spelers', () => {
     expect(html).toContain('kort-topscorers')
   })
 
-  it('puts the card Uitblinker at the top of the sidebar, with its watermark', async () => {
+  it('puts the card Uitblinker at the top of the sidebar without a summary, with its watermark', async () => {
+    vi.mocked(getSquadSummary).mockResolvedValue(undefined)
     vi.mocked(readSeasonUitblinker).mockResolvedValue({
       kind: 'last-match',
       openMatch: 'sc Heerenveen – FC Twente',
@@ -194,6 +198,8 @@ describe('the page /spelers', () => {
   })
 
   it('has no card Uitblinker and no empty place without one', async () => {
+    vi.mocked(getSquadSummary).mockResolvedValue(undefined)
+
     const html = await render()
 
     expect(html).not.toContain('hf-card-game-uitblinker')
@@ -596,7 +602,7 @@ describe('the card Selectie on /spelers', () => {
   })
 })
 
-describe('the card Veranderingen in de selectie on /spelers', () => {
+describe('the card Mutaties on /spelers', () => {
   const changes = {
     arrived: [],
     departed: [],
@@ -607,6 +613,8 @@ describe('the card Veranderingen in de selectie on /spelers', () => {
       wikidata: true,
     },
   }
+  const main = (html: string) =>
+    html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
   const side = (html: string) => html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
   beforeEach(() => {
@@ -614,12 +622,20 @@ describe('the card Veranderingen in de selectie on /spelers', () => {
     vi.mocked(getSquadChanges).mockResolvedValue(changes)
   })
 
-  it('is in the sidebar above the small cards, and the credit names the squad of the season before and Wikidata', async () => {
-    const sidebar = side(await render())
+  it('is white under the squad in the main column, and the credit names the squad of the season before and Wikidata', async () => {
+    const html = await render()
+    const sidebar = side(html)
 
     expect(getSquadChanges).toHaveBeenCalledWith(squadData, '2026/27', ['2026/27', '2025/26'])
-    expect(sidebar.indexOf('veranderingen-in-de-selectie')).toBeGreaterThan(-1)
-    expect(sidebar.indexOf('veranderingen-in-de-selectie')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
+    expect(main(html)).toContain('<section class="hf-card" aria-labelledby="mutaties">')
+    expect(main(html).indexOf('id="mutaties"')).toBeGreaterThan(main(html).indexOf('id="selectie"'))
+    expect(sidebar).not.toContain('id="mutaties"')
+    // The order of reading is that of the screen: Selectie, Mutaties, In het kort, small cards.
+    expect(
+      [...html.matchAll(/<h[23][^>]*id="(selectie|mutaties|erin|eruit|in-het-kort|kort-topscorers)"/g)].map(
+        (match) => match[1],
+      ),
+    ).toEqual(['selectie', 'mutaties', 'erin', 'eruit', 'in-het-kort', 'kort-topscorers'])
     expect(sidebar).toContain('Selectie 2025/26')
     expect(sidebar).toContain('Sc_Heerenveen_in_het_seizoen_2025/26_(mannen)')
     expect(sidebar).toContain('Selectie 2026/27')
@@ -629,9 +645,10 @@ describe('the card Veranderingen in de selectie on /spelers', () => {
   it('is not there without changes, and the credit does not name the season before', async () => {
     vi.mocked(getSquadChanges).mockResolvedValue(undefined)
 
-    const sidebar = side(await render())
+    const html = await render()
+    const sidebar = side(html)
 
-    expect(sidebar).not.toContain('veranderingen-in-de-selectie')
+    expect(html).not.toContain('id="mutaties"')
     expect(sidebar).not.toContain('Selectie 2025/26')
     expect(sidebar).not.toContain('Wikidata')
   })
@@ -643,7 +660,7 @@ describe('the card Veranderingen in de selectie on /spelers', () => {
 
     const html = await render()
 
-    expect(html).not.toContain('veranderingen-in-de-selectie')
+    expect(html).not.toContain('id="mutaties"')
     expect(html).toContain('id="selectie"')
     expect(html).toContain('kort-topscorers')
     expect(error).toHaveBeenCalledWith(

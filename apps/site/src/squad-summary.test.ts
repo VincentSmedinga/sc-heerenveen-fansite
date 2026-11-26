@@ -1,7 +1,7 @@
 import { listSeasonPlayerBirths } from '@fansite/db/queries'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSquadSummary, positionCounts, squadSummary } from './squad-summary'
+import { getSquadSummary, squadSummary } from './squad-summary'
 import { squadData } from './test-squad'
 
 vi.mock('./database', () => ({ getDatabase: () => ({ db: {} }) }))
@@ -9,7 +9,6 @@ vi.mock('@fansite/db/queries', () => ({ listSeasonPlayerBirths: vi.fn() }))
 
 const figure = (age: number | undefined, country: null | string | undefined = 'NL') => ({ age, country })
 const noCountry = (age?: number) => ({ age, country: undefined })
-const line = { country: null, givenName: 'Proef', key: 'Proef Speler', shirtNumber: null, surname: 'Speler' }
 
 describe('squadSummary', () => {
   it('gives the number of players, the average with the youngest and the oldest, and the number of different countries', () => {
@@ -76,32 +75,6 @@ describe('squadSummary', () => {
   })
 })
 
-describe('positionCounts', () => {
-  const part = (label: null | string, size: number) => ({
-    label,
-    players: Array.from({ length: size }, () => ({ ...line })),
-  })
-
-  it('has the four positions, with 0 for an empty one, and then the players without one', () => {
-    expect(positionCounts([part('Aanvallers', 2), part('Positie onbekend', 1)])).toEqual([
-      { count: 0, label: 'Doelmannen' },
-      { count: 0, label: 'Verdedigers' },
-      { count: 0, label: 'Middenvelders' },
-      { count: 2, label: 'Aanvallers' },
-      { count: 1, label: 'Positie onbekend' },
-    ])
-  })
-
-  it('has no line Positie onbekend when everybody has a position', () => {
-    expect(positionCounts([part('Doelmannen', 3)])?.map(({ label }) => label)).not.toContain('Positie onbekend')
-  })
-
-  it('has no lines when nobody has a position', () => {
-    expect(positionCounts([part(null, 20)])).toBeUndefined()
-    expect(positionCounts([])).toBeUndefined()
-  })
-})
-
 describe('getSquadSummary', () => {
   const today = new Date('2026-10-23T13:40:00Z')
   const [first, second, third, fourth, fifth] = squadData.players.map((player) => player.name)
@@ -125,12 +98,6 @@ describe('getSquadSummary', () => {
       basis: { known: 4, total: 5 },
       countries: 3,
       players: 5,
-      positions: [
-        { count: 1, label: 'Doelmannen' },
-        { count: 1, label: 'Verdedigers' },
-        { count: 1, label: 'Middenvelders' },
-        { count: 2, label: 'Aanvallers' },
-      ],
     })
   })
 
@@ -170,16 +137,6 @@ describe('getSquadSummary', () => {
 
     expect(summary?.ages).toBeUndefined()
     expect(listSeasonPlayerBirths).not.toHaveBeenCalled()
-  })
-
-  it('counts the positions only when the list says enough', async () => {
-    const withLevel = (level: 'bijna' | 'deels') => ({
-      ...squadData,
-      completeness: { ...squadData.completeness!, level },
-    })
-
-    expect((await getSquadSummary(withLevel('bijna'), '2025/26', today))?.positions).toHaveLength(4)
-    expect((await getSquadSummary(withLevel('deels'), '2025/26', today))?.positions).toBeUndefined()
   })
 
   it('has no figures when the squad is not known', async () => {

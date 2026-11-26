@@ -75,6 +75,12 @@ describe('card-columns.css', () => {
     )
   })
 
+  it('gives a transparent card that is a part of a card no space at the sides', () => {
+    expect(css).toMatch(
+      /\.hf-card \.hf-card-columns-grid > \.hf-card-transparent \{\s*border-width: 0;\s*padding-inline: 0;\s*\}/,
+    )
+  })
+
   it('never makes the grid with the lead into grid lanes, so the lead keeps its column', () => {
     expect(css).toMatch(/@supports \(display: grid-lanes\) \{\s*\.hf-card-columns-grid \{\s*display: grid-lanes;/)
   })

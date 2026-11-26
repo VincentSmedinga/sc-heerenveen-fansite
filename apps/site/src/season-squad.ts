@@ -150,6 +150,26 @@ export function isEnglishPage(title: string) {
   return title.endsWith(' SC Heerenveen season')
 }
 
+/** The lines of these players, in the order they come in. */
+export function linesOf(players: PublicSeasonPlayer[], seasonNumbers: SeasonSquad['seasonNumbers']): SquadPlayer[] {
+  const numbered = players.some((player) => player.shirtNumber !== null)
+  const flagged = players.some((player) => player.country !== null)
+
+  return players.map((player) => {
+    const href = playerHref(player.personSlug)
+    const number = seasonNumbers.get(player.sourceName)
+
+    return {
+      country: flagged ? player.country : undefined,
+      ...(href === undefined ? {} : { href }),
+      key: player.sourceName,
+      ...(number === undefined ? {} : { seasonLine: `${number}e seizoen` }),
+      shirtNumber: numbered ? player.shirtNumber : undefined,
+      ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),
+    }
+  })
+}
+
 /** Whether the card has a list: a season whose squad we don't know shows the sentence alone. */
 export function showsPlayers(squad: SeasonSquad) {
   return cardPlayers(squad).length > 0 && squad.completeness !== undefined && squad.completeness.level !== 'onbekend'
@@ -192,23 +212,4 @@ export function squadParts(
 /** Whether the mark of the editors counts: the squad is marked and the level is `compleet`. */
 function isCompleteByEditors(completeness: SeasonSquad['completeness']) {
   return completeness?.markedComplete === true && completeness.level === 'compleet'
-}
-
-function linesOf(players: PublicSeasonPlayer[], seasonNumbers: SeasonSquad['seasonNumbers']): SquadPlayer[] {
-  const numbered = players.some((player) => player.shirtNumber !== null)
-  const flagged = players.some((player) => player.country !== null)
-
-  return players.map((player) => {
-    const href = playerHref(player.personSlug)
-    const number = seasonNumbers.get(player.sourceName)
-
-    return {
-      country: flagged ? player.country : undefined,
-      ...(href === undefined ? {} : { href }),
-      key: player.sourceName,
-      ...(number === undefined ? {} : { seasonLine: `${number}e seizoen` }),
-      shirtNumber: numbered ? player.shirtNumber : undefined,
-      ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),
-    }
-  })
 }
