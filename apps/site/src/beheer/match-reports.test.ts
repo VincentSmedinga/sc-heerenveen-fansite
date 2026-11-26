@@ -23,6 +23,7 @@ import {
   players,
   playerSeasonStats,
   playerStatDifferences,
+  squadCompleteness,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -1074,6 +1075,27 @@ describe('the list', () => {
       reportStatus: null,
       reportToCheck: false,
     })
+  })
+})
+
+describe('the completeness of the squad after a change of a report (#1675)', () => {
+  const rated = async () => (await database.db.select().from(squadCompleteness)).map((row) => row.season)
+  const forget = () => database.pool.query('DELETE FROM squad_completeness')
+
+  it('is worked out again when a report is saved', async () => {
+    await forget()
+    await save(report())
+
+    expect(await rated()).toEqual(['2026/27'])
+  })
+
+  it('is worked out again when a report is removed and the goals come back', async () => {
+    await wikipediaGoals()
+    await save(report())
+    await forget()
+    await removeReport(database.db, userId, matchId, 'Het was een proef', t1)
+
+    expect(await rated()).toEqual(['2026/27'])
   })
 })
 

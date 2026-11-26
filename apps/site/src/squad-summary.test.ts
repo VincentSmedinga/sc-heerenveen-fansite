@@ -123,7 +123,10 @@ describe('getSquadSummary', () => {
   it('has no figures when the squad is not known', async () => {
     expect(
       await getSquadSummary(
-        { ...squadData, completeness: { bestSource: 'selectie', level: 'onbekend', playerCount: 0 } },
+        {
+          ...squadData,
+          completeness: { bestSource: 'selectie', level: 'onbekend', markedComplete: false, playerCount: 0 },
+        },
         '2026/27',
         today,
       ),

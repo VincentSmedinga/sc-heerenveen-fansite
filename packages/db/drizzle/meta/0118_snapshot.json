@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "9977ea86-2789-4314-8e50-c26a17cfd749",
+  "id": "c17fe1ad-f14f-4924-81cb-d32cb4cee40a",
   "prevId": "ca7634d7-f9f4-430f-b76d-88653653dd9e",
   "tables": {
     "admin_login_attempts": {
@@ -592,7 +592,7 @@
         },
         "action": {
           "name": "action",
-          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge','supporter.rename','supporter.block','supporter.unblock','supporter.forget-address','quiz.create','quiz.edit','quiz.publish')",
+          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge','supporter.rename','supporter.block','supporter.unblock','supporter.forget-address','quiz.create','quiz.edit','quiz.publish','squad.mark-complete','squad.unmark-complete')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -4934,67 +4934,6 @@
         }
       }
     },
-    "opponent_name_searches": {
-      "name": "opponent_name_searches",
-      "columns": {
-        "name": {
-          "name": "name",
-          "type": "varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "club_id": {
-          "name": "club_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "season": {
-          "name": "season",
-          "type": "varchar(7)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "searched_at": {
-          "name": "searched_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "opponent_name_searches_club_id_clubs_id_fk": {
-          "name": "opponent_name_searches_club_id_clubs_id_fk",
-          "tableFrom": "opponent_name_searches",
-          "tableTo": "clubs",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "opponent_name_searches_name_club_id_season_pk": {
-          "name": "opponent_name_searches_name_club_id_season_pk",
-          "columns": [
-            "name",
-            "club_id",
-            "season"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "page_transitions": {
       "name": "page_transitions",
       "columns": {
@@ -7060,6 +6999,58 @@
           "value": "`sources`.`spotify_url` like 'https://%'"
         }
       }
+    },
+    "squad_complete_marks": {
+      "name": "squad_complete_marks",
+      "columns": {
+        "season": {
+          "name": "season",
+          "type": "varchar(7)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "marked_by": {
+          "name": "marked_by",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "marked_at": {
+          "name": "marked_at",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "squad_complete_marks_marked_by_admin_users_id_fk": {
+          "name": "squad_complete_marks_marked_by_admin_users_id_fk",
+          "tableFrom": "squad_complete_marks",
+          "tableTo": "admin_users",
+          "columnsFrom": [
+            "marked_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "squad_complete_marks_season": {
+          "name": "squad_complete_marks_season",
+          "columns": [
+            "season"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
     },
     "squad_completeness": {
       "name": "squad_completeness",

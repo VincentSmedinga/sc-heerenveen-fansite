@@ -2,7 +2,16 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { listEditorSources } from '@fansite/db/queries'
-import { adminUsers, auditLog, clubs, matches, matchGoals, type NewMatch } from '@fansite/db/schema'
+import {
+  adminUsers,
+  auditLog,
+  clubs,
+  matches,
+  matchGoals,
+  type NewMatch,
+  players,
+  squadCompleteness,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -282,6 +291,16 @@ describe('deleteAddedMatch', () => {
     expect(await database.db.select().from(matchGoals)).toEqual([])
     expect((await log())[1]).toMatchObject({ action: 'match.delete', itemId: id, reason: 'Dubbel' })
     expect((await log())[1]?.detail).toContain('bron: Leeuwarder Courant, 12 mei 2009')
+  })
+
+  it('works out the completeness of the squad of its season again (#1675)', async () => {
+    const outcome = await addMatch(database.db, userId, entry(), t0)
+
+    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2008/09' })
+    await database.pool.query('DELETE FROM squad_completeness')
+    await deleteAddedMatch(database.db, userId, outcome.status === 'added' ? outcome.id : 0, 'Dubbel', t0)
+
+    expect(await database.db.select().from(squadCompleteness)).toMatchObject([{ season: '2008/09' }])
   })
 
   it('never deletes a match of an import, and says so', async () => {

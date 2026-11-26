@@ -5,6 +5,7 @@ import type { Match, MatchGoal } from '@fansite/db/schema'
 import { recordAction } from '@fansite/db/audit-log'
 import { mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
 import { matchCards, matches, matchGoals, matchReports, matchSubstitutions } from '@fansite/db/schema'
+import { storeCompleteness } from '@fansite/db/store-completeness'
 import { asc, eq } from 'drizzle-orm'
 
 import type { FieldName, ReportErrors, Row, Side } from './report-fields'
@@ -551,7 +552,7 @@ async function readGoals(db: Pick<Database, 'select'>, matchId: number): Promise
  * editors' and a change of Wikipedia that waited for them is let go, and the log gets one line.
  */
 async function settle(
-  transaction: Pick<Database, 'insert' | 'select' | 'update'>,
+  transaction: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   userId: number,
   match: Match,
   stored: StoredMatchReport,
@@ -569,6 +570,8 @@ async function settle(
     .where(eq(matchReports.matchId, match.id))
 
   if (kind === 'doelpunt') {
+    // The scorers decide whether the squad of the season can be complete (#1675).
+    await storeCompleteness(transaction, match.season, undefined, now)
     await markGoalsEdited(transaction, match, oldGoals, userId, now)
     await rejectPending(transaction, match.id, now, ['goals'])
   }

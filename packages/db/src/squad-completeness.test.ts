@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import type { PlayerSource } from './schema.ts'
 import type { CompletenessPlayer, CompletenessScorer, SquadCompletenessInput } from './squad-completeness.ts'
 
 import { levelOf, minimumMatches, smallSquad, sourceCeilings, squadCompleteness } from './squad-completeness.ts'
@@ -17,6 +18,7 @@ function season(overrides: Partial<SquadCompletenessInput> = {}): SquadCompleten
 
   return {
     goalsTotal: null,
+    markedComplete: false,
     matchesTotal: null,
     players: list,
     playersPerSource: { selectie: 28 },
@@ -206,5 +208,48 @@ describe('levelOf', () => {
       'compleet',
       'compleet',
     ])
+  })
+})
+
+describe('squadCompleteness for a season the editors marked as complete (#1675)', () => {
+  it.each(Object.keys(sourceCeilings) as PlayerSource[])('is complete with 95 whatever the source: %s', (source) => {
+    const result = squadCompleteness(season({ markedComplete: true, playersPerSource: { [source]: 28 } }))
+
+    expect(result).toMatchObject({ level: 'compleet', probability: 95 })
+  })
+
+  it('ignores the checks of the size, the matches and the goals, and still stores their outcome', () => {
+    const list = players(5)
+    const result = squadCompleteness(
+      season({
+        goalsTotal: 1,
+        markedComplete: true,
+        matchesTotal: 1,
+        players: list,
+        playersPerSource: { statistieken: 5 },
+        scorers: scorersOf(list, 3),
+      }),
+    )
+
+    expect(result).toMatchObject({ level: 'compleet', probability: 95 })
+    expect(result.checks.filter((check) => check.outcome === 'failed').map((check) => check.name)).toEqual([
+      'size',
+      'matches',
+      'goals',
+    ])
+  })
+
+  it('is still lowered by a missing scorer, as without the mark', () => {
+    const list = players(28)
+    const scorers = [...scorersOf(list, 9), { goals: 1, name: 'Niet Erbij', personId: 999 }]
+    const result = squadCompleteness(season({ markedComplete: true, players: list, scorers }))
+
+    expect(result).toMatchObject({ level: 'deels', probability: 45 })
+  })
+
+  it('stays unknown for a season without players', () => {
+    const result = squadCompleteness(season({ markedComplete: true, players: [], playersPerSource: {} }))
+
+    expect(result).toMatchObject({ level: 'onbekend', probability: 0 })
   })
 })

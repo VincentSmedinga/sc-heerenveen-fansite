@@ -634,6 +634,9 @@ De pagina van de selectie geeft `findSquadPage`, voor de bronvermelding onder de
 De importer schrijft ze, en geen pagina toont ze nog.
 `squad_completeness` heeft per seizoen met spelers de kans dat de lijst de hele selectie is, het niveau, het aantal spelers, de beste bron, de som van de wedstrijden en de doelpunten van de tabel, de controles (JSON) en het moment van berekenen (#746).
 De importer schrijft haar, de site leest haar; een seizoen zonder rij is `onbekend`.
+`squad_complete_marks` heeft per seizoen dat de redactie als compleet markeerde wie dat deed (`marked_by`, leeg als het account weg is) en wanneer (`marked_at`, UTC) (#1675).
+Alleen het beheer schrijft haar, en `storeCompleteness` leest haar.
+De site toont alleen dat de markering er is (`markedComplete` van `findSquadCompleteness`), niet wie haar zette.
 
 `player_season_stats` heeft per speler, seizoen en competitie de optredens, doelpunten en assists uit de tabel van de selectie op de Nederlandse Wikipedia (bron en licentie als bij de selectie: CC BY-SA 4.0).
 De importer schrijft de rijen in dezelfde run als de selectie (zie de [README van de importer](../../apps/importer/README.md), _De cijfers van een speler_).

@@ -26,6 +26,7 @@ import {
   players,
   playerSeasonStats,
   sources,
+  squadCompleteMarks,
   squadCompleteness,
   stadiums,
   staff,
@@ -220,20 +221,29 @@ export async function findPublishedArticle(db: Database, slug: string, until: Da
 /**
  * The chance that the list of players of a season is the whole squad, such as `2026/27`: the
  * level, the number of players it was worked out for and the source it rests on. It gives
- * nothing for a season without players, which the site reads as `onbekend`. The probability
- * and the checks stay internal.
+ * nothing for a season without players, which the site reads as `onbekend`. `markedComplete`
+ * says that the editors marked the squad as complete (issue 1675). Who did that stays
+ * internal, as do the probability and the checks.
  */
 export async function findSquadCompleteness(db: Database, season: string) {
   const [row] = await db
     .select({
       bestSource: squadCompleteness.bestSource,
       level: squadCompleteness.level,
+      markedSeason: squadCompleteMarks.season,
       playerCount: squadCompleteness.playerCount,
     })
     .from(squadCompleteness)
+    .leftJoin(squadCompleteMarks, eq(squadCompleteMarks.season, squadCompleteness.season))
     .where(eq(squadCompleteness.season, season))
 
-  return row
+  if (row === undefined) {
+    return undefined
+  }
+
+  const { markedSeason, ...completeness } = row
+
+  return { ...completeness, markedComplete: markedSeason !== null }
 }
 
 /**

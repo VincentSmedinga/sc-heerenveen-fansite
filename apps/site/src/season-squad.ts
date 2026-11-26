@@ -50,8 +50,11 @@ const labels = {
 /** The parts from the goal to the front, then the players without a position. */
 const partOrder = ['doelman', 'verdediger', 'middenvelder', 'aanvaller', 'unknown'] as const
 
-/** How long the squad of a season is kept: the import reads it at most once an hour. */
-const keptFor = 5 * 60 * 1000
+/**
+ * How long the squad of a season is kept: the import reads it at most once an hour, and a
+ * change of the editors shows within this time.
+ */
+export const squadKeptFor = 5 * 60 * 1000
 
 async function loadSquad(season: string): Promise<SeasonSquad> {
   const { db } = getDatabase()
@@ -64,16 +67,16 @@ async function loadSquad(season: string): Promise<SeasonSquad> {
   return { completeness, pages, players }
 }
 
-const seasonSquads = cacheForKey(keptFor, loadSquad)
+const seasonSquads = cacheForKey(squadKeptFor, loadSquad)
 
 /**
  * The players on the card: those of the season, except the players from our reports when a
  * better source has the season (#935). The reports are the last source, so their players are
  * on the card only when nothing better is there; the page lists them under "Alle spelers" in
- * every case.
+ * every case. A squad that is complete by the mark of the editors (#1675) hides nobody.
  */
 export function cardPlayers(squad: SeasonSquad): PublicSeasonPlayer[] {
-  return squad.completeness?.bestSource === 'verslag'
+  return squad.completeness?.bestSource === 'verslag' || isCompleteByEditors(squad.completeness)
     ? squad.players
     : squad.players.filter((player) => player.source !== 'verslag')
 }
@@ -89,6 +92,12 @@ export function completenessSentence(completeness: SeasonSquad['completeness'], 
   }
 
   const known = `We kennen ${playerCount ?? completeness.playerCount} spelers van dit seizoen`
+
+  // The editors know it, whatever the source: say that they say so (#1675). A mark with a
+  // scorer who is missing has a lower level, and then the sentence is as without it.
+  if (isCompleteByEditors(completeness)) {
+    return `${known}. Volgens de redactie is de selectie compleet.`
+  }
 
   // The list of the reports is our own and the weakest: say where it comes from.
   if (completeness.bestSource === 'verslag') {
@@ -161,6 +170,11 @@ export function squadParts(players: PublicSeasonPlayer[]): SquadPart[] {
 
     return inPart.length === 0 ? [] : [{ label: labels[part], players: linesOf(inPart) }]
   })
+}
+
+/** Whether the mark of the editors counts: the squad is marked and the level is `compleet`. */
+function isCompleteByEditors(completeness: SeasonSquad['completeness']) {
+  return completeness?.markedComplete === true && completeness.level === 'compleet'
 }
 
 function linesOf(players: PublicSeasonPlayer[]): SquadPlayer[] {

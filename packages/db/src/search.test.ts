@@ -568,9 +568,23 @@ describe('findSquadCompleteness', () => {
     expect(await findSquadCompleteness(database.db, '2026/27')).toEqual({
       bestSource: 'selectie',
       level: 'compleet',
+      markedComplete: false,
       playerCount: 28,
     })
     expect(await findSquadCompleteness(database.db, '2025/26')).toBeUndefined()
+
+    await database.pool.query(
+      "INSERT INTO squad_complete_marks (season, marked_at) VALUES ('2026/27', UTC_TIMESTAMP())",
+    )
+
+    // Only that the editors marked it: who did and when stay internal (#1675).
+    expect(await findSquadCompleteness(database.db, '2026/27')).toEqual({
+      bestSource: 'selectie',
+      level: 'compleet',
+      markedComplete: true,
+      playerCount: 28,
+    })
+    await database.pool.query('DELETE FROM squad_complete_marks')
   })
 })
 

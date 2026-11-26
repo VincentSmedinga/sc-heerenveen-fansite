@@ -1415,7 +1415,7 @@
 ## De importer onthoudt per naam, club en seizoen wanneer hij een tegenstander zocht
 
 - **Datum:** 26 november 2026
-- **Besluit:** migratie 0118 zet de tabel `opponent_name_searches` neer (#1678): de naam, de club, het seizoen en `searched_at`, met de eerste drie als sleutel.
+- **Besluit:** migratie 0119 zet de tabel `opponent_name_searches` neer (#1678): de naam, de club, het seizoen en `searched_at`, met de eerste drie als sleutel.
   De naam wordt byte voor byte vergeleken, zoals een titel op Wikipedia.
   De rijen gaan weg met hun club, en de kopie van acceptatie neemt de tabel mee.
 - **Waarom:** zonder dit geheugen zoekt elke run dezelfde namen, en komen de andere nooit aan de beurt.
