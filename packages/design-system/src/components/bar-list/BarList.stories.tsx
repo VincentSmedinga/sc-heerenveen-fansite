@@ -19,6 +19,7 @@ const meta = preview.meta({
           'De naam en het getal zijn de tekst van de lijst; de balk is versiering die een schermlezer overslaat. Zet de lijst in een `Card` onder een kop van niveau 2 die zegt wat de balken tellen.',
           'Staat er een eenheid achter het getal, zoals een procent, geef die dan mee met `unit`; de balken blijven even lang als de getallen.',
           'De balken zijn dik, groen en staan op een spoor: groen is hier een aantal, dezelfde kleur als in een tabel en een staafdiagram.',
+          'Moet één regel opvallen, markeer die dan met `highlight`, en zeg ook in de naam waarom.',
           'Hij is gebouwd uit `Bar`.',
         ].join('\n'),
       },
@@ -88,6 +89,36 @@ export const Percentages = meta.story({
       <Card aria-labelledby="balken-procent">
         <Heading id="balken-procent" level={2}>
           Het vaakst gekozen
+        </Heading>
+        <BarList {...args} />
+      </Card>
+    </div>
+  ),
+})
+
+export const MarkedRow = meta.story({
+  args: {
+    rows: [
+      {
+        highlight: true,
+        label: (
+          <>
+            <strong>2–1</strong> (uitslag)
+          </>
+        ),
+        value: 14,
+      },
+      { label: '1–0', value: 11 },
+      { label: '1–1', value: 8 },
+      { label: 'anders', value: 15 },
+    ],
+  },
+  name: 'Met een gemarkeerde regel',
+  render: (args) => (
+    <div style={{ maxInlineSize: '24rem' }}>
+      <Card aria-labelledby="balken-gemarkeerd">
+        <Heading id="balken-gemarkeerd" level={2}>
+          Meest voorspelde eindstanden
         </Heading>
         <BarList {...args} />
       </Card>

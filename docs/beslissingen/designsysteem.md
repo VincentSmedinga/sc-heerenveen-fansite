@@ -4784,3 +4784,17 @@
   Laadt het script niet terwijl JavaScript aanstaat, dan blijven de regels verborgen en doet de knop niets.
   Zoeken in de pagina vindt verborgen regels niet.
 - **Alternatieven:** een link met `?alle=1` (herlaadt de pagina); een selectievakje met `:has()` (een schermlezer hoort geen knop); verbergen pas als het script draait, zoals `DataTable.More` (de lange lijst klapt na het laden dicht); een optie op elke tabel en lijst (drie keer gebouwd); een knop die na de klik verdwijnt en de focus verplaatst (meer code en niet te sluiten); vaste CSS-regels per aantal.
+
+## De gespeelde score valt op met de markeringsband
+
+- **Datum:** 26 november 2026
+- **Besluit:** een rij van `BarList` kan gemarkeerd zijn (`highlight`), en alleen als de aanroeper dat vraagt (#1696).
+  De band en de tekst gebruiken de markeringskleuren van een tabelrij (`--hf-colour-background-highlight` en `--hf-colour-text-highlight`).
+  De staaf blijft groen en zijn spoor krijgt in die rij de kleur van de kaart.
+  De band steekt links en rechts evenveel uit als zijn binnenruimte, zodat naam, staaf en getal recht onder die van de andere rijen staan.
+  `PredictionCrowd` markeert zo de gespeelde score, zet die vet en houdt het woord "(uitslag)".
+  De regel met winst, gelijk en verlies blijft zoals hij is.
+- **Waarom:** dezelfde band betekent op de hele site "let op deze rij", en de tekst haalt 10,3:1 in licht en 11,4:1 in donker.
+  Een kleur voor goed of fout zou lezen als winst of verlies.
+  Zonder spoor in de kleur van de kaart haalt de staaf in licht 2,98:1 tegen de band, en is het grijze spoor bijna niet te zien.
+- **Alternatieven:** een staaf in een eigen kleur (lijkt op winst of verlies); een label "Uitslag" (kost breedte op een telefoon); een zachtere tint (in donker gelijk aan de kaart, dus een nieuw token); ook nadruk in de regel boven de lijst (twee opvallende punten in één kaart).

@@ -28,7 +28,7 @@ export type PredictionCrowdProps = {
 
 /** One row of the most predicted final scores. */
 export type PredictionCrowdScore = {
-  /** Whether this is the score that was played. It is marked in words. */
+  /** Whether this is the score that was played. Its row is marked, and it says so in words. */
   actual?: boolean | undefined
   /** How many supporters predicted it. */
   count: number
@@ -41,9 +41,10 @@ const outcomeWords = { draw: 'Gelijk', loss: 'Verlies', win: 'Winst' } as const
 /**
  * What a group of supporters predicted for one match, without a name: a line with how many
  * predicted, and from the kick-off the outcome bar with its words and the list of the most
- * predicted scores. After the match the key figures stand on top. The colours are never the
- * only sign: the outcome and the score that were played carry the word "uitslag". It has no
- * card or heading of its own, so the page puts it in the card of the game.
+ * predicted scores. After the match the key figures stand on top. The row of the score that
+ * was played is marked. The colours are never the only sign: the outcome and the score that
+ * were played carry the word "uitslag". It has no card or heading of its own, so the page
+ * puts it in the card of the game.
  */
 export const PredictionCrowd = ({ children, figures, headingLevel = 3, outcomes, scores }: PredictionCrowdProps) => {
   const legend =
@@ -75,7 +76,15 @@ export const PredictionCrowd = ({ children, figures, headingLevel = 3, outcomes,
           <BarList
             aria-label="Meest voorspelde eindstanden, met hoe vaak"
             rows={scores.map(({ actual, count, label }) => ({
-              label: actual === true ? `${label} (uitslag)` : label,
+              highlight: actual === true,
+              label:
+                actual === true ? (
+                  <>
+                    <strong>{label}</strong> (uitslag)
+                  </>
+                ) : (
+                  label
+                ),
               value: count,
             }))}
           />

@@ -14,6 +14,8 @@ export type BarListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> & {
 
 /** One row of a bar list: what it is about, as a name or a link, and its number. */
 export type BarListRow = {
+  /** Marks the row with a band. The mark is only for the eye, so say it in the label too. */
+  highlight?: boolean
   /** The name of the row, such as a season. A link is fine: the bar is not part of it. */
   label: ReactNode
   /** The number the bar is as long as, and the number the row shows as text. */
@@ -41,8 +43,15 @@ export const BarList = ({ className, rows, unit = '', wide = false, ...props }: 
       role="list"
       style={{ '--hf-bar-list-digits': digits, ...props.style } as CSSProperties}
     >
-      {rows.map(({ label, value, wideOnly }, index) => (
-        <li className={classNames('hf-bar-list-row', wideOnly && 'hf-bar-list-wide-only')} key={index}>
+      {rows.map(({ highlight, label, value, wideOnly }, index) => (
+        <li
+          className={classNames(
+            'hf-bar-list-row',
+            highlight && 'hf-bar-list-highlight',
+            wideOnly && 'hf-bar-list-wide-only',
+          )}
+          key={index}
+        >
           <span className="hf-bar-list-label">{label}</span>
           <span aria-hidden="true" className="hf-bar-list-track">
             <span

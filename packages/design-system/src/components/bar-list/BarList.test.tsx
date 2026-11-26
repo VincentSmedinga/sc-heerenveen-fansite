@@ -66,4 +66,19 @@ describe('BarList', () => {
       '3',
     )
   })
+
+  it('marks only the row that asks for it', () => {
+    const { container } = render(
+      <BarList
+        rows={[
+          { label: 'a', value: 8 },
+          { highlight: true, label: 'b', value: 4 },
+          { highlight: false, label: 'c', value: 2 },
+        ]}
+      />,
+    )
+    const rows = [...container.querySelectorAll('.hf-bar-list-row')]
+
+    expect(rows.map((row) => row.classList.contains('hf-bar-list-highlight'))).toEqual([false, true, false])
+  })
 })

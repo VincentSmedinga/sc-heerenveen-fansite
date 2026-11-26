@@ -3,7 +3,7 @@
  * needs, the number sits at the end, and the bar takes what is left, so it never makes the
  * card wider on a narrow screen. The fill is the green of a count (the tone `plain` of
  * chart.css) on a track of its own colour, or the tint of the track of a switch on a
- * soft card, and it reaches 3:1 on the card in light and in dark.
+ * soft card, and it reaches 3:1 on the card in light and in dark. A row can be marked.
  */
 
 @layer hf.components {
@@ -24,6 +24,19 @@
 
   .hf-bar-list-wide .hf-bar-list-row {
     grid-template-columns: 8em minmax(0, 1fr) max(2em, calc(var(--hf-bar-list-digits, 2) * 1ch));
+  }
+
+  /*
+   * A marked row has a band behind all of it, in the colours of a marked row in a table. The
+   * negative margin and the same padding let the band reach past the text, so the name, the bar
+   * and the number stay under those of the other rows.
+   */
+  .hf-bar-list-highlight {
+    background-color: var(--hf-colour-background-highlight);
+    border-radius: 0.375rem;
+    color: var(--hf-colour-text-highlight);
+    margin-inline: calc(-1 * var(--hf-space-s));
+    padding-inline: var(--hf-space-s);
   }
 
   /*
@@ -58,6 +71,11 @@
     block-size: var(--hf-size-bar-thick);
     border-radius: var(--hf-radius-bar);
     display: block;
+  }
+
+  /* On the band the green only reaches 3:1 against a track in the colour of the card. */
+  .hf-bar-list-highlight .hf-bar-list-track {
+    background-color: var(--hf-colour-background-surface);
   }
 
   .hf-bar-list-fill {
