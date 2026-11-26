@@ -5,6 +5,7 @@ Per seizoen geven we een kans dat de lijst met spelers iedereen bevat die in de 
 Het is een schatting en geen gemeten waarheid, en elk getal op de site zegt dat ook.
 De regel staat in `packages/db/src/squad-completeness.ts` (`squadCompleteness`).
 De functie leest niets en vraagt niets: de aanroeper geeft de gegevens van één seizoen en de dag van vandaag, zodat een test die kan zetten.
+Een markering van de redactie verandert de regel voor dat seizoen (zie _De markering van de redactie_).
 
 ## De regel
 
@@ -52,6 +53,20 @@ Een Engelse selectie wordt daarom hoogstens `bijna`, het plafond van 70.
 `goals` draait ook niet in het seizoen dat loopt (`seasonOf` van de dag van vandaag, zoals de rest van de site het lopende seizoen kent), want de tabel van Wikipedia loopt dan weken achter op onze wedstrijden (#1291).
 De uitkomst is `unavailable`, met de uitleg dat het seizoen loopt en de tabel kan achterlopen, en ze verlaagt de kans niet.
 Zodra het seizoen voorbij is (1 juli), werkt de controle weer zoals hierboven.
+
+## De markering van de redactie
+
+De redactie weet soms dat een lijst heel is, terwijl de bron dat niet kan weten (#1675).
+Ze markeert de selectie van een afgelopen seizoen (vanaf 1 juli erna) als compleet op Beheer > Spelers.
+De markering staat in de tabel `squad_complete_marks` en hoort bij het seizoen, niet bij een speler.
+Geen import haalt haar weg, en ze blijft staan als de lijst verandert.
+
+- De kans van een gemarkeerd seizoen begint bij 95, ongeacht de bron.
+- Alleen de controle `scorers` verlaagt haar nog, zoals hierboven.
+  De controles `size`, `matches` en `goals` tellen niet mee, al staat hun uitkomst nog in de lijst.
+- Zonder spelers blijft de uitkomst `onbekend`.
+- `storeCompleteness` leest de markering, dus het beheer, de import en `import:completeness` rekenen hetzelfde.
+- Na intrekken rekent het beheer het seizoen meteen opnieuw uit, en geldt de regel zonder markering weer.
 
 ## De meting
 

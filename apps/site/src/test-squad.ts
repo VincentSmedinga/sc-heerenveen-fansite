@@ -9,7 +9,7 @@ import type { SeasonSquad } from './season-squad'
 const noName = { personFamilyName: null, personFamilyNamePrefix: null, personGivenName: null, personSlug: null }
 
 export const squadData: SeasonSquad = {
-  completeness: { bestSource: 'selectie', level: 'compleet', playerCount: 5 },
+  completeness: { bestSource: 'selectie', level: 'compleet', markedComplete: false, playerCount: 5 },
   pages: [{ readAt: new Date('2026-10-23T11:30:00Z'), title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)' }],
   players: [
     {

@@ -9,11 +9,15 @@ import { personQualityPath } from '#src/beheer/person-table'
 import { positionChoices } from '#src/beheer/player-fields'
 import { type AdminPlayerRow, doubleShirtNumbers, listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
+import { findSquadMark } from '#src/beheer/squad-mark'
 import { getDatabase } from '#src/database'
-import { describeShowDelay } from '#src/matches'
+import { FocusOnLoad } from '#src/FocusOnLoad'
+import { describePeriod, describeShowDelay } from '#src/matches'
+import { squadKeptFor } from '#src/season-squad'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
 
 import { addPlayerPath, playerPath, playersPath } from './paths'
+import { SquadMarkCard } from './SquadMarkCard'
 
 // Render on each request: who is logged in and the players of a season are not known when the
 // site is built.
@@ -50,10 +54,15 @@ function positionText({ personLine, position }: Pick<AdminPlayerRow, 'personLine
 }
 
 const errors: Record<string, string> = {
+  markeren:
+    'Dit seizoen kun je niet als compleet markeren. Dat kan vanaf 1 juli na het seizoen, als het spelers heeft. Er is niets veranderd.',
   'persoon-weg': 'Deze persoon bestaat niet meer. Er is niets veranderd. Kies hieronder een speler.',
   seizoen: 'Dit seizoen kennen we niet: het heeft nog geen wedstrijd. Er is niets veranderd.',
   weg: 'Deze speler bestaat niet. Er is niets veranderd. Kies hieronder een speler.',
 }
+
+/** The words of the address after an action on the mark: their notice gets the focus. */
+const markWords = ['compleet', 'ingetrokken', 'markeren', 'was-al-compleet', 'was-al-ingetrokken']
 
 // The players of a season for an editor, to add one or to change one (issue 1020). The list
 // opens on the current season, and the season picker is a form with method GET, so the page
@@ -72,15 +81,22 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const season = requested !== undefined && seasons.includes(requested) ? requested : current
   const rows = await listAdminPlayers(db, season)
   const doubles = doubleShirtNumbers(rows)
+  const squad = await findSquadMark(db, season, now)
+  const markDelay = `De site toont dat binnen ${describePeriod(squadKeptFor)}.`
   const notices: Record<string, string> = {
+    compleet: `De selectie van ${season} is gemarkeerd als compleet. ${markDelay}`,
+    ingetrokken: `De markering van de selectie van ${season} is ingetrokken. ${markDelay}`,
     samengevoegd: 'De twee personen zijn één persoon.',
     toegevoegd: `De speler staat in de selectie van ${season} en is te kiezen bij een doelpunt. Op de site staat hij ${describeShowDelay(season, now)}.`,
+    'was-al-compleet': `De selectie van ${season} was al gemarkeerd. Er is niets veranderd.`,
+    'was-al-ingetrokken': `De selectie van ${season} had geen markering meer. Er is niets veranderd.`,
     weggehaald: `De speler is uit de selectie van ${season} gehaald. Hij blijft in de lijst van het seizoen staan.`,
   }
   // Only a word the page knows: the address is input, and `__proto__` is no notice.
   const known = (texts: Record<string, string>, word: string | string[] | undefined) =>
     typeof word === 'string' && Object.hasOwn(texts, word) ? texts[word] : undefined
   const notice = known(errors, fout) ?? known(notices, gedaan)
+  const word = [fout, gedaan].find((value) => typeof value === 'string' && markWords.includes(value))
 
   return (
     <Page.Main areas={adminAreas} className={compact}>
@@ -101,7 +117,16 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
-        {notice === undefined ? null : <Notice>{notice}</Notice>}
+        {notice === undefined ? null : typeof word === 'string' ? (
+          <>
+            <Notice id="gedaan" tabIndex={-1}>
+              {notice}
+            </Notice>
+            <FocusOnLoad id="gedaan" key={word} />
+          </>
+        ) : (
+          <Notice>{notice}</Notice>
+        )}
         {doubles.length === 0 ? null : (
           <Notice>
             Dubbel rugnummer in de selectie van {season}:{' '}
@@ -143,6 +168,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
             />
           </Card>
         )}
+        <SquadMarkCard season={season} squad={squad} />
       </Page.Cell>
     </Page.Main>
   )

@@ -177,17 +177,8 @@ const pastSeasonPeriod = 60 * 60 * 1000
 
 const numberWords = ['nul', 'een', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien']
 
-/**
- * How long a change of the editors takes to show on the public pages, as the beheer words it:
- * "binnen vijf minuten" for the current season and "binnen een uur" for one that is over. It
- * comes from the periods the data is kept for, so the words follow them.
- */
-export function describeShowDelay(season: string, now = new Date()): string {
-  return `binnen ${describePeriod(season === seasonOf(now) ? currentSeasonPeriod : pastSeasonPeriod)}`
-}
-
 /** A period in words, as "vijf minuten" or "een uur". */
-function describePeriod(period: number): string {
+export function describePeriod(period: number): string {
   const minutes = Math.round(period / 60_000)
   const hours = minutes / 60
 
@@ -196,6 +187,15 @@ function describePeriod(period: number): string {
   }
 
   return minutes === 1 ? 'een minuut' : `${numberWords[minutes] ?? minutes} minuten`
+}
+
+/**
+ * How long a change of the editors takes to show on the public pages, as the beheer words it:
+ * "binnen vijf minuten" for the current season and "binnen een uur" for one that is over. It
+ * comes from the periods the data is kept for, so the words follow them.
+ */
+export function describeShowDelay(season: string, now = new Date()): string {
+  return `binnen ${describePeriod(season === seasonOf(now) ? currentSeasonPeriod : pastSeasonPeriod)}`
 }
 
 async function loadSeason(season: string): Promise<MatchData> {

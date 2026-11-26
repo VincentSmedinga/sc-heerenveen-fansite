@@ -4,7 +4,9 @@
 // table of who played does not know the bench), and the checks only ever lower that number. A
 // check that cannot run changes nothing, so we claim no more than we can check. The numbers
 // come from a measurement on ten seasons with a table of the whole squad
-// (docs/volledigheid-selectie.md).
+// (docs/volledigheid-selectie.md). A season the editors marked as complete (issue 1675) starts
+// at the highest ceiling whatever its source, and only a missing scorer, a proven gap, lowers
+// it.
 // The function reads nothing and asks nothing: the caller gives it the facts of one season and
 // today's date, so a test can set the day. The check of the goals does not run in the season
 // that is running: the table of Wikipedia is changed by hand, so it lags behind our matches by
@@ -43,6 +45,8 @@ export type SquadCompleteness = {
 export type SquadCompletenessInput = {
   /** The goals the table of the season gave added up, or null when it gave none. */
   goalsTotal: null | number
+  /** Whether the editors marked the squad of this season as complete. */
+  markedComplete: boolean
   /** The matches the table of the season gave added up, or null when it gave none. */
   matchesTotal: null | number
   /** The players of the season, as they are stored. */
@@ -81,6 +85,9 @@ export const sourceCeilings: Record<PlayerSource, number> = {
   wikidata: 50,
 }
 
+/** The chance of a season the editors marked as complete: that of a table of the squad. */
+export const markedProbability = sourceCeilings.selectie
+
 /** A squad of fewer players than this is rarely whole: the measured seasons have 22 to 36. */
 export const smallSquad = 20
 
@@ -112,6 +119,17 @@ export function levelOf(probability: number): CompletenessLevel {
   return probability >= 1 ? 'weinig' : 'onbekend'
 }
 
+/** The scorers who are not in the list, by their person or by their name. */
+export function missingScorers(players: CompletenessPlayer[], scorers: CompletenessScorer[]): CompletenessScorer[] {
+  const persons = new Set(players.flatMap((player) => (player.personId === null ? [] : [player.personId])))
+  const names = new Set(players.map((player) => nameKey(player.name)))
+
+  // A scorer is in the list by his person or by his name: English squads have no persons.
+  return scorers.filter(
+    (scorer) => !((scorer.personId !== null && persons.has(scorer.personId)) || names.has(nameKey(scorer.name))),
+  )
+}
+
 export function squadCompleteness(input: SquadCompletenessInput): SquadCompleteness {
   const count = input.players.length
   const sources = (Object.keys(sourceCeilings) as PlayerSource[]).filter(
@@ -122,11 +140,15 @@ export function squadCompleteness(input: SquadCompletenessInput): SquadCompleten
     return { checks: [], level: 'onbekend', probability: 0 }
   }
 
-  let probability = Math.max(...sources.map((source) => sourceCeilings[source]))
+  let probability = input.markedComplete
+    ? markedProbability
+    : Math.max(...sources.map((source) => sourceCeilings[source]))
   const checks = [sizeCheck(count), scorersCheck(input), matchesCheck(input, sources), goalsCheck(input)]
 
   for (const { cap, check } of checks) {
-    if (check.outcome === 'failed') {
+    // The editors know better than a guess from the number of players or the sums of a table.
+    // Every check is still stored with its outcome.
+    if (check.outcome === 'failed' && (!input.markedComplete || check.name === 'scorers')) {
       probability = Math.min(probability, cap)
     }
   }
@@ -182,12 +204,7 @@ function scorersCheck({ players, scorers }: SquadCompletenessInput): Checked {
     return unavailable(name, 'the season has no scorers of ours in the database')
   }
 
-  const persons = new Set(players.flatMap((player) => (player.personId === null ? [] : [player.personId])))
-  const names = new Set(players.map((player) => nameKey(player.name)))
-  // A scorer is in the list by his person or by his name: English squads have no persons.
-  const found = scorers.filter(
-    (scorer) => (scorer.personId !== null && persons.has(scorer.personId)) || names.has(nameKey(scorer.name)),
-  ).length
+  const found = scorers.length - missingScorers(players, scorers).length
   const detail = `${found} of the ${scorers.length} scorers of ours are in the list`
 
   if (found === scorers.length) {

@@ -827,6 +827,13 @@
       "when": 1795569098715,
       "tag": "0117_add_quiz_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "5",
+      "when": 1795651804029,
+      "tag": "0118_add_squad_complete_marks",
+      "breakpoints": true
     }
   ]
 }

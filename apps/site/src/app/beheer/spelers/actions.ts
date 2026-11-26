@@ -21,6 +21,7 @@ import {
   validatePlayer,
 } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
+import { markSquadComplete, unmarkSquadComplete } from '#src/beheer/squad-mark'
 import { getDatabase } from '#src/database'
 
 import { listPath, mergePath, playerPath, playersPath } from './paths'
@@ -33,6 +34,9 @@ import { listPath, mergePath, playerPath, playersPath } from './paths'
 
 /** What the form that merges two persons shows after a merge that did not work. */
 export type MergeFormState = { error?: string }
+
+/** What the form of the mark of a squad shows after an action that did not work. */
+export type SquadMarkState = { error?: string }
 
 /**
  * Adds a player to the squad of a season (issue 1020). A form that is wrong comes back with
@@ -85,6 +89,31 @@ export async function submitAddPlayer(
       : toGoals
         ? matchPartPath(back.id, 'doelpunten', { done: 'speler-toegevoegd' })
         : matchPath(back.id, 'speler-toegevoegd'),
+  )
+}
+
+/**
+ * Marks the squad of a season as complete (issue 1675). It ends on the list of the season with
+ * a notice. A season that can't be marked (the running one, one without players or one we do
+ * not know) ends on the list with a notice that says so, and an action that failed comes back
+ * as an error, which gets the focus.
+ */
+export async function submitMarkSquad(season: string): Promise<SquadMarkState> {
+  const { userId } = await requireRole('owner', 'editor')
+  let outcome: Awaited<ReturnType<typeof markSquadComplete>>
+
+  try {
+    outcome = await markSquadComplete(getDatabase().db, userId, season)
+  } catch (error) {
+    console.error(adminFailure('mark a squad as complete', error))
+
+    return { error: 'De selectie is niet gemarkeerd. Er is niets veranderd. Probeer het nog eens.' }
+  }
+
+  redirect(
+    outcome === 'refused'
+      ? `${playersPath}?fout=markeren`
+      : listPath(season, outcome === 'done' ? 'compleet' : 'was-al-compleet'),
   )
 }
 
@@ -211,5 +240,25 @@ export async function submitRemovePlayer(playerId: number): Promise<void> {
       : outcome === 'done'
         ? listPath(found.player.season, 'weggehaald')
         : playerPath(id, outcome === 'in-use' ? 'blijft' : 'was-al-weg'),
+  )
+}
+
+/** Takes the mark of a season back (issue 1675), in the same way as `submitMarkSquad`. */
+export async function submitUnmarkSquad(season: string): Promise<SquadMarkState> {
+  const { userId } = await requireRole('owner', 'editor')
+  let outcome: Awaited<ReturnType<typeof unmarkSquadComplete>>
+
+  try {
+    outcome = await unmarkSquadComplete(getDatabase().db, userId, season)
+  } catch (error) {
+    console.error(adminFailure('take back the mark of a squad', error))
+
+    return { error: 'De markering is niet ingetrokken. Er is niets veranderd. Probeer het nog eens.' }
+  }
+
+  redirect(
+    outcome === 'refused'
+      ? `${playersPath}?fout=seizoen`
+      : listPath(season, outcome === 'done' ? 'ingetrokken' : 'was-al-ingetrokken'),
   )
 }

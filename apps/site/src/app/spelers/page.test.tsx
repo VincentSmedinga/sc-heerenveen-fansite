@@ -426,7 +426,7 @@ describe('the card Selectie on /spelers', () => {
 
   it('shows the players from the reports as one list of names, with a sentence that says where they come from', async () => {
     withSquad({
-      completeness: { bestSource: 'verslag', level: 'weinig', playerCount: 3 },
+      completeness: { bestSource: 'verslag', level: 'weinig', markedComplete: false, playerCount: 3 },
       players: squadData.players
         .slice(0, 3)
         .map((player) => ({ ...player, country: null, position: null, shirtNumber: null, source: 'verslag' as const })),
@@ -444,7 +444,7 @@ describe('the card Selectie on /spelers', () => {
 
   it('counts only the players on the card in the sentence', async () => {
     withSquad({
-      completeness: { bestSource: 'selectie', level: 'compleet', playerCount: 6 },
+      completeness: { bestSource: 'selectie', level: 'compleet', markedComplete: false, playerCount: 6 },
       players: [
         ...squadData.players,
         { ...squadData.players[0]!, name: 'Verslag Speler', position: null, shirtNumber: null, source: 'verslag' },
@@ -476,7 +476,7 @@ describe('the card Selectie on /spelers', () => {
     expect(linesOf(await render()).map(([, name]) => name)).toContain('Redactie Speler')
 
     withSquad({
-      completeness: { bestSource: 'verslag', level: 'weinig', playerCount: 2 },
+      completeness: { bestSource: 'verslag', level: 'weinig', markedComplete: false, playerCount: 2 },
       players: [{ ...squadData.players[1]!, source: 'verslag' }, added],
     })
 
@@ -485,7 +485,7 @@ describe('the card Selectie on /spelers', () => {
 
   it('has one list without headings of parts for a season in which nobody has a position', async () => {
     withSquad({
-      completeness: { bestSource: 'statistieken', level: 'deels', playerCount: 3 },
+      completeness: { bestSource: 'statistieken', level: 'deels', markedComplete: false, playerCount: 3 },
       players: squadData.players.slice(0, 3).map((player) => ({ ...player, position: null, shirtNumber: null })),
     })
 
@@ -550,7 +550,7 @@ describe('the card Selectie on /spelers', () => {
   })
 
   it('shows no players when the chance is unknown, although some are stored', async () => {
-    withSquad({ completeness: { bestSource: 'doelpunten', level: 'onbekend', playerCount: 5 } })
+    withSquad({ completeness: { bestSource: 'doelpunten', level: 'onbekend', markedComplete: false, playerCount: 5 } })
 
     expect(card(await render())).not.toMatch(/<h3|<ul|<li/)
   })

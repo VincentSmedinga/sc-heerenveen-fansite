@@ -1,7 +1,7 @@
 import { squadCompleteness } from '@fansite/db/squad-completeness'
 import { describe, expect, it } from 'vitest'
 
-import { completenessSentence, isEnglishPage, squadPageName, squadParts } from './season-squad'
+import { cardPlayers, completenessSentence, isEnglishPage, squadPageName, squadParts } from './season-squad'
 import { squadData } from './test-squad'
 
 const base = squadData.players[0]!
@@ -84,7 +84,7 @@ describe('completenessSentence', () => {
 
   it('says the list comes from the reports, without a percentage, whatever the level', () => {
     for (const level of ['weinig', 'deels', 'bijna', 'compleet'] as const) {
-      expect(completenessSentence({ bestSource: 'verslag', level, playerCount: 25 })).toBe(
+      expect(completenessSentence({ bestSource: 'verslag', level, markedComplete: false, playerCount: 25 })).toBe(
         'We kennen 25 spelers van dit seizoen, uit de verslagen. Wie niet speelde, ontbreekt waarschijnlijk.',
       )
     }
@@ -94,19 +94,50 @@ describe('completenessSentence', () => {
 describe('completenessSentence for a list from goals or the editors (#1040)', () => {
   it('says who is on the list and that the squad is not complete, for both sources', () => {
     for (const bestSource of ['doelpunten', 'redactie'] as const) {
-      expect(completenessSentence({ bestSource, level: 'weinig', playerCount: 18 })).toBe(
+      expect(completenessSentence({ bestSource, level: 'weinig', markedComplete: false, playerCount: 18 })).toBe(
         'We kennen 18 spelers van dit seizoen: wie scoorde of door de redactie is toegevoegd. De selectie is niet compleet.',
       )
     }
   })
 
   it('keeps the sentences of the other sources', () => {
-    expect(completenessSentence({ bestSource: 'selectie', level: 'weinig', playerCount: 5 })).toBe(
-      'We kennen 5 spelers van dit seizoen, vooral wie scoorde of overkwam. De selectie is verre van compleet.',
-    )
-    expect(completenessSentence({ bestSource: 'selectie', level: 'compleet', playerCount: 25 })).toContain(
-      'Waarschijnlijk staat iedereen',
-    )
+    expect(
+      completenessSentence({ bestSource: 'selectie', level: 'weinig', markedComplete: false, playerCount: 5 }),
+    ).toBe('We kennen 5 spelers van dit seizoen, vooral wie scoorde of overkwam. De selectie is verre van compleet.')
+    expect(
+      completenessSentence({ bestSource: 'selectie', level: 'compleet', markedComplete: false, playerCount: 25 }),
+    ).toContain('Waarschijnlijk staat iedereen')
+  })
+})
+
+describe('a squad the editors marked as complete (#1675)', () => {
+  const marked = { level: 'compleet', markedComplete: true, playerCount: 26 } as const
+  const withReports = [player({ name: 'Uit de selectie' }), player({ name: 'Uit een verslag', source: 'verslag' })]
+
+  it.each(['selectie', 'statistieken', 'doelpunten', 'redactie', 'verslag'] as const)(
+    'says that the editors say so, whatever the best source: %s',
+    (bestSource) => {
+      expect(completenessSentence({ ...marked, bestSource }, 26)).toBe(
+        'We kennen 26 spelers van dit seizoen. Volgens de redactie is de selectie compleet.',
+      )
+    },
+  )
+
+  it('shows every player, also those from the reports', () => {
+    const completeness = { ...marked, bestSource: 'selectie' as const }
+
+    expect(cardPlayers({ ...squadData, completeness, players: withReports })).toHaveLength(2)
+  })
+
+  it('follows the sentences and the list as without a mark when a scorer is missing', () => {
+    const completeness = { ...marked, bestSource: 'doelpunten' as const, level: 'deels' as const }
+
+    expect(completenessSentence(completeness, 26)).toContain('De selectie is niet compleet.')
+    expect(cardPlayers({ ...squadData, completeness, players: withReports })).toHaveLength(1)
+  })
+
+  it('says nothing about the editors for a complete squad without a mark', () => {
+    expect(completenessSentence({ ...marked, bestSource: 'selectie', markedComplete: false })).not.toContain('redactie')
   })
 })
 
@@ -131,6 +162,7 @@ describe('the sentence of a running season whose table lags behind our matches (
     const list = Array.from({ length: 29 }, (_, index) => ({ name: `Speler ${index}`, personId: index + 1 }))
     const result = squadCompleteness({
       goalsTotal: 18,
+      markedComplete: false,
       matchesTotal: null,
       players: list,
       playersPerSource: { selectie: 29 },
@@ -140,8 +172,8 @@ describe('the sentence of a running season whose table lags behind our matches (
     })
 
     expect(result.level).toBe('compleet')
-    expect(completenessSentence({ bestSource: 'selectie', level: result.level, playerCount: 29 })).toBe(
-      'We kennen 29 spelers van dit seizoen. Waarschijnlijk staat iedereen uit de selectie erbij.',
-    )
+    expect(
+      completenessSentence({ bestSource: 'selectie', level: result.level, markedComplete: false, playerCount: 29 }),
+    ).toBe('We kennen 29 spelers van dit seizoen. Waarschijnlijk staat iedereen uit de selectie erbij.')
   })
 })
