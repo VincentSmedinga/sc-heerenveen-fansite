@@ -88,7 +88,14 @@ describe('the look of the code field', () => {
     expect(css).toContain('inline-size: min(100%, calc(6 * var(--hf-code-box-max) + 5 * var(--hf-space-s)));')
     expect(css).toContain('--hf-code-gap: min(var(--hf-space-s), 3cqi);')
     expect(css).toContain('--hf-code-box: min(var(--hf-code-box-max), calc((100cqi - 5 * var(--hf-code-gap)) / 6));')
-    expect(css).toContain('font-size: min(var(--hf-figure-large-font-size), calc(var(--hf-code-box) * 1.5));')
+    expect(css).toContain('font-size: min(var(--hf-figure-large-font-size), calc(var(--hf-code-box) * 1.2));')
+  })
+
+  it('spaces the digits by the width of a tabular digit, so the sixth is in its box too', () => {
+    expect(css).toContain('--hf-code-digit: 0.632em;')
+    expect(css).toContain('letter-spacing: calc(var(--hf-code-box) + var(--hf-code-gap) - var(--hf-code-digit));')
+    expect(css).toContain('padding-inline: calc((var(--hf-code-box) - var(--hf-code-digit)) / 2) 0;')
+    expect(css).not.toMatch(/\dch\b/)
   })
 
   it('keeps the borders thin enough that a digit stays in a narrow box', () => {

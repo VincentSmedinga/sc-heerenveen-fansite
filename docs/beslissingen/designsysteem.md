@@ -4720,6 +4720,9 @@
 - **Besluit:** de zes vakjes blijven op één rij (#1686).
   Hun breedte en de ruimte ertussen volgen de beschikbare ruimte, en de cijfers worden alleen kleiner als dat moet.
   In weinig ruimte worden ook de randen van de vakjes dunner, zodat een cijfer in zijn vakje past.
+  De ruimte tussen de cijfers rekent met de breedte van een tabelcijfer van Atkinson Hyperlegible Next (0,632em), niet met `1ch`.
+  `1ch` is breder, waardoor elk cijfer iets verder naar links stond: op 200% raakte het zesde de rand van zijn vakje.
+  Met gewone tekst schuiven de cijfers daardoor hoogstens ruim 3 pixels naar het midden van hun vakje.
 - **Waarom:** het veld ziet er met gewone tekst uit zoals nu en blijft één tekstveld.
 - **Alternatieven:** bij weinig ruimte een gewoon veld zonder vakjes: eenvoudiger, maar een ander uiterlijk.
 

@@ -27,19 +27,22 @@
     }
 
     > input {
+      /* The width of a tabular digit of our font: 1ch is the wider proportional 0. */
+      --hf-code-digit: 0.632em;
+
       background: transparent;
       block-size: 3.375rem;
       border: 0;
       box-sizing: border-box;
       color: var(--hf-colour-text-heading);
       display: block;
-      font-size: min(var(--hf-figure-large-font-size), calc(var(--hf-code-box) * 1.5));
+      font-size: min(var(--hf-figure-large-font-size), calc(var(--hf-code-box) * 1.2));
       font-variant-numeric: tabular-nums;
       font-weight: var(--hf-figure-font-weight);
       inline-size: calc(100% + var(--hf-code-box) + var(--hf-code-gap));
-      letter-spacing: calc(var(--hf-code-box) + var(--hf-code-gap) - 1ch);
+      letter-spacing: calc(var(--hf-code-box) + var(--hf-code-gap) - var(--hf-code-digit));
       padding-block: 0;
-      padding-inline: calc((var(--hf-code-box) - 1ch) / 2) 0;
+      padding-inline: calc((var(--hf-code-box) - var(--hf-code-digit)) / 2) 0;
       position: relative;
     }
 
