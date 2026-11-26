@@ -8,6 +8,8 @@ import type { Database } from '@fansite/db/client'
 import type { Person } from '@fansite/db/schema'
 
 import { mergeChosenPersons, type PersonMergePlan, planPersonMerge } from '@fansite/db/person-merge'
+import { players } from '@fansite/db/schema'
+import { eq } from 'drizzle-orm'
 
 import { regionName } from './countries'
 import { refreshCompleteness, refreshPlayerAddresses } from './players'
@@ -133,8 +135,8 @@ export function mergeDifferences({ kept, other, result }: PersonMergePlan): Merg
 
 /**
  * Merges two persons for an editor: see `mergeChosenPersons`, which writes `person.merge` with
- * `describeMerge` in the same transaction. A season in which two rows became one has a player
- * less, so its completeness is worked out again.
+ * `describeMerge` in the same transaction. A merge can change who counts as in the list of a
+ * season, so the completeness of each season of the person is worked out again (#1675).
  */
 export async function mergePersons(
   db: Database,
@@ -145,7 +147,10 @@ export async function mergePersons(
   const outcome = await mergeChosenPersons(db, { describe: describeMerge, keptId, otherId, userId }, now)
 
   if (outcome !== 'missing' && outcome !== 'same') {
-    for (const season of new Set(outcome.doubles.map((double) => double.season))) {
+    const rows = await db.selectDistinct({ season: players.season }).from(players).where(eq(players.personId, keptId))
+    const seasons = [...rows, ...outcome.doubles].map((row) => row.season)
+
+    for (const season of new Set(seasons)) {
       await refreshCompleteness(db, season, now)
     }
     await refreshPlayerAddresses(db)

@@ -1343,6 +1343,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 - Bij een afgelopen seizoen met minstens één speler staat onder de lijst de kaart "Selectie compleet" (`SquadMarkCard.tsx`, de acties in `src/beheer/squad-mark.ts`, #1675).
   Eigenaar en redacteur markeren de selectie daar als compleet, of trekken de markering in; elke knop noemt het seizoen.
   De kaart toont wie de markering zette en wanneer, en noemt de doelpuntenmakers die ontbreken en de markering daarom laten wegvallen.
+  Een wijziging van doelpunten in het beheer rekent het seizoen meteen opnieuw uit, en personen samenvoegen of aanpassen elk seizoen van die persoon.
   Markeren en intrekken rekenen het seizoen meteen uit en komen in het logboek (`squad.mark-complete` en `squad.unmark-complete`, met het beginjaar in `item_id`); de site volgt binnen vijf minuten.
 - `/beheer/spelers/nieuw?seizoen=<seizoen>` voegt een speler toe.
   Bovenaan staat een zoekformulier met methode GET (`q`): wat het vindt (`searchPersons`, hoogstens 25 personen), staat als lijst "Persoon" in het formulier, met "Een nieuwe persoon" als laatste keuze.

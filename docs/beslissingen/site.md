@@ -8420,6 +8420,7 @@
   - Elke wijziging van doelpunten in het beheer rekent het seizoen meteen opnieuw uit, in dezelfde transactie.
     Dat geldt ook voor een verslag, een live verslag, een verwijderde wedstrijd en het overnemen van Wikipedia.
     De uurlijkse import rekent alleen het lopende seizoen uit, dus een afgelopen seizoen wacht niet op haar.
+  - Personen samenvoegen en een persoon aanpassen rekenen elk seizoen van die persoon opnieuw uit.
 - **Waarom:** een doelpuntenmaker die ontbreekt is een bewezen gat.
   Het aantal spelers en de sommen van een tabel zijn vermoedens, en die weet de redactie beter.
 - **Alternatieven:** de markering wint altijd (de site kan dan iets zeggen dat aantoonbaar niet klopt).

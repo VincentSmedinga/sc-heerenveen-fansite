@@ -14,6 +14,7 @@ import {
   matchSubstitutions,
   type NewMatch,
   players,
+  squadCompleteness,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
@@ -247,6 +248,21 @@ describe('addLiveEvent for a card and a substitution', () => {
 })
 
 describe('removeLiveEvent', () => {
+  it('works out the completeness of the squad again, as adding a goal does (#1675)', async () => {
+    const rated = async () => (await database.db.select().from(squadCompleteness)).map((row) => row.season)
+    const forget = () => database.pool.query('DELETE FROM squad_completeness')
+
+    await forget()
+    await add('doelpunt', { kant: 'zij', minuut: '88', naam: 'Sibbing' })
+    expect(await rated()).toEqual(['2026/27'])
+
+    const [added] = await database.db.select().from(matchGoals).where(eq(matchGoals.minute, 88))
+
+    await forget()
+    await removeLiveEvent(database.db, userId, matchId, 'doelpunt', added!.id)
+    expect(await rated()).toEqual(['2026/27'])
+  })
+
   it('takes an event away, logs a line, and says so when it is gone already', async () => {
     await add('doelpunt', { kant: 'zij', minuut: '88', naam: 'Sibbing' })
 

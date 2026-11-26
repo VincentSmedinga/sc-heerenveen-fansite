@@ -140,6 +140,14 @@ describe('findMerge', () => {
 })
 
 describe('mergePersons', () => {
+  it('works out the completeness of every season of the person again, also without a double row (#1675)', async () => {
+    await mergePersons(database.db, userId, { keptId: renamed, otherId: old }, t0)
+
+    const rated = await database.db.select({ season: squadCompleteness.season }).from(squadCompleteness)
+
+    expect(rated.map((row) => row.season).sort()).toEqual(['2020/21', '2021/22', '2022/23'])
+  })
+
   it('merges with the function of the importer and writes one row of the log that says what moved', async () => {
     const [row] = await database.db.select().from(players).orderBy(asc(players.season))
 
@@ -197,9 +205,9 @@ describe('mergePersons', () => {
       ['2021/22', 'Nieuwe Naam', 14],
       ['2022/23', 'Nieuwe Naam', null],
     ])
-    expect(await database.db.select({ season: squadCompleteness.season }).from(squadCompleteness)).toEqual([
-      { season: '2021/22' },
-    ])
+    const rated = await database.db.select({ season: squadCompleteness.season }).from(squadCompleteness)
+
+    expect(rated.map((row) => row.season).sort()).toEqual(['2020/21', '2021/22', '2022/23'])
   })
 
   it('names what went before the lists, so a long line of the log does not cut it off', async () => {

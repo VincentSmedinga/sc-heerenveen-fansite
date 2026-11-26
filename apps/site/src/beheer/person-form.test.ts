@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, auditLog, personPages, persons, players } from '@fansite/db/schema'
+import { adminUsers, auditLog, personPages, persons, players, squadCompleteness } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -109,6 +109,15 @@ describe('the form of a person', () => {
       '2004/05',
       '2005/06',
     ])
+  })
+
+  it('works out the completeness of each season of the person again after a rename (#1675)', async () => {
+    await database.pool.query('DELETE FROM squad_completeness')
+    await editPerson(database.db, userId, personId, await entryOf({ achternaam: 'Bedenksel' }, 'naam'), now)
+
+    const rated = await database.db.select({ season: squadCompleteness.season }).from(squadCompleteness)
+
+    expect(rated.map((row) => row.season).sort()).toEqual(['2004/05', '2005/06'])
   })
 
   it('renames the person and his player in every season, as the editors name', async () => {
