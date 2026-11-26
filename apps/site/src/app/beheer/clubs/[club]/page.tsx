@@ -137,7 +137,9 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
           action={submitClubColour.bind(null, slug)}
           choice={club.colourChoice}
           colour={clubColourOf(club.slug, club.colourChoice)}
-          key={`kleur-${club.id}-${club.colourChoice ?? ''}`}
+          // Not the choice: without JavaScript React finds the answer of the form back by this
+          // key, and the choice has changed by then.
+          key={`kleur-${club.id}`}
           name={club.name}
           showDelay={showDelay}
         />

@@ -63,6 +63,22 @@ describe('the form of the colour of a club', () => {
     await waitFor(() => expect(screen.getByText(/Nu: #e30613, uit de lijst\./u)).toBeTruthy())
   })
 
+  it('still says what was saved after a later colour that is wrong', async () => {
+    const action = vi
+      .fn<(previous: ClubColourState, formData: FormData) => Promise<ClubColourState>>()
+      .mockResolvedValueOnce({ mode: 'eigen', saved: '#00a651' })
+      .mockResolvedValueOnce({ colour: 'rood', error: 'Dat is geen kleur.', field: 'kleur', mode: 'eigen' })
+
+    show(action)
+    save()
+    await waitFor(() => expect(screen.getByText(/Nu: #00a651, gekozen door de redactie\./u)).toBeTruthy())
+    await waitFor(() => expect(screen.getByRole('button', { name: /Opslaan/u }).hasAttribute('disabled')).toBe(false))
+    save()
+    await waitFor(() => expect(screen.getByText('Dat is geen kleur.')).toBeTruthy())
+
+    expect(screen.getByText(/Nu: #00a651, gekozen door de redactie\./u)).toBeTruthy()
+  })
+
   it('shows the error at the field, keeps the value and moves the focus there', async () => {
     show(() => Promise.resolve({ colour: 'rood', error: 'Dat is geen kleur.', field: 'kleur', mode: 'eigen' }))
     save()

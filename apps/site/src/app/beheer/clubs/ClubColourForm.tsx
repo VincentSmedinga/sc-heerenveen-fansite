@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Card, Field, Form, Heading, Input, RadioGroup, Text } from '@fansite/design-system'
-import { useActionState, useEffect, useRef } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { type ClubColourMode, type ClubColourState, colourFieldId, colourModeId } from '#src/beheer/club-colour-fields'
 
@@ -43,11 +43,16 @@ export function ClubColourForm({ action, choice, colour, name, showDelay }: Prop
     }
   }, [state])
 
-  // The page is not rendered again after a choice that worked, so the line takes what was
-  // saved from the answer of the action.
-  const saved = state.saved === undefined ? undefined : state.saved || null
-  const holds = saved === undefined ? colour : saved
-  const fromList = saved === undefined ? stored === 'lijst' : state.mode === 'lijst'
+  // The page is not rendered again after a choice that worked, so the card keeps what was
+  // saved from the answer of the action, also when a later answer is an error.
+  const [saved, setSaved] = useState<ClubColourState>()
+
+  if (state.saved !== undefined && saved !== state) {
+    setSaved(state)
+  }
+
+  const holds = saved === undefined ? colour : saved.saved || null
+  const fromList = saved === undefined ? stored === 'lijst' : saved.mode === 'lijst'
   const source = fromList ? 'uit de lijst' : 'gekozen door de redactie'
 
   return (
