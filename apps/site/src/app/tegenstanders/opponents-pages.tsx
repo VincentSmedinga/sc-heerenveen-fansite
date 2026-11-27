@@ -174,7 +174,7 @@ export async function clubListMetadata(): Promise<Metadata> {
  * with the choice Eredivisie. The switch is only there when a cup tie was played. A value of
  * the choice that is not known is the page "niet gevonden". The list is the main column, on the
  * white surface. The sidebar has the cards Het makkelijkst and Het moeilijkst (`RankingCard`),
- * the best and the worst ten of the average points per match, which count the same matches as
+ * the best and the worst five of the average points per match, which count the same matches as
  * the list and let a visitor choose Alle, Thuis or Uit, the card Laatste overwinning
  * (`LastWinCard`) with the clubs of the Eredivisie, and the credit under it. On a phone it
  * follows the list.

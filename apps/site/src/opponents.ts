@@ -499,32 +499,27 @@ export function stadiumsOf(matches: readonly PublicClubMatch[]): Stadium[] {
 /** The points against a club: 3 for a win and 1 for a draw, in the cup too. */
 export const pointsOf = (record: { drawn: number; won: number }) => record.won * 3 + record.drawn
 
-/** How many matches a club needs for the lists of the average points, and how many clubs. */
+/** How many matches a club needs for the lists of the average points. */
 export const topPointsMinimum = 5
-export const topPointsClubs = 10
 
 /** How many places the card Het makkelijkst shows. */
-export const topPointsPlaces = 10
+export const topPointsPlaces = 5
 
 /** A place in the top of the average points per match: the club, its figures, its place. */
 export type PointsPlace = { name: string; place: number; played: number; points: number; slug: string }
 
 /**
- * The top 10 of the clubs against which sc Heerenveen took the most points per match, from the
+ * The top 5 of the clubs against which sc Heerenveen took the most points per match, from the
  * records the page already has, so for the choice of the page. The points are the ones of the
  * column Punten (`pointsOf`) and the average is those points per played match. Only a club with
  * at least `topPointsMinimum` played matches counts, because a club met once or twice would
  * otherwise be on top. Level averages go by the number of matches, then by name; the order
  * compares the real ratio and not the rounded number, and every club has a place of its own.
  * `played` is the number of matches of all the clubs that count, not only of those shown.
- * With fewer than `topPointsClubs` clubs that count, `places` is empty and `played` is 0.
+ * With fewer than five clubs that count, it has a place for each of them.
  */
 export function topPointsOf(records: readonly PublicClubRecord[]) {
   const counting = records.filter((record) => record.played >= topPointsMinimum)
-
-  if (counting.length < topPointsClubs) {
-    return { places: [] as PointsPlace[], played: 0 }
-  }
 
   const places = counting
     .map((record) => ({ name: record.name, played: record.played, points: pointsOf(record), slug: record.slug }))
@@ -539,7 +534,7 @@ export function topPointsOf(records: readonly PublicClubRecord[]) {
 }
 
 /** How many places the card Het moeilijkst shows. */
-export const hardestPlaces = 10
+export const hardestPlaces = 5
 
 /**
  * Where sc Heerenveen played the matches that a card counts: `all`, at home (`home`) or away
@@ -596,19 +591,15 @@ export function clubQuery(competition: CompetitionChoice, venue: Venue, page: nu
 }
 
 /**
- * The 10 clubs against which sc Heerenveen took the fewest points per match, for the card Het
- * moeilijkst under the top 10. It counts the same clubs (`topPointsMinimum` played matches) and
+ * The 5 clubs against which sc Heerenveen took the fewest points per match, for the card Het
+ * moeilijkst under the top 5. It counts the same clubs (`topPointsMinimum` played matches) and
  * the same points, and orders on the real ratio, lowest first. Level ratios go by the most
- * matches, then by name. It has places only when at least `topPointsClubs` clubs count;
- * otherwise `places` is empty and `played` is 0. `played` is the number of
- * matches of all the clubs that count.
+ * matches, then by name. With fewer than five clubs that count, it has a place for each of
+ * them, so a club can be in this list and in the top 5. `played` is the number of matches of
+ * all the clubs that count.
  */
 export function hardestOf(records: readonly PublicClubRecord[]) {
   const counting = records.filter((record) => record.played >= topPointsMinimum)
-
-  if (counting.length < topPointsClubs) {
-    return { places: [] as PointsPlace[], played: 0 }
-  }
 
   const places = counting
     .map((record) => ({ name: record.name, played: record.played, points: pointsOf(record), slug: record.slug }))

@@ -158,19 +158,8 @@ describe.each([
         since="2022/23"
       />
     ),
-    places: [
-      'Club 10',
-      'Club 09',
-      'Club 08',
-      'Club 07',
-      'Club 06',
-      'Club 05',
-      'Club 04',
-      'Club 03',
-      'Club 02',
-      'Club 01',
-    ],
-    points: ['3,00', '2,70', '2,40', '2,10', '1,80', '1,50', '1,20', '0,90', '0,60', '0,30'],
+    places: ['Club 10', 'Club 09', 'Club 08', 'Club 07', 'Club 06'],
+    points: ['3,00', '2,70', '2,40', '2,10', '1,80'],
     title: 'Het makkelijkst',
   },
   {
@@ -187,19 +176,8 @@ describe.each([
         since="2022/23"
       />
     ),
-    places: [
-      'Club 00',
-      'Club 01',
-      'Club 02',
-      'Club 03',
-      'Club 04',
-      'Club 05',
-      'Club 06',
-      'Club 07',
-      'Club 08',
-      'Club 09',
-    ],
-    points: ['0,00', '0,30', '0,60', '0,90', '1,20', '1,50', '1,80', '2,10', '2,40', '2,70'],
+    places: ['Club 00', 'Club 01', 'Club 02', 'Club 03', 'Club 04'],
+    points: ['0,00', '0,30', '0,60', '0,90', '1,20'],
     title: 'Het moeilijkst',
   },
 ])('$title', ({ caption, homeFirst, id, make, places, points, title }) => {
@@ -212,7 +190,7 @@ describe.each([
     expect(screen.getByText('Gemiddeld aantal punten per wedstrijd')).toBeTruthy()
   })
 
-  it('shows the first ten places with two decimals and a comma, in one table without a button', () => {
+  it('shows the first five places with two decimals and a comma, in one table without a button', () => {
     render(make({}))
 
     const first = tables()[0]
@@ -221,10 +199,10 @@ describe.each([
 
     expect(tables()).toHaveLength(1)
     expect(namesIn(first ?? null)).toEqual(places)
-    expect(column()).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
+    expect(column()).toEqual(['1', '2', '3', '4', '5'])
     expect([...(first?.querySelectorAll('td.hf-key') ?? [])].map((cell) => cell.textContent)).toEqual(points)
-    expect(first?.querySelector('caption')?.textContent).toBe(`De eerste 10 clubs ${caption}`)
-    // Eleven clubs count, and the eleventh is left out.
+    expect(first?.querySelector('caption')?.textContent).toBe(`De eerste 5 clubs ${caption}`)
+    // Eleven clubs count, and the last six are left out.
     expect(screen.queryByRole('button', { name: /meer|Herstel/ })).toBeNull()
     expect(document.querySelector('details, [aria-live]')).toBeNull()
   })
@@ -264,7 +242,7 @@ describe.each([
 
     expect(screen.getByRole('button', { name: 'Thuis' }).getAttribute('aria-pressed')).toBe('true')
     expect(namesIn(tables()[0] ?? null)[0]).toBe(homeFirst)
-    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 10 clubs ${caption}, thuis`)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 5 clubs ${caption}, thuis`)
     expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde thuiswedstrijden')).toBeTruthy()
 
     chooseVenue('Alle')
@@ -287,11 +265,24 @@ describe.each([
     expect(status.textContent).toBe('Thuis gekozen')
   })
 
-  it('says one sentence, and shows no table, for a choice with fewer than ten clubs that count', () => {
+  it('shows the clubs that count, though fewer than five, in the table', () => {
     render(make({}))
     chooseVenue('Uit')
 
-    expect(screen.getByText('Nog geen 10 clubs met minstens 5 gespeelde uitwedstrijden.')).toBeTruthy()
+    expect(namesIn(tables()[0] ?? null)).toHaveLength(4)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 4 clubs ${caption}, uit`)
+  })
+
+  it('names one club in the singular', () => {
+    render(make({ records: { ...venueRecords, all: venueRecords.all.slice(0, 1) } }))
+
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De club ${caption}`)
+  })
+
+  it('says one sentence, and shows no table, when no club counts', () => {
+    render(make({ records: { ...venueRecords, all: [] } }))
+
+    expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(tables()).toEqual([])
     expect(screen.getByRole('heading', { level: 2, name: title })).toBeTruthy()
   })
@@ -299,7 +290,7 @@ describe.each([
   it('names the Eredivisie in the caption, and keeps the choice in every link', () => {
     render(make({ choice: 'league', query: '?competitie=eredivisie' }))
 
-    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 10 clubs ${caption}, in de Eredivisie`)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 5 clubs ${caption}, in de Eredivisie`)
     expect(
       [...document.querySelectorAll('a')].every((link) =>
         link.getAttribute('href')?.endsWith('?competitie=eredivisie'),
@@ -322,7 +313,7 @@ describe.each([
     expect(html).not.toContain('<button')
     expect(html).toContain(places[0])
     expect(html).not.toContain('Toon 5 meer')
-    expect(html.match(/<tbody>.*?<\/tbody>/s)?.[0].match(/<tr/g)).toHaveLength(10)
+    expect(html.match(/<tbody>.*?<\/tbody>/s)?.[0].match(/<tr/g)).toHaveLength(5)
   })
 })
 
