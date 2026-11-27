@@ -291,8 +291,11 @@ export function ClubsCard({
 /** An average of points as the Dutch write it, with two decimals and a comma: `2,43`. */
 const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
-/** The legend of the card: the icons and words of its two columns. The place has no line. */
-const topPointsLegend = tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
+/**
+ * The legend of the card: the icons and words of its two columns. The place has no line. Each
+ * table makes its own: the server gives an element that two tables share the same ids twice.
+ */
+const topPointsLegend = () => tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
 
 /** The line under the heading of Het makkelijkst and Het moeilijkst: what the figure is. */
 const pointsIntro = 'Gemiddeld aantal punten per wedstrijd'
@@ -978,7 +981,7 @@ function RankingPanel({
       <DataTable
         caption={caption(`${places.length === 1 ? 'De club' : `De eerste ${places.length} clubs`} ${lead}`)}
         columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
-        legend={topPointsLegend}
+        legend={topPointsLegend()}
         rows={places.map((place) => ({
           cells: [averageFormat.format(place.points / place.played), place.played],
           header: place.name,
