@@ -4,6 +4,7 @@ import { itemLimits } from '@fansite/db/schema'
 import { decodeHTML, decodeHTMLStrict } from 'entities'
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
 import { parseFeed } from 'feedsmith'
+import { createHash } from 'node:crypto'
 
 /**
  * What the importer keeps of a news item, and nothing more. An intro, an image, an author or a
@@ -24,7 +25,11 @@ export type FeedItem = {
   publishedAt: Date | null
   /** The season of a podcast episode, a positive whole number up to 99999, or null. */
   seasonNumber: null | number
-  /** The key of the story this item is a version of (see `threadRuleFor`), or null. */
+  /**
+   * The key of the story of this item (see `threadRuleFor`), or null. Also null when the key
+   * needs a time and the feed gives none; `storeItems` then works it out with the time it
+   * stores.
+   */
   threadKey: null | string
   /** The headline as text. */
   title: string
@@ -153,13 +158,17 @@ const paywallNamespaces: Record<string, string> = {
 }
 
 /**
- * How a source tells the versions of one story apart from other stories: a pattern that finds
- * a code in the path of a link. A source that puts a story in its feed again under a new
- * headline, such as a live blog that gets a headline for every update, gives every version a
- * link with the same code. The pattern has one group, the code, which is the `thread_key` of
- * the item. The site shows the newest version of a story of a source only.
+ * How a source tells which items are one story. The result is the `thread_key` of an item. The
+ * site shows the newest item of a story of a source only, and a story that sources of one
+ * publisher have under the same key once.
+ *
+ * - `link-code`: a pattern that finds a code in the path of a link, with one group, the code. A
+ *   source that puts a story in its feed again under a new headline, such as a live blog that
+ *   gets a headline for every update, gives every version a link with the same code.
+ * - `headline-day`: the headline and the day of publication, for a publisher whose papers print
+ *   one article under a code of their own each.
  */
-export type ThreadRule = RegExp
+export type ThreadRule = { kind: 'headline-day' } | { kind: 'link-code'; pattern: RegExp }
 
 /**
  * A zone label that a source puts on times that are in another zone: `label` is what the feed
@@ -191,21 +200,38 @@ export function paywallNamespaceFor(sourceDomain: string): string | undefined {
  * changes with every version, the code does not. It is the same code at both newspapers for an
  * article they share, which is why the key only joins items of one source.
  */
-const dpgMediaThread: ThreadRule = /~([a-z0-9]{8,9})\/?$/iu
+const dpgMediaThread: ThreadRule = { kind: 'link-code', pattern: /~([a-z0-9]{8,9})\/?$/iu }
 
 /**
- * The rules for the versions of a story, by the domain of the source. A source without a rule
- * has no keys: every item is its own story.
+ * The papers of Mediahuis give a shared article an article code of their own each, but nearly
+ * always the same headline on the same day (see `docs/bronnen.md`, De Mediahuis-kranten).
+ */
+const mediahuisThread: ThreadRule = { kind: 'headline-day' }
+
+/**
+ * The rules for the key of a story, by the domain of the source. A source without a rule has
+ * no keys: every item is its own story.
  */
 const threadRules: Record<string, ThreadRule> = {
   'www.ad.nl': dpgMediaThread,
   'www.bd.nl': dpgMediaThread,
   'www.bndestem.nl': dpgMediaThread,
   'www.destentor.nl': dpgMediaThread,
+  'www.dvhn.nl': mediahuisThread,
   'www.ed.nl': dpgMediaThread,
+  'www.flevopost.nl': mediahuisThread,
+  'www.frieschdagblad.nl': mediahuisThread,
   'www.gelderlander.nl': dpgMediaThread,
+  'www.gooieneemlander.nl': mediahuisThread,
+  'www.haarlemsdagblad.nl': mediahuisThread,
+  'www.ijmuidercourant.nl': mediahuisThread,
+  'www.lc.nl': mediahuisThread,
+  'www.leidschdagblad.nl': mediahuisThread,
+  'www.limburger.nl': mediahuisThread,
+  'www.noordhollandsdagblad.nl': mediahuisThread,
   'www.parool.nl': dpgMediaThread,
   'www.pzc.nl': dpgMediaThread,
+  'www.telegraaf.nl': mediahuisThread,
   'www.trouw.nl': dpgMediaThread,
   'www.tubantia.nl': dpgMediaThread,
   'www.volkskrant.nl': dpgMediaThread,
@@ -294,12 +320,27 @@ export function readFeed(
 }
 
 /**
- * The key of the story that a link belongs to under a rule, or null when the link has no code.
- * The key is the code as the link writes it, in lower case, with its tilde: `~a40dbd48`.
+ * The key of the story of an item under a rule, or null when the item has none.
+ *
+ * A `link-code` rule gives the code as the link writes it, in lower case, with its tilde:
+ * `~a40dbd48`; a link without a code has no key. A `headline-day` rule gives the day of
+ * publication in Dutch time and a hash of the headline, such as `2026-11-20:1f0c…`; an item
+ * without a time, or with a headline without letters or digits, has no key.
  */
-export function threadKeyOf(href: string, rule: ThreadRule): null | string {
+export function threadKeyOf(
+  item: { publishedAt: Date | null; title: string; url: string },
+  rule: ThreadRule,
+): null | string {
+  if (rule.kind === 'headline-day') {
+    const headline = headlineWords(item.title)
+
+    return headline === '' || item.publishedAt === null
+      ? null
+      : `${dutchDay.format(item.publishedAt)}:${createHash('sha256').update(headline).digest('hex')}`
+  }
+
   try {
-    const code = rule.exec(new URL(href).pathname)?.[1]
+    const code = rule.pattern.exec(new URL(item.url).pathname)?.[1]
 
     return code === undefined ? null : `~${code.toLowerCase()}`
   } catch {
@@ -307,7 +348,15 @@ export function threadKeyOf(href: string, rule: ThreadRule): null | string {
   }
 }
 
-/** The rule for the versions of a story at this source, or undefined when it has none. */
+/** The day a moment falls on in the Netherlands, written `2026-11-20`. */
+const dutchDay = new Intl.DateTimeFormat('en-CA', {
+  day: '2-digit',
+  month: '2-digit',
+  timeZone: 'Europe/Amsterdam',
+  year: 'numeric',
+})
+
+/** The rule for the keys of the stories of this source, or undefined when it has none. */
 export function threadRuleFor(sourceDomain: string): ThreadRule | undefined {
   return threadRules[sourceDomain]
 }
@@ -367,14 +416,16 @@ function cleanItem(
     return { reason: `the key is longer than ${itemLimits.key} characters` }
   }
 
+  const publishedAt = parseTime(raw.time, now, timeRule)
+
   return {
     durationSeconds: wholeNumber(raw.duration, maxDurationSeconds),
     episodeNumber: wholeNumber(raw.episode, maxNumber),
     key,
     paywalled: raw.paywalled === true,
-    publishedAt: parseTime(raw.time, now, timeRule),
+    publishedAt,
     seasonNumber: wholeNumber(raw.season, maxNumber),
-    threadKey: threadRule === undefined ? null : threadKeyOf(link.href, threadRule),
+    threadKey: threadRule === undefined ? null : threadKeyOf({ publishedAt, title, url: link.href }, threadRule),
     title,
     url: link.href,
   }
@@ -404,6 +455,19 @@ function decodeEntities(value: string | undefined) {
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
+}
+
+/**
+ * The words and numbers of a headline, in lower case, with one space between them. Capitals,
+ * punctuation (straight and curly quotes alike), symbols and spacing don't tell two headlines
+ * apart.
+ */
+function headlineWords(title: string): string {
+  return title
+    .normalize('NFKC')
+    .toLowerCase()
+    .replaceAll(/[^\p{L}\p{M}\p{N}]+/gu, ' ')
+    .trim()
 }
 
 /** Whether the text of an element says `true`, in any case and with white space around it. */

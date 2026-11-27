@@ -80,13 +80,14 @@ export const sources = mysqlTable(
     allowEmbed: boolean('allow_embed').notNull().default(false),
     // How the source wants to be credited. Empty means the name of the source.
     attribution: varchar('attribution', { length: 150 }),
-    // The publisher that owns the source, such as `dpg-media`, for sources that print the same
-    // article under one article code. Empty means the source has none and is never merged with
-    // another.
+    // The publisher that owns the source, such as `dpg-media` or `mediahuis`, for sources that
+    // print the same article, under the same key (`items.thread_key`). Empty means the source
+    // has none and is never merged with another.
     publisher: varchar('publisher', { length: 100 }),
     // Whether the source is the local paper of its publisher: of two sources with the same
     // publisher, the lists show the story of the local one when it is about a club that the
-    // source follows (see `sourceClubs`), and otherwise the story of the other one.
+    // source follows (see `sourceClubs`) or when it follows `everyStory`, and otherwise the
+    // story of the other one.
     local: boolean('local').notNull().default(false),
 
     // The permission: whether we asked, whether the source gave it, since when and what was
@@ -915,11 +916,19 @@ const articleTitle = customType<{ data: string }>({
 })
 
 /**
+ * In `source_clubs`: the `local` source goes first for every story of its publisher, whatever
+ * the headlines name, such as the Leeuwarder Courant among the papers of Mediahuis. Not the
+ * name of a club.
+ */
+export const everyStory = '*'
+
+/**
  * The clubs that a regional source follows: names like `matches.opponent` has them, the same
  * as in `item_clubs` ("N.E.C.", "Vitesse"). Of an article that two sources of one publisher
  * have, the source that is `local` is shown only when a headline of the article names one of
- * these clubs (see `isShownOnce` in `queries.ts`). A source with no rows follows no club. The
- * seed fills the table from the register (`realSources`); the rows go with their source.
+ * these clubs (see `isShownOnce` in `queries.ts`), or always when it follows `everyStory`. A
+ * source with no rows follows no club. The seed fills the table from the register
+ * (`realSources`); the rows go with their source.
  */
 export const sourceClubs = mysqlTable(
   'source_clubs',

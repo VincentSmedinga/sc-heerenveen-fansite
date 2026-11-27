@@ -90,9 +90,7 @@ Al in het register (#72).
 
 - **Domein:** `www.lc.nl`
 - **Soort:** nieuws, regionaal dagblad
-- **Uitgever:** geen in het register (#567).
-  De Leeuwarder Courant hoort bij Mediahuis, net als De Telegraaf, maar de twee feeds delen geen artikelcode.
-  Op 1 november 2026 hadden ze elk 50 berichten, met geen enkele gelijke code (de getallen aan het eind van de link) en geen gelijke kop.
+- **Uitgever:** `mediahuis`, en de krant gaat voor: een artikel dat meer kranten van Mediahuis hebben, tonen we bij deze krant (#1711, zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.lc.nl/sport/sc-heerenveen/rss/`
   - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 15 augustus 2026.
   - Over sc Heerenveen: 47 van de 50 noemen Heerenveen in de kop of de categorieën.
@@ -144,7 +142,7 @@ Al in het register (#142).
 
 - **Domein:** `www.telegraaf.nl`
 - **Soort:** nieuws, landelijk dagblad
-- **Uitgever:** geen in het register, zie bij de Leeuwarder Courant (#567)
+- **Uitgever:** `mediahuis` (#1711, zie _De Mediahuis-kranten_)
 - **Feed:** `https://www.telegraaf.nl/tag/sc-heerenveen/rss/`
   - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 19 oktober 2026, het oudste van 21 februari 2026.
     Dat is ongeveer anderhalf bericht per week.
@@ -577,7 +575,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.dvhn.nl`
 - **Soort:** nieuws, regionaal dagblad van Groningen en Drenthe
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feeds:** met het filter `club`
   - `https://www.dvhn.nl/sport/rss/`: een 200 met 50 berichten.
   - `https://www.dvhn.nl/sport/fc-groningen/rss/`: een 200 met 50 berichten.
@@ -601,7 +599,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.frieschdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Friesland
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.frieschdagblad.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
@@ -622,7 +620,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.limburger.nl`
 - **Soort:** nieuws, regionaal dagblad voor Limburg
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feeds:** met het filter `club`
   - `https://www.limburger.nl/sport/rss/`: een 200 met 39 berichten.
   - `https://www.limburger.nl/sport/voetbal/rss/`: een 200 met 50 berichten.
@@ -645,7 +643,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.noordhollandsdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Noord-Holland
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feeds:** met het filter `club`
   - `https://www.noordhollandsdagblad.nl/sport/rss/`: een 200 met 50 berichten.
   - `https://www.noordhollandsdagblad.nl/sport/az/rss/`: een 200 met 50 berichten.
@@ -668,7 +666,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.gooieneemlander.nl`
 - **Soort:** nieuws, regionaal dagblad voor het Gooi en Eemland
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.gooieneemlander.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
@@ -688,7 +686,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.haarlemsdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Haarlem en omstreken
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.haarlemsdagblad.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
@@ -708,7 +706,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.leidschdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Leiden en omstreken
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.leidschdagblad.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
@@ -728,7 +726,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.ijmuidercourant.nl`
 - **Soort:** nieuws, regionaal dagblad voor IJmuiden en omstreken
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.ijmuidercourant.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
@@ -748,7 +746,7 @@ Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten
 
 - **Domein:** `www.flevopost.nl`
 - **Soort:** nieuws, regionaal huis-aan-huisblad voor Flevoland, van Mediahuis Noord
-- **Uitgever:** Mediahuis, geen `publisher` in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, `publisher` `mediahuis` (zie _De Mediahuis-kranten_).
   De Flevopost staat in #1382 en niet in #1380.
 - **Feed:** `https://www.flevopost.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant, maar zonder `<premium>`.
@@ -771,7 +769,11 @@ Een rubriek die niet bestaat, geeft een 404 met een lege RSS-tekst; de fetcher m
 Een artikel kan onder meer merken staan.
 De artikelcode is het getal voor `.html` in de link, en het is niet de code met een `~` van DPG Media (#1367).
 Op 18 november 2026 vergeleken we de codes van alle feeds van Mediahuis, in één run op een lege database: 720 berichten van 10 kranten, en geen enkele code stond bij twee kranten (de berichten die twee feeds van één krant delen, zijn één rij).
-Daarom is er geen `publisher` voor Mediahuis en geen sleutelregel voor een gedeeld artikel; zie _We nemen de Nederlandse dagbladen van Mediahuis_ in [`beslissingen/importer.md`](beslissingen/importer.md).
+De kranten delen wel artikelen: in een kopie van de database van acceptatie van 25 november 2026 stonden 147 koppen op één dag bij twee of meer kranten, en nog 4 koppen verspreid over twee dagen (2348 bewaarde berichten).
+Daarom hebben alle elf kranten van Mediahuis, ook de Leeuwarder Courant en De Telegraaf, `publisher` `mediahuis`, en komt de sleutel uit de kop en de dag (#1711).
+Een artikel van meer kranten tonen we één keer: bij de Leeuwarder Courant als zij het heeft, en anders bij de krant die het eerst publiceerde.
+Een kop die per krant anders is geschreven, of een artikel dat een krant op een andere dag plaatst, blijft dubbel.
+Zie _Mediahuis krijgt één uitgever, met een sleutel uit de kop en de dag_ in [`beslissingen/importer.md`](beslissingen/importer.md).
 
 ### De Stentor
 

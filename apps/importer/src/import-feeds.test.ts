@@ -1786,7 +1786,7 @@ describe('importing the dailies of Mediahuis, the way the register has them', ()
     expect(shown.every((item) => item.sourceName === 'Dagblad van het Noorden')).toBe(true)
   })
 
-  it('shows an article that two papers share under each paper, because there is no publisher', async () => {
+  it('shows an article that two papers share once, under their publisher', async () => {
     const shared = feedWith(
       entry('Kordiam-0000000999', {
         link: 'https://www.dagblad.test/sport/gedeeld/900000999.html',
@@ -1810,11 +1810,12 @@ describe('importing the dailies of Mediahuis, the way the register has them', ()
       .from(sources)
       .where(inArray(sources.domain, ['www.dvhn.nl', 'www.frieschdagblad.nl']))
 
-    expect(brands).toEqual([{ publisher: null }, { publisher: null }])
+    expect(brands).toEqual([{ publisher: 'mediahuis' }, { publisher: 'mediahuis' }])
 
     const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
 
-    expect(shown.map((entry) => entry.sourceName).sort()).toEqual(['Dagblad van het Noorden', 'Friesch Dagblad'])
+    // The same time, so the item stored first.
+    expect(shown.map((entry) => entry.sourceName)).toEqual(['Dagblad van het Noorden'])
   })
 })
 
@@ -2397,7 +2398,7 @@ describe('the versions of a story', () => {
   })
 
   it('gives a source without a rule no key, so a code in its links changes nothing', async () => {
-    const feed = await addFeed('http://unused.test/rss/', { domain: 'www.lc.nl' })
+    const feed = await addFeed('http://unused.test/rss/', { domain: 'www.vi.nl' })
 
     await importBody(
       feed,
@@ -2409,6 +2410,111 @@ describe('the versions of a story', () => {
 
     expect((await itemsInDatabase()).map((row) => row.threadKey)).toEqual([null, null])
     expect(await shownTitles()).toEqual(['tweede', 'eerste'])
+  })
+})
+
+describe('a story that several papers of Mediahuis have', () => {
+  const later = new Date('2026-10-22T20:00:00Z')
+  const friday = 'Thu, 22 Oct 2026 15:00:00 GMT'
+  const headline = 'Spits na zege: ’Dit is mooi’'
+
+  const addPaper = (domain: string, publisher: null | string = 'mediahuis', local = false) =>
+    addFeed(`http://${domain}/rss/`, { domain, local, publisher, slug: domain.replaceAll('.', '-') })
+
+  async function importBody(feed: Awaited<ReturnType<typeof addFeed>>, body: string, now = firstRun) {
+    const server = await serve(body)
+
+    await database.db
+      .update(feeds)
+      .set({ etag: null, lastModified: null, url: `${server.origin}/rss/` })
+      .where(eq(feeds.id, feed.id))
+
+    return importFeed(database.db, fetcherFor(servers), await storedFeed(feed.id), now)
+  }
+
+  /** One article as a paper puts it in its feed: a link with an article code of its own. */
+  const article = (paper: string, title = headline, pubDate = friday) =>
+    feedWith(entry(paper, { link: `https://${paper}.test/sport/spits/${paper.length}.html`, pubDate, title }))
+
+  const shown = async () =>
+    (await listArchivePage(database.db, { limit: 50, until: later })).map((item) => [item.sourceName, item.title])
+
+  async function threePapers() {
+    return {
+      haarlem: await addPaper('www.haarlemsdagblad.nl'),
+      ijmuiden: await addPaper('www.ijmuidercourant.nl'),
+      noord: await addPaper('www.noordhollandsdagblad.nl'),
+    }
+  }
+
+  it('shows the same headline of three papers once, the quotes straight or curly', async () => {
+    const { haarlem, ijmuiden, noord } = await threePapers()
+
+    await importBody(ijmuiden, article('ijmuiden'))
+    await importBody(haarlem, article('haarlem', "Spits na zege: 'Dit is mooi'"))
+    await importBody(noord, article('noordholland'))
+
+    expect(new Set((await itemsInDatabase()).map((row) => row.threadKey)).size).toBe(1)
+    expect(await shown()).toHaveLength(1)
+    expect(await countArchiveItems(database.db, { until: later })).toBe(1)
+  })
+
+  it('keeps the same headline of another day and of another publisher apart', async () => {
+    const { haarlem, ijmuiden } = await threePapers()
+    const andere = await addPaper('www.nd.nl', null)
+
+    await importBody(ijmuiden, article('ijmuiden'))
+    await importBody(haarlem, article('haarlem', headline, 'Wed, 21 Oct 2026 15:00:00 GMT'))
+    await importBody(andere, article('anders'))
+
+    expect(await shown()).toHaveLength(3)
+  })
+
+  it('changes the key when the headline or the day changes in the feed', async () => {
+    const { ijmuiden } = await threePapers()
+
+    await importBody(ijmuiden, article('ijmuiden'))
+    const [first] = await itemsInDatabase()
+
+    expect(await importBody(ijmuiden, article('ijmuiden', 'Een andere kop'), secondRun)).toMatchObject({ updated: 1 })
+    const [renamed] = await itemsInDatabase()
+
+    await importBody(ijmuiden, article('ijmuiden', 'Een andere kop', 'Wed, 21 Oct 2026 15:00:00 GMT'), secondRun)
+    const [moved] = await itemsInDatabase()
+
+    expect(first?.threadKey).toMatch(/^2026-10-22:/u)
+    expect(renamed?.threadKey).not.toBe(first?.threadKey)
+    expect(moved?.threadKey).toMatch(/^2026-10-21:/u)
+  })
+
+  it('makes the key of an item without a time from the time we first saw it, and keeps it', async () => {
+    const { ijmuiden } = await threePapers()
+    const body = feedWith(entry('zonder-tijd', { pubDate: 'geen datum', title: headline }))
+
+    await importBody(ijmuiden, body)
+    const [first] = await itemsInDatabase()
+
+    expect(first?.threadKey).toMatch(/^\d{4}-\d{2}-\d{2}:/u)
+    expect(await importBody(ijmuiden, body, new Date('2026-11-30T12:00:00Z'))).toMatchObject({ unchanged: 1 })
+    expect((await itemsInDatabase())[0]?.threadKey).toBe(first?.threadKey)
+  })
+
+  it('gives stored items their key at the next import, and leaves a hidden item alone', async () => {
+    const { haarlem, ijmuiden } = await threePapers()
+
+    await importBody(ijmuiden, article('ijmuiden'))
+    await importBody(haarlem, article('haarlem'))
+    await database.db.update(items).set({ threadKey: null })
+    await database.db.update(items).set({ hiddenAt: firstRun }).where(eq(items.sourceId, haarlem.sourceId))
+
+    // The feed of IJmuiden no longer lists the item, so the key comes from what is stored.
+    await importBody(ijmuiden, feedWith(), secondRun)
+    await importBody(haarlem, feedWith(), secondRun)
+
+    const rows = await itemsInDatabase()
+
+    expect(rows.find((row) => row.sourceId === ijmuiden.sourceId)?.threadKey).toMatch(/^2026-10-22:/u)
+    expect(rows.find((row) => row.sourceId === haarlem.sourceId)).toMatchObject({ hiddenAt: firstRun, threadKey: null })
   })
 })
 

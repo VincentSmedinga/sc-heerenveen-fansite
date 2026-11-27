@@ -100,20 +100,20 @@ Het bronnenregister legt per bron vast wat we mogen tonen.
 Een kop, de link en de naam van de bron mogen altijd, dus daar zit geen kolom voor.
 Al het andere staat uit tot de bron toestemming geeft (principe 1 en 2 in het hoofdstuk Redactie van Storybook).
 
-| Kolom                                            | Betekenis                                                                                                                                                             | Standaard |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video`                                                                                  | geen      |
-| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'                                                                                      | leeg      |
-| `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                                                                                                                | 0         |
-| `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                                                                                                                | onwaar    |
-| `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron                                                                                            | leeg      |
-| `slug`                                           | De vaste naam in een adres, zoals `omroep-abe`; uniek, en een andere naam verandert het adres niet                                                                    | leeg      |
-| `publisher`                                      | De uitgever van de bron, zoals `dpg-media`; bronnen met dezelfde uitgever tonen een artikel dat ze allebei hebben één keer                                            | leeg      |
-| `local`                                          | Of de bron de regionale krant van zijn uitgever is; die gaat voor als twee bronnen hetzelfde artikel hebben en het over een club uit haar lijst gaat (`source_clubs`) | onwaar    |
-| `apple_podcasts_url`, `spotify_url`              | Waar een podcast staat op Apple Podcasts en Spotify; alleen `https`, hoogstens 300 tekens                                                                             | leeg      |
-| `consent_status`, `consent_date`, `consent_note` | De toestemming: `none`, `asked` of `given`, sinds welke dag, en wat is afgesproken                                                                                    | `none`    |
-| `enabled`                                        | Zet de bron uit zonder hem te verwijderen                                                                                                                             | waar      |
-| `created_at`                                     | Wanneer de bron is toegevoegd, in UTC                                                                                                                                 | nu        |
+| Kolom                                            | Betekenis                                                                                                                                                                                | Standaard |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `name`, `domain`, `kind`                         | De naam, het domein (uniek) en de soort: `news`, `podcast`, `forum`, `club`, `video`                                                                                                     | geen      |
+| `description`                                    | Wat de bron is, in een of twee zinnen van onszelf, voor de pagina 'Onze bronnen'                                                                                                         | leeg      |
+| `intro_max_length`                               | Hoeveel tekens van een intro we tonen; 0 is geen intro                                                                                                                                   | 0         |
+| `allow_image`, `allow_embed`                     | Of we een afbeelding tonen, en of we de bron insluiten                                                                                                                                   | onwaar    |
+| `attribution`                                    | De bronvermelding zoals de bron die wil; leeg betekent de naam van de bron                                                                                                               | leeg      |
+| `slug`                                           | De vaste naam in een adres, zoals `omroep-abe`; uniek, en een andere naam verandert het adres niet                                                                                       | leeg      |
+| `publisher`                                      | De uitgever van de bron, zoals `dpg-media` of `mediahuis`; bronnen met dezelfde uitgever tonen een artikel dat ze allebei hebben één keer                                                | leeg      |
+| `local`                                          | Of de bron de regionale krant van zijn uitgever is; die gaat voor als twee bronnen hetzelfde artikel hebben en het over een club uit haar lijst gaat (`source_clubs`, of bij `*` altijd) | onwaar    |
+| `apple_podcasts_url`, `spotify_url`              | Waar een podcast staat op Apple Podcasts en Spotify; alleen `https`, hoogstens 300 tekens                                                                                                | leeg      |
+| `consent_status`, `consent_date`, `consent_note` | De toestemming: `none`, `asked` of `given`, sinds welke dag, en wat is afgesproken                                                                                                       | `none`    |
+| `enabled`                                        | Zet de bron uit zonder hem te verwijderen                                                                                                                                                | waar      |
+| `created_at`                                     | Wanneer de bron is toegevoegd, in UTC                                                                                                                                                    | nu        |
 
 Een bron met alleen een naam, een domein en een soort krijgt dus de strengste waarden.
 De CHECK-constraint `sources_display_needs_consent` weigert een bron met een intro, een afbeelding of insluiten zolang `consent_status` niet `given` is.
@@ -189,12 +189,13 @@ De rijen gaan weg met hun kop, en de tabel weghalen verliest geen gegevens.
 `source_clubs` heeft per regionale bron de clubs die ze volgt (#1367), met dezelfde namen als `item_clubs`.
 De seed zet de rijen uit het register (`followedClubs` in `realSources`) en haalt een club weg die er niet meer staat.
 Van een artikel dat twee kranten van één uitgever geven, wint de regionale krant alleen als de kop een van deze clubs noemt (zie _Eén artikel van twee kranten_).
+Een bron die `*` volgt (`everyStory` in `schema.ts`), nu alleen de Leeuwarder Courant, wint elk verhaal van haar uitgever.
 De rijen gaan weg met hun bron.
 
 ### De versies van een verhaal
 
 Een bron kan een verhaal steeds onder een nieuwe kop in de feed zetten, zoals een liveblog.
-Elke versie is een bericht, en `thread_key` bindt ze: de importer maakt hem per domein uit de link (zie de [README van de importer](../../apps/importer/README.md), _Versies van een verhaal_) en laat hem leeg bij een bron zonder regel.
+Elke versie is een bericht, en `thread_key` bindt ze: de importer maakt hem per domein uit de link, of bij Mediahuis uit de kop en de dag (zie de [README van de importer](../../apps/importer/README.md), _Versies van een verhaal_) en laat hem leeg bij een bron zonder regel.
 De kolom is hoofdlettergevoelig (`utf8mb4_bin`), met een index op `source_id` en `thread_key`.
 De site toont per bron en sleutel het nieuwste bericht (de nieuwste `published_at`, bij dezelfde tijd het hoogste `id`), en `isShown` regelt dat voor elke query samen met de relevantie en het verbergen:
 
@@ -209,10 +210,12 @@ De oudere versies blijven in de tabel, en het beheer toont ze allemaal.
 
 Twee kranten van één uitgever kunnen hetzelfde artikel geven onder één artikelcode: het Algemeen Dagblad en De Gelderlander (beide `publisher` `dpg-media`, net als de andere kranten van DPG Media) zetten het verslag van een wedstrijd van N.E.C. allebei in hun feed.
 Beide hebben dan dezelfde `thread_key`.
+De kranten van Mediahuis (`publisher` `mediahuis`) delen een artikel onder een eigen code per krant; hun `thread_key` komt uit de kop en de dag.
 Bij een bron met een `publisher` toont de lijst van berichten van alle bronnen, dus `/nieuws` zonder keuze van een bron, de homepage en de zoekresultaten, zo'n verhaal één keer (`isShownOnce` in `queries.ts`, via `isShown(until, { merge: true })`):
 
 - elke bron zet haar nieuwste bericht van het verhaal dat niet verborgen is naar voren, en bronnen die aanstaan en geen podcast zijn doen mee;
 - het bericht van de bron met `local` gaat voor als de kop van een bericht van het verhaal, bij welke bron van de uitgever ook, een club noemt die de bron volgt (`source_clubs`, tegen `item_clubs`); anders gaat het bericht van de bron die niet `local` is voor;
+- een bron met `local` die `*` volgt, gaat voor bij elk verhaal, wat de koppen ook noemen;
 - een bron met `local` zonder clubs in `source_clubs` volgt geen club, dus bij elk artikel wint dan de andere bron;
 - zijn er twee bronnen van dezelfde rang, zoals twee regionale kranten die allebei de club volgen of geen van beide, dan het bericht met de vroegste `published_at`, en bij dezelfde tijd het laagste `id`;
 - de naam, de link, de tijd en de betaalmuur zijn die van het bericht dat wint;

@@ -259,7 +259,7 @@ export async function importFeed(
   }
 
   const counts = await db.transaction(async (transaction) => {
-    const stored = await storeItems(transaction, feed, read.items, now, seasonMatches)
+    const stored = await storeItems(transaction, feed, read.items, now, seasonMatches, threadRule)
 
     await transaction
       .update(feeds)
@@ -527,23 +527,34 @@ export async function runImport(
 }
 
 /**
- * Gives the items of a source that were stored before it had a rule for the versions of a story
- * the key of their story, from their link. An item without a key and a link without a code stay
- * as they are, and so does a hidden item, which the importer leaves alone. Items the feed no
- * longer lists are covered too: the key comes from the stored link. It does nothing once every
- * item has its key.
+ * Gives the items of a source that were stored before it had a rule for the keys of its stories
+ * the key of their story, from what is stored: the link, or the headline and the time. An item
+ * that the rule gives no key stays as it is, and so does a hidden item, which the importer
+ * leaves alone. Items the feed no longer lists are covered too. It does nothing once every item
+ * that can have a key has one.
  */
 async function backfillThreadKeys(db: Executor, sourceId: number, rule: ThreadRule) {
   const keyless = await db
-    .select({ id: items.id, url: items.url })
+    .select({ id: items.id, publishedAt: items.publishedAt, title: items.title, url: items.url })
     .from(items)
-    .where(and(eq(items.sourceId, sourceId), isNull(items.threadKey), isNull(items.hiddenAt), like(items.url, '%~%')))
+    .where(
+      and(
+        eq(items.sourceId, sourceId),
+        isNull(items.threadKey),
+        isNull(items.hiddenAt),
+        // Only a link with a tilde can hold a code, so the others need not come along.
+        rule.kind === 'link-code' ? like(items.url, '%~%') : undefined,
+      ),
+    )
 
-  for (const { id, url } of keyless) {
-    const threadKey = threadKeyOf(url, rule)
+  for (const { id, ...item } of keyless) {
+    const threadKey = threadKeyOf(item, rule)
 
     if (threadKey !== null) {
-      await db.update(items).set({ threadKey }).where(eq(items.id, id))
+      await db
+        .update(items)
+        .set({ threadKey })
+        .where(and(eq(items.id, id), isNull(items.hiddenAt)))
     }
   }
 }
@@ -901,6 +912,7 @@ async function storeItems(
   found: FeedItem[],
   now: Date,
   seasonMatches: readonly MatchDay[],
+  threadRule: ThreadRule | undefined,
 ) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
   const relevance: RelevanceCounts = { doubtful: 0, irrelevant: 0, relevant: 0 }
@@ -939,6 +951,12 @@ async function storeItems(
     const rows = batch.map((item) => {
       const before = known.get(item.key)
       const publishedAt = item.publishedAt ?? before?.publishedAt ?? now
+      // Worked out again for an item without a time in the feed, because a key can need the
+      // time we store.
+      const threadKey =
+        threadRule === undefined || item.publishedAt !== null
+          ? item.threadKey
+          : threadKeyOf({ publishedAt, title: item.title, url: item.url }, threadRule)
       // An item that a feed without a filter of the same source offers is `relevant`,
       // whichever feed runs last: it stays with that feed (its `feedId`), so a run of the
       // feed with the filter doesn't take it over.
@@ -957,7 +975,7 @@ async function storeItems(
         (before.title === item.title &&
           before.url === item.url &&
           before.paywalled === item.paywalled &&
-          before.threadKey === item.threadKey &&
+          before.threadKey === threadKey &&
           before.relevance === itemRelevance &&
           before.durationSeconds === item.durationSeconds &&
           before.seasonNumber === item.seasonNumber &&
@@ -981,7 +999,7 @@ async function storeItems(
         relevance: itemRelevance,
         seasonNumber: item.seasonNumber,
         sourceId: feed.sourceId,
-        threadKey: item.threadKey,
+        threadKey,
         title: item.title,
         url: item.url,
       }

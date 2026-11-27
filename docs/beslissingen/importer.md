@@ -1613,6 +1613,7 @@
   De regel "alleen binnen een bron" geldt nog voor bronnen zonder `publisher`, en voor het filter per bron; bronnen met dezelfde `publisher` tonen een verhaal met dezelfde sleutel samen één keer.
 - **Later:** zie _De artikelcode van DPG Media heeft acht of negen letters en cijfers_ (2 november 2026).
   De code is nu van acht of negen letters en cijfers, niet alleen acht; de rest van de regel blijft.
+- **Later:** zie _Mediahuis krijgt één uitgever, met een sleutel uit de kop en de dag_ (27 november 2026): bij de kranten van Mediahuis komt de sleutel niet uit de link, maar uit de kop en de dag.
 
 ## Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant
 
@@ -1623,6 +1624,7 @@
     De andere bronnen hebben geen `publisher`.
   - **Wat we vergeleken:** op 1 november 2026 lazen we de feeds van de Leeuwarder Courant en De Telegraaf (Mediahuis) één keer, alleen gelezen: 50 berichten per feed, met geen enkele gelijke artikelcode en geen gelijke kop.
     Zij krijgen dus geen `publisher` en geen regel voor een sleutel; delen ze later wel een code, dan is dat een nieuw issue.
+    **Later:** zie _Mediahuis krijgt één uitgever, met een sleutel uit de kop en de dag_ (27 november 2026): de kranten van Mediahuis hebben nu een `publisher`.
   - **Eén bericht per uitgever en sleutel:** op `/nieuws` zonder keuze van een bron, op de homepage en in de zoekresultaten staat van bronnen met dezelfde `publisher` onder dezelfde `thread_key` één bericht.
     Elke bron brengt haar nieuwste bericht van het verhaal dat niet verborgen is naar voren.
     Wint de bron met `local`; zijn er twee lokale bronnen of geen, dan het bericht met de vroegste `published_at`, en bij dezelfde tijd het laagste `id`.
@@ -1647,6 +1649,7 @@
 - **Later:** zie _Een regionale krant wint alleen bij een club uit haar regio_ (17 november 2026).
   De bron met `local` gaat niet meer altijd voor: ze wint alleen als de kop een club noemt die ze volgt, en anders wint de bron die niet regionaal is.
   "De landelijke krant laten winnen" is daarmee het antwoord voor een artikel over een andere club.
+- **Later:** zie _Bij Mediahuis gaat de Leeuwarder Courant voor_ (27 november 2026): een `local` bron die elk verhaal volgt, wint altijd.
 
 ## Een afwijking van Wikipedia komt bij een redacteur, die beslist
 
@@ -4418,6 +4421,7 @@
   De keuze bij het tonen laat de bewaarde berichten staan en kost geen import.
 - **Later:** vervangt in _Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant_ (1 november 2026) de regel dat de bron met `local` altijd voorgaat, en de afweging "de landelijke krant laten winnen" bij de alternatieven; wie wint hangt nu van het artikel af.
 - **Alternatieven:** de gevolgde clubs afleiden uit wat een bron vaak noemt (minder voorspelbaar, moeilijker te testen); de wedstrijden rond de publicatie als extra bewijs nemen (meer werk voor weinig winst); een eigen regel voor sc Heerenveen (geen bron heeft nu een landelijke tegenhanger voor een Friese regionale krant); bronnen van verschillende uitgevers samenvoegen (er is geen gedeelde sleutel).
+- **Later:** zie _Bij Mediahuis gaat de Leeuwarder Courant voor_ (27 november 2026): een `local` bron die `*` volgt, wint elk verhaal van haar uitgever, ook als geen kop een club noemt.
 
 ## We nemen de Nederlandse dagbladen van Mediahuis
 
@@ -4433,6 +4437,7 @@
   Een 404 met een lege RSS-tekst is een fout van de feed: de fetcher oordeelt op de status.
 - **Alternatieven:** alleen de kranten met berichten over de club; de feeds over FC Groningen en AZ weglaten; nu een `publisher` en een sleutelregel voor Mediahuis maken.
 - **Later:** vervangt _We wijzen het Dagblad van het Noorden af_ (9 november 2026).
+- **Later:** zie _Mediahuis krijgt één uitgever, met een sleutel uit de kop en de dag_ (27 november 2026): een gedeeld artikel krijgt nu wel een regel, met `publisher` `mediahuis` en een sleutel uit de kop en de dag.
 
 ## We nemen de DPG-kranten met een sportfeed, NRC niet, en we geven ze één uitgever
 
@@ -4982,3 +4987,35 @@
   De naam is de vermelding die de voorwaarden van L1 vragen.
 - **Alternatieven:** L1 afgewezen laten, omdat De Limburger al een bron is en de opbrengst klein is.
   Of de naam "L1 Nieuws", die beter bij de andere namen past maar afwijkt van wat L1 vraagt.
+
+## Mediahuis krijgt één uitgever, met een sleutel uit de kop en de dag
+
+- **Datum:** 27 november 2026
+- **Besluit:** de elf kranten van Mediahuis hebben `publisher` `mediahuis` (#1711).
+  Hun `thread_key` is de dag van publicatie in Nederlandse tijd en een SHA-256 van de kop.
+  Voor de hash maken we de kop gelijk: kleine letters, en alles wat geen letter of cijfer is wordt één spatie.
+  Daardoor past elke kop in de kolom, en tellen twee lange koppen die alleen aan het eind verschillen als twee verhalen.
+  Er is geen migratie: de seed zet de uitgever, en de importer geeft bewaarde berichten bij de eerstvolgende import hun sleutel.
+- **Waarom:** hetzelfde artikel krijgt bij elke krant een eigen code, maar bijna altijd dezelfde kop op dezelfde dag (147 van 151 gevallen in een kopie van acceptatie van 25 november 2026).
+  De koppen zijn lang en specifiek, en in de telling hadden berichten met dezelfde kop en dag ook dezelfde betaalmuur en relevantie.
+  Een sleutel van de importer gebruikt de bestaande samenvoeging van de site.
+- **Nadeel:** plaatst één krant op één dag twee berichten met dezelfde kop, dan toont de site alleen het nieuwste.
+  Een kop die per krant anders is geschreven, of een artikel op een andere dag, blijft dubbel.
+- **Alternatieven:** de kop binnen 48 uur (vangt 4 gevallen meer, maar vraagt een tijdvenster in de query van de site); de kop met de exacte tijd (mist kranten die uren na elkaar publiceren); niets doen en met de hand verbergen.
+
+## Bij Mediahuis gaat de Leeuwarder Courant voor
+
+- **Datum:** 27 november 2026
+- **Besluit:** van een verhaal bij meer kranten van Mediahuis tonen we het bericht van de Leeuwarder Courant.
+  Zonder de Leeuwarder Courant het eerst gepubliceerde bericht, en bij dezelfde tijd het eerst bewaarde.
+  De Leeuwarder Courant is `local` en volgt in `source_clubs` de waarde `*` (`everyStory`), die voor elk verhaal geldt.
+- **Waarom:** de Leeuwarder Courant staat het dichtst bij de club, en fans kennen haar.
+  De waarde `*` hergebruikt de tabel en de volgorde die er al waren, zonder migratie.
+- **Alternatieven:** de regel voor lokale kranten zoals hij was (de Leeuwarder Courant wint dan alleen als de kop de club noemt); altijd het eerst gepubliceerde bericht; een nieuwe kolom voor de voorrang (een migratie voor één krant).
+
+## Samenvoegen blijft binnen één uitgever
+
+- **Datum:** 27 november 2026
+- **Besluit:** gelijke koppen van verschillende uitgevers voegen we niet samen.
+- **Waarom:** in de kopie van acceptatie kwam het bij de zichtbare berichten niet voor, en een algemene kop kan een ander artikel verbergen.
+- **Alternatieven:** elke gelijke kop op één dag samenvoegen, welke uitgever ook (#17).

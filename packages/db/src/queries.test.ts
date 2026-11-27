@@ -40,6 +40,7 @@ import {
 import {
   clubs,
   discussions,
+  everyStory,
   feeds,
   itemClubs,
   items,
@@ -1225,6 +1226,41 @@ describe('a story that two sources of one publisher have', () => {
     expect(await countArchiveItems(database.db, { sources: ['landelijk'], until: now })).toBe(1)
     expect(await countArchiveItems(database.db, { sources: ['landelijk', 'lokaal'], until: now })).toBe(2)
     expect((await listArchiveSources(database.db, now)).map((source) => source.slug)).toEqual(['landelijk', 'lokaal'])
+  })
+
+  describe('with a local source that follows every story, as the Leeuwarder Courant', () => {
+    async function addMediahuis() {
+      const eerste = await addSource('eerste')
+      const tweede = await addSource('tweede')
+      const voorrang = await addSource('voorrang', { local: true })
+
+      await follow(voorrang, everyStory)
+
+      return { eerste, tweede, voorrang }
+    }
+
+    it('shows its item, also when no headline names a club and it was published last', async () => {
+      const { eerste, tweede, voorrang } = await addMediahuis()
+
+      await addItem(eerste, 'Verslag eerste', '2026-10-22T08:00:00Z', { clubs: [] })
+      await addItem(tweede, 'Verslag tweede', '2026-10-22T08:01:00Z')
+      await addItem(voorrang, 'Verslag voorrang', '2026-10-22T09:00:00Z', { clubs: [] })
+
+      expect(await archive()).toEqual(['Verslag voorrang'])
+      expect(await recent()).toEqual(['Verslag voorrang'])
+      expect(await searched()).toEqual(['Verslag voorrang'])
+      expect(await countArchiveItems(database.db, { until: now })).toBe(1)
+    })
+
+    it('shows the item published first, then the one stored first, without it or when it is hidden', async () => {
+      const { eerste, tweede, voorrang } = await addMediahuis()
+
+      await addItem(tweede, 'Verslag tweede', '2026-10-22T08:00:00Z')
+      await addItem(eerste, 'Verslag eerste', '2026-10-22T08:00:00Z')
+      await addItem(voorrang, 'Verslag voorrang', '2026-10-22T07:00:00Z', { hiddenAt: now })
+
+      expect(await archive()).toEqual(['Verslag tweede'])
+    })
   })
 
   it('never joins sources of different publishers or without a publisher', async () => {

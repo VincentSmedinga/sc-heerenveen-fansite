@@ -23,6 +23,7 @@ import { connect } from './client.ts'
 import { withClubs } from './clubs.ts'
 import { readDatabaseEnv } from './env.ts'
 import {
+  everyStory,
   feeds,
   leagueResults,
   matchAppearances,
@@ -157,8 +158,13 @@ export const testSources = [
  * The lists show such an article once. The source that is `local`, the paper closest to the
  * news (De Gelderlander for N.E.C.), wins when a headline of the article names a club it
  * follows (`followedClubs`, written like `matches.opponent`); otherwise the other source wins.
- * A local source with no `followedClubs` follows no club. A source with no publisher is never
- * merged with another.
+ * A local source with no `followedClubs` follows no club, and one that follows `everyStory`
+ * wins every article of its publisher. A source with no publisher is never merged with
+ * another.
+ *
+ * The papers of Mediahuis (`mediahuis`) print one article under an article code of their own
+ * each, so their key comes from the headline and the day (see `threadRules` in the importer).
+ * The Leeuwarder Courant goes first.
  *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest
  * (see `read-forum.ts`).
@@ -174,8 +180,11 @@ export const realSources = [
       'Dagblad uit Leeuwarden voor Friesland. Op de sportpagina’s staan verslagen, interviews en columns over sc Heerenveen.',
     domain: 'www.lc.nl',
     feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/', { filter: 'club', url: 'https://www.lc.nl/sport/rss/' }],
+    followedClubs: [everyStory],
     kind: 'news',
+    local: true,
     name: 'Leeuwarder Courant',
+    publisher: 'mediahuis',
     slug: 'leeuwarder-courant',
   },
   {
@@ -198,6 +207,7 @@ export const realSources = [
     ],
     kind: 'news',
     name: 'De Telegraaf',
+    publisher: 'mediahuis',
     slug: 'de-telegraaf',
   },
   {
@@ -210,6 +220,7 @@ export const realSources = [
     ],
     kind: 'news',
     name: 'Dagblad van het Noorden',
+    publisher: 'mediahuis',
     slug: 'dagblad-van-het-noorden',
   },
   {
@@ -219,6 +230,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.frieschdagblad.nl/sport/rss/' }],
     kind: 'news',
     name: 'Friesch Dagblad',
+    publisher: 'mediahuis',
     slug: 'friesch-dagblad',
   },
   {
@@ -231,6 +243,7 @@ export const realSources = [
     ],
     kind: 'news',
     name: 'De Limburger',
+    publisher: 'mediahuis',
     slug: 'de-limburger',
   },
   {
@@ -243,6 +256,7 @@ export const realSources = [
     ],
     kind: 'news',
     name: 'Noordhollands Dagblad',
+    publisher: 'mediahuis',
     slug: 'noordhollands-dagblad',
   },
   {
@@ -252,6 +266,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.gooieneemlander.nl/sport/rss/' }],
     kind: 'news',
     name: 'De Gooi- en Eemlander',
+    publisher: 'mediahuis',
     slug: 'de-gooi-en-eemlander',
   },
   {
@@ -261,6 +276,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.haarlemsdagblad.nl/sport/rss/' }],
     kind: 'news',
     name: 'Haarlems Dagblad',
+    publisher: 'mediahuis',
     slug: 'haarlems-dagblad',
   },
   {
@@ -270,6 +286,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.leidschdagblad.nl/sport/rss/' }],
     kind: 'news',
     name: 'Leidsch Dagblad',
+    publisher: 'mediahuis',
     slug: 'leidsch-dagblad',
   },
   {
@@ -279,6 +296,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.ijmuidercourant.nl/sport/rss/' }],
     kind: 'news',
     name: 'IJmuider Courant',
+    publisher: 'mediahuis',
     slug: 'ijmuider-courant',
   },
   {
@@ -388,6 +406,7 @@ export const realSources = [
     feeds: [{ filter: 'club', url: 'https://www.flevopost.nl/sport/rss/' }],
     kind: 'news',
     name: 'De Flevopost',
+    publisher: 'mediahuis',
     slug: 'de-flevopost',
   },
   {
