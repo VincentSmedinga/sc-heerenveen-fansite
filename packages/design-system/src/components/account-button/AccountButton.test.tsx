@@ -9,26 +9,29 @@ import { glyphs } from './glyphs'
 // Without the comments, which describe the rules in words.
 const css = readFileSync(join(import.meta.dirname, 'account-button.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
+const initialPaths = () => [...document.querySelectorAll('mask .hf-account-button-initials path')]
+
 describe('AccountButton', () => {
-  it('is the link Inloggen without a screen name, with the scarf around the neck and no initials', () => {
+  it('is the link Inloggen without a screen name, with no initials', () => {
     render(<AccountButton />)
     const link = screen.getByRole('link', { name: 'Inloggen' })
 
     expect(link.getAttribute('href')).toBe('/fans/inloggen')
     expect(link.hasAttribute('data-signed-in')).toBe(false)
-    expect(link.querySelector('.hf-account-button-neck')).not.toBeNull()
-    expect(link.querySelector('text')).toBeNull()
+    expect(initialPaths()).toHaveLength(0)
   })
 
-  it('is the link Mijn account with a screen name, with the initials on the chest', () => {
+  it('is the link Mijn account with a screen name, with the initials cut out and centred', () => {
     render(<AccountButton screenName="Blauwwit_Sjoerd" />)
     const link = screen.getByRole('link', { name: 'Mijn account' })
 
     expect(link.getAttribute('href')).toBe('/fans/mijn-account')
     expect(link.hasAttribute('data-signed-in')).toBe(true)
-    expect(
-      [...link.querySelectorAll('mask .hf-account-button-initials path')].map((path) => path.getAttribute('d')),
-    ).toEqual([glyphs['B'], glyphs['S']])
+    expect(initialPaths().map((path) => path.getAttribute('d'))).toEqual([glyphs['B'], glyphs['S']])
+    expect(initialPaths().map((path) => path.getAttribute('transform'))).toEqual([
+      'translate(4.8 6.25) scale(0.7)',
+      'translate(8.4 6.25) scale(0.7)',
+    ])
   })
 
   it('takes its name from the link and not from the drawing: the initials are lines, not text', () => {
@@ -42,17 +45,34 @@ describe('AccountButton', () => {
     expect(link.textContent).toBe('')
   })
 
-  it('puts one initial in the middle of the chest, and draws none for a name without a letter', () => {
+  it('centres one initial, and draws none for a name without a letter it can draw', () => {
     const { rerender } = render(<AccountButton screenName="Tjalle99" />)
-    const paths = () => [...document.querySelectorAll('.hf-account-button-initials path')]
 
-    expect(paths()).toHaveLength(1)
-    expect(paths()[0]?.getAttribute('transform')).toBe('translate(14 24.6)')
+    expect(initialPaths().map((path) => path.getAttribute('transform'))).toEqual(['translate(6.6 6.25) scale(0.7)'])
 
-    rerender(<AccountButton screenName="1234" />)
+    for (const screenName of ['1234', 'Жанна']) {
+      rerender(<AccountButton screenName={screenName} />)
 
-    expect(paths()).toHaveLength(0)
-    expect(screen.getByRole('link', { name: 'Mijn account' })).toBeTruthy()
+      expect(initialPaths()).toHaveLength(0)
+      expect(screen.getByRole('link', { name: 'Mijn account' }).hasAttribute('data-signed-in')).toBe(true)
+    }
+  })
+
+  it('draws a new torso when someone logs in or out, so that change does not move', () => {
+    const { rerender } = render(<AccountButton />)
+    const torso = () => document.querySelector('.hf-account-button-torso')
+    const signedOut = torso()
+
+    rerender(<AccountButton screenName="Tjalle99" />)
+    const signedIn = torso()
+
+    expect(signedIn).not.toBe(signedOut)
+
+    rerender(<AccountButton screenName="Tjalle100" />)
+    expect(torso()).toBe(signedIn)
+
+    rerender(<AccountButton />)
+    expect(torso()).not.toBe(signedIn)
   })
 
   it('is a RoundButton on the header', () => {
@@ -61,37 +81,37 @@ describe('AccountButton', () => {
     expect(screen.getByRole('link').className).toBe('hf-round-button hf-round-button-header hf-account-button extra')
   })
 
-  it('gives each button its own masks, so two buttons on a page do not share one', () => {
+  it('gives each button its own clip path and mask, so two buttons on a page do not share one', () => {
     render(
       <>
         <AccountButton />
         <AccountButton screenName="Tjalle99" />
       </>,
     )
-    const masks = [...document.querySelectorAll('mask')].map((mask) => mask.id)
+    const ids = [...document.querySelectorAll('clipPath, mask')].map((element) => element.id)
+    const references = [...document.querySelectorAll('[clip-path], [mask]')].map(
+      (element) => element.getAttribute('clip-path') ?? element.getAttribute('mask'),
+    )
 
-    expect(masks).toHaveLength(4)
-    expect(new Set(masks).size).toBe(4)
-    for (const user of document.querySelectorAll('[mask]')) {
-      expect(masks).toContain(/^url\(#(.*)\)$/.exec(user.getAttribute('mask') ?? '')?.[1])
-    }
+    expect(ids).toHaveLength(4)
+    expect(new Set(ids).size).toBe(4)
+    expect(references.sort()).toEqual(ids.map((id) => `url(#${id})`).sort())
   })
 
   describe('account-button.css', () => {
-    it('raises the arms when logged in and with the keyboard, and under the mouse only on a device with a mouse', () => {
-      expect(css).toMatch(/&\[data-signed-in\],\s*&:focus-visible \{\s*\.hf-account-button-wave \{[^}]*opacity: 1;/)
-      expect(css).toMatch(/@media \(hover: hover\) \{\s*&:hover \{\s*\.hf-account-button-wave \{[^}]*opacity: 1;/)
+    it('raises the torso when logged in and with the keyboard, and under the mouse only on a device with a mouse', () => {
+      expect(css).toMatch(
+        /&\[data-signed-in\],\s*&:focus-visible \{\s*\.hf-account-button-torso \{\s*translate: 0 -7\.5px;/,
+      )
+      expect(css).toMatch(/@media \(hover: hover\) \{\s*&:hover \.hf-account-button-torso \{\s*translate: 0 -7\.5px;/)
+      expect(css).not.toMatch(/:active/)
     })
 
-    it('waves twice, with durations from the motion tokens, so nothing moves with reduced motion', () => {
-      const waves = css.match(/animation: hf-account-button-wave [^;]+;/g) ?? []
-
-      expect(waves).toHaveLength(2)
-      for (const wave of waves) {
-        expect(wave).toMatch(/calc\(2\.5 \* var\(--hf-motion-duration-medium\)\)/)
-        expect(wave).toMatch(/var\(--hf-motion-duration-short\) 2;$/)
-      }
-      expect(css).toMatch(/@keyframes hf-account-button-wave/)
+    it('moves with the motion tokens only, so nothing moves with reduced motion', () => {
+      expect(css.match(/transition:[^;]+;/g)).toEqual([
+        'transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-morph);',
+      ])
+      expect(css).not.toMatch(/animation|@keyframes/)
     })
   })
 })

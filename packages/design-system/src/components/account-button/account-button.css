@@ -1,96 +1,37 @@
 /*
- * The account button of the header (AccountButton): a RoundButton on the header
- * (round-button.css) with a supporter of 32 pixels, larger than the icon of the other round
- * buttons, because it has more detail.
+ * The account button of the header (AccountButton). It is a RoundButton on the header
+ * (round-button.css), which gives it its size, its colours and how it comes forward under the
+ * mouse, pressed and with the keyboard. This file moves the torso in the ring.
  *
- * Logged out the arms and the scarf above the head are away: folded down into the shoulders and
- * see-through, and the scarf hangs around the neck. Under the mouse (only on a device with a
- * mouse) and with the keyboard (:focus-visible) the arms come up out of the shoulders, the
- * scarf around the neck goes, and once the arms are up they wave the scarf from side to side
- * twice. Logged in (data-signed-in) the arms and the scarf are up already; under the mouse and
- * with the keyboard they wave.
+ * Logged out the torso waits below, so only the shoulders show. Under the mouse (only on a
+ * device with a mouse) and with the keyboard (:focus-visible) it slides straight up until it
+ * fills the ring, and slides back when the mouse or the focus leaves. Pressing (:active) alone,
+ * as on a touch screen, leaves it where it is. Logged in (data-signed-in) the torso is up
+ * already, so nothing moves.
  *
- * Coming up takes the medium duration (0,4 seconds). The wave takes two and a half times as
- * long, twice, and starts after the short duration, when the arms are nearly up. With reduced
- * motion every duration is 0s, so the arms are simply there and the wave has no time to move:
- * nothing moves.
- *
- * The arms come up with `translate` and `scale` and wave with `rotate`, three properties that
- * add up, so the wave does not undo the way up.
+ * Sliding takes the medium duration (0,4 seconds). With reduced motion every duration is 0s,
+ * so the torso is simply there. A change between logged out and logged in draws a new torso
+ * (AccountButton.tsx), so that change never moves.
  */
 
 @layer hf.components {
   .hf-account-button {
-    > .hf-account-button-fan {
-      block-size: 2rem;
-      inline-size: 2rem;
-      overflow: visible;
-    }
-
-    /* The arms and the scarf above the head, folded into the shoulders. */
-    .hf-account-button-wave {
-      opacity: 0;
-      scale: 1 0.45;
+    .hf-account-button-torso {
       transform-box: view-box;
-      transform-origin: 16px 23px;
-      transition:
-        opacity var(--hf-motion-duration-short) var(--hf-motion-ease-change),
-        scale var(--hf-motion-duration-medium) var(--hf-motion-ease-enter),
-        translate var(--hf-motion-duration-medium) var(--hf-motion-ease-enter);
-      translate: 0 8px;
-    }
-
-    .hf-account-button-neck {
-      transition: opacity var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+      transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-morph);
     }
 
     &[data-signed-in],
     &:focus-visible {
-      .hf-account-button-wave {
-        opacity: 1;
-        scale: 1;
-        translate: 0 0;
+      .hf-account-button-torso {
+        translate: 0 -7.5px;
       }
-
-      .hf-account-button-neck {
-        opacity: 0;
-      }
-    }
-
-    &:focus-visible .hf-account-button-wave {
-      animation: hf-account-button-wave calc(2.5 * var(--hf-motion-duration-medium)) var(--hf-motion-ease-morph)
-        var(--hf-motion-duration-short) 2;
     }
 
     @media (hover: hover) {
-      &:hover {
-        .hf-account-button-wave {
-          animation: hf-account-button-wave calc(2.5 * var(--hf-motion-duration-medium)) var(--hf-motion-ease-morph)
-            var(--hf-motion-duration-short) 2;
-          opacity: 1;
-          scale: 1;
-          translate: 0 0;
-        }
-
-        .hf-account-button-neck {
-          opacity: 0;
-        }
+      &:hover .hf-account-button-torso {
+        translate: 0 -7.5px;
       }
-    }
-  }
-
-  @keyframes hf-account-button-wave {
-    0%,
-    100% {
-      rotate: 0deg;
-    }
-
-    25% {
-      rotate: -9deg;
-    }
-
-    75% {
-      rotate: 9deg;
     }
   }
 }

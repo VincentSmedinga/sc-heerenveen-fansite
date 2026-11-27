@@ -1,7 +1,7 @@
 /**
- * The capitals A to Z as lines, for the initials on the chest of the AccountButton. Each letter
- * is drawn in a box 4 wide and 5 high, as a path for a stroke with round ends, like the rest of
- * the supporter. The initials are part of the drawing, not text: the drawing is hidden from
+ * The capitals A to Z as lines, for the initials in the ring of the AccountButton. Each letter
+ * is drawn in a box 4 wide and 5 high, as a path for a stroke with round ends, like the rest
+ * of the drawing. The initials are part of the drawing, not text: the drawing is hidden from
  * assistive technology, and the name of the button says where it goes.
  */
 export const glyphs: Readonly<Record<string, string>> = {

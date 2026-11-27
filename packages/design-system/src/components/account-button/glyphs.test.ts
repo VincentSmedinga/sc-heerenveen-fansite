@@ -7,7 +7,7 @@ describe('glyphs', () => {
     expect(Object.keys(glyphs)).toEqual([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'])
   })
 
-  it('stays inside the box of 4 by 5, so two letters fit on the chest', () => {
+  it('stays inside the box of 4 by 5, so two letters fit in the ring', () => {
     for (const [letter, path] of Object.entries(glyphs)) {
       // The end points of each command; the radii of an arc are left out.
       const points = path

@@ -1,6 +1,6 @@
 import type { ComponentProps, CSSProperties } from 'react'
 
-import { expect, userEvent } from 'storybook/test'
+import { expect, userEvent, waitFor } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
@@ -20,8 +20,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De knop voor je account in de header: een ronde knop met een fan met een sjaal. Wie niet is ingelogd, gaat ermee naar Inloggen; wie is ingelogd, naar Mijn account. Je kiest hem voor de header, naast de knop voor licht en donker.',
-          'Uitgelogd hangen de armen langs het lijf en zit de sjaal om de nek. Onder de muis en bij focus gaan de armen omhoog en zwaait de fan twee keer met de sjaal. Ingelogd houdt hij de sjaal omhoog, met de initialen op de borst. Een schermlezer hoort waar de link heen gaat; de fan zelf, met de initialen, is een tekening die verborgen is.',
+          'De knop voor je account in de header: een ronde knop met een ring, met daarin een hoofd en schouders. Wie niet is ingelogd, gaat ermee naar Inloggen; wie is ingelogd, naar Mijn account. Je kiest hem voor de header, naast de knop voor licht en donker.',
+          'Uitgelogd schuift de romp onder de muis en bij focus omhoog tot hij de ring vult. Ingelogd is de ring een dichte schijf met de initialen erin uitgesneden, en beweegt er niets. Een schermlezer hoort waar de link heen gaat; de tekening, met de initialen, is verborgen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -39,10 +39,20 @@ const inHeader = (args: ComponentProps<typeof AccountButton>) => (
   </Page.Header>
 )
 
+// Where the torso is, once it has stopped moving: `none` below, or moved up into the ring.
+const expectTorso = async (canvasElement: HTMLElement, translate: string) => {
+  const torso = canvasElement.querySelector('.hf-account-button-torso') as Element
+
+  await waitFor(() => expect(getComputedStyle(torso).translate).toBe(translate))
+}
+
+const raised = '0px -7.5px'
+
 export const SignedOut = meta.story({
   name: 'Uitgelogd',
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     await expect(canvas.getByRole('link', { name: 'Inloggen' })).toHaveAttribute('href', '/fans/inloggen')
+    await expectTorso(canvasElement, 'none')
   },
   render: inHeader,
 })
@@ -53,7 +63,7 @@ export const Hover = meta.story({
     docs: {
       description: {
         story:
-          'De armen gaan omhoog en de fan zwaait twee keer met de sjaal. De muis is nagebootst met de add-on Pseudo States; met de muis zie je de echte beweging.',
+          'De romp schuift omhoog tot hij de ring vult. De muis is nagebootst met de add-on Pseudo States; met de muis zie je de beweging.',
       },
     },
     pseudo: { hover: ['.hf-account-button'] },
@@ -63,9 +73,10 @@ export const Hover = meta.story({
 
 export const Focus = meta.story({
   name: 'Uitgelogd, met focus',
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     await userEvent.tab()
     await expect(canvas.getByRole('link', { name: 'Inloggen' })).toHaveFocus()
+    await expectTorso(canvasElement, raised)
   },
   render: inHeader,
 })
@@ -82,6 +93,25 @@ export const OneInitial = meta.story({
 export const TwoInitials = meta.story({
   args: { screenName: 'Blauwwit_Testfan' },
   name: 'Ingelogd, twee initialen',
+  play: async ({ canvas, canvasElement }) => {
+    await expectTorso(canvasElement, raised)
+    await userEvent.tab()
+    await expect(canvas.getByRole('link', { name: 'Mijn account' })).toHaveFocus()
+    await expectTorso(canvasElement, raised)
+  },
+  render: inHeader,
+})
+
+export const NoInitials = meta.story({
+  args: { screenName: '1997' },
+  name: 'Ingelogd, zonder initialen',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Een schermnaam zonder letter die we kunnen tekenen geeft de dichte schijf.',
+      },
+    },
+  },
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('link', { name: 'Mijn account' })).toHaveAttribute('href', '/fans/mijn-account')
   },
@@ -102,18 +132,15 @@ export const ReducedMotion = meta.story({
     docs: {
       description: {
         story:
-          'Met minder beweging staan de armen er meteen, zonder te zwaaien. De tijden van de beweging staan hier op nul, zoals de tokens dat doen als de bezoeker minder beweging kiest.',
+          'Met minder beweging staat de romp onder de muis meteen boven, zonder te schuiven. De tijden van de beweging staan hier op nul, zoals de tokens dat doen als de bezoeker minder beweging kiest.',
       },
     },
     pseudo: { hover: ['.hf-account-button'] },
   },
   play: async ({ canvasElement }) => {
-    const wave = canvasElement.querySelector('.hf-account-button-wave')
+    const torso = canvasElement.querySelector('.hf-account-button-torso') as Element
 
-    await expect(wave).not.toBeNull()
-    const durations = getComputedStyle(wave as Element).transitionDuration.split(', ')
-
-    await expect(durations.every((duration) => duration === '0s')).toBe(true)
+    await expect(getComputedStyle(torso).transitionDuration).toBe('0s')
   },
   render: (args) => (
     <div style={reduced}>
