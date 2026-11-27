@@ -67,11 +67,11 @@ afterEach(() => {
 /** The main column: the card Alle tegenstanders. */
 const mainOf = (html: string) => html.slice(0, html.indexOf('<section class="hf-page-section"'))
 
-/** The side section: the card with the top 10 and the credit. */
+/** The side section: the card with the top 5 and the credit. */
 const sidebarOf = (html: string) =>
   html.slice(html.indexOf('<section class="hf-page-section"'), html.indexOf('</main>'))
 
-/** The rows of the top 10: the place, the club and its address, the average and the matches. */
+/** The rows of the top 5: the place, the club and its address, the average and the matches. */
 const placesOf = (html: string) =>
   [
     ...sidebarOf(html).matchAll(
@@ -103,7 +103,7 @@ describe('the page /tegenstanders', () => {
     ])
   })
 
-  it('has the card Laatste overwinning after the top 10 and before the credit, when there are places', async () => {
+  it('has the card Laatste overwinning after the top 5 and before the credit, when there are places', async () => {
     const places = [
       { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
       { days: null, lastWin: null, name: 'Ajax', slug: 'ajax' },
@@ -264,7 +264,7 @@ describe('the page /tegenstanders', () => {
     expect(html).not.toContain('Bron: ')
   })
 
-  it('has Alle tegenstanders on the white surface in the main column, and the top 10 on the soft one in the side section', async () => {
+  it('has Alle tegenstanders on the white surface in the main column, and the top 5 on the soft one in the side section', async () => {
     const html = await render()
 
     expect(mainOf(html)).toMatch(
@@ -276,7 +276,7 @@ describe('the page /tegenstanders', () => {
     )
   })
 
-  it('has a side section with a name, the top 10 first and the credit after it', async () => {
+  it('has a side section with a name, the top 5 first and the credit after it', async () => {
     const sidebar = sidebarOf(await render())
 
     expect(sidebar).toContain('aria-label="Het makkelijkst, het moeilijkst en de bron"')
@@ -302,11 +302,11 @@ describe('the page /tegenstanders', () => {
     expect(sidebarOf(html)).toContain('Gemiddeld aantal punten per wedstrijd')
     expect(sidebarOf(html)).toContain('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')
     expect(sidebarOf(html)).toContain(
-      '<caption class="hf-visually-hidden">De eerste 10 clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
+      '<caption class="hf-visually-hidden">De eerste 5 clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
     )
     expect(sidebarOf(html)).not.toContain('Toon 5 meer')
-    // The two cards of the sidebar show ten places each.
-    expect(placesOf(html)).toHaveLength(20)
+    // The two cards of the sidebar show five places each.
+    expect(placesOf(html)).toHaveLength(10)
     // Without JavaScript the buttons would do nothing, so there are none.
     expect(sidebarOf(html)).not.toContain('<button')
   })
@@ -320,7 +320,7 @@ describe('the page /tegenstanders', () => {
     expect(html).toContain('id="het-moeilijkst"')
   })
 
-  it('keeps the choice in the links of the top 10', async () => {
+  it('keeps the choice in the links of the top 5', async () => {
     vi.mocked(getClubRecords).mockResolvedValue([...leagueRecords, ...tenRecords])
 
     const html = await render({ competitie: 'eredivisie' })
@@ -353,7 +353,7 @@ describe('the page /tegenstanders', () => {
     expect(error).toHaveBeenCalledWith('Could not read the opponents at home and away for /tegenstanders: no home')
   })
 
-  it('keeps the top 10 when there is no club at all', async () => {
+  it('keeps the top 5 when there is no club at all', async () => {
     vi.mocked(getClubRecords).mockResolvedValue([])
 
     const html = await render()

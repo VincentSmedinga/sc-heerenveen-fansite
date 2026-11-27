@@ -635,7 +635,7 @@ De rijkop is een link dankzij `href` op een rij van `DataTable`.
 Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 De lijst staat in de hoofdkolom, op het witte vlak.
 De zijkolom heeft de zachte kaart "Het makkelijkst" (`RankingCard`) en de bronvermelding.
-De kaart toont de clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`): een vaste top 10 in één tabel, zonder knop, met en zonder JavaScript.
+De kaart toont de clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`): een vaste top 5 in één tabel, zonder knop, met en zonder JavaScript.
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
 Het is een `DataTable` met `sortable={false}`: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
 Onder de kop staat "Gemiddeld aantal punten per wedstrijd" en een keuze Alle, Thuis en Uit (`VenueSwitch`, een `SegmentedControl` in de browser).

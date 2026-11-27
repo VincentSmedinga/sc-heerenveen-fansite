@@ -785,17 +785,17 @@ export function LastWinCard({
 
 /**
  * The cards Het makkelijkst and Het moeilijkst of the page Tegenstanders, on the soft surface
- * in the sidebar: the ten clubs against which sc Heerenveen took the most points per match (see
- * `topPointsOf`), and the ten against which it took the fewest (see `hardestOf`). `low` is
- * Het moeilijkst, which runs from low to high; the two are the same card with another heading,
- * anchor and order. A line under the heading says what the figure is, and a choice of Alle,
- * Thuis or Uit (`VenueSwitch`) picks the records of `records`. The card counts the same
- * matches as the list of all the opponents, so it follows the switch of the page, and its links
- * keep the choice (`address` and `query`, as in `ClubsCard`). The table has the place, the club
- * as a link, the average with two decimals and the number of matches, and it cannot be sorted:
- * its order is the point. The caption says they are our points, so the card is not read as the
- * average of the opponent. The line under the table says which clubs count. With fewer than ten
- * clubs that count there is a sentence and no table, and the card stays.
+ * in the sidebar: the five clubs against which sc Heerenveen took the most points per match
+ * (see `topPointsOf`), and the five against which it took the fewest (see `hardestOf`). `low`
+ * is Het moeilijkst, which runs from low to high; the two are the same card with another
+ * heading, anchor and order. A line under the heading says what the figure is, and a choice of
+ * Alle, Thuis or Uit (`VenueSwitch`) picks the records of `records`. The card counts the same
+ * matches as the list of all the opponents, so it follows the switch of the page, and its
+ * links keep the choice (`address` and `query`, as in `ClubsCard`). The table has the place,
+ * the club as a link, the average with two decimals and the number of matches, and it cannot
+ * be sorted: its order is the point. The caption says they are our points, so the card is not
+ * read as the average of the opponent. The line under the table says which clubs count. With
+ * fewer than ten clubs that count there is a sentence and no table, and the card stays.
  */
 export function RankingCard({
   address,
@@ -941,7 +941,7 @@ function MeetingLine({ choice, match, now }: { choice: CompetitionChoice; match:
 
 /**
  * What a ranking card shows for one venue: a sentence when fewer than `topPointsClubs` clubs
- * count, else the table with the ten places, the legend and the line "Gebaseerd op". The order
+ * count, else the table with the five places, the legend and the line "Gebaseerd op". The order
  * is the answer, and the caption says which way it runs, so the table does not sort. `low` is
  * the card Het moeilijkst, which runs from low to high; the caption names the venue and the
  * choice of competition.

@@ -3224,6 +3224,8 @@
   Eén onderdeel haalt de herhaling tussen de twee kaarten weg.
 - **Alternatieven:** terug naar een top 5 met de plaatsen 6 tot en met 10 achter een `Disclosure` (de opzet van #1416); `MoreRows` houden voor een volgende kaart; één kaart die beide lijsten toont (zichtbaar anders, met nieuwe koppen en ankers); twee onderdelen houden.
 - **Later:** vervangt _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026) en de top 5 uit _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026).
+- **Later:** vervangen door _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5_ (27 november 2026): de kaarten tonen vijf clubs.
+  Het ene onderdeel `RankingCard` en het minimum van 10 clubs blijven.
 
 ## De eerste termijn van Foppe de Haan eindigt op de laatste dag van 2003/04
 
@@ -3347,3 +3349,14 @@
   De opgeslagen waarden en mapnamen veranderen niet, want daar hangt de import aan.
 - **Alternatieven:** overal "het archief van de Fansite" (klungelig in "cijfers van bezoekers van het archief van de Fansite"); overal "de Fansite (1997–2006)" (rommelig op kleine kaarten); de regel van 0.6.0 laten staan; alle documenten en README's aanpassen; geen test, alleen de checklist van de reviewer.
 - **Later:** vult _Onze eigen gegevens heten overal sc Heerenveen Fansite_ aan: "de Fansite" en "het archief van de Fansite" zijn nu de namen voor de jaren 1997 tot 2006, en de bronvermelding "sc Heerenveen Fansite" blijft.
+
+## De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5
+
+- **Datum:** 27 november 2026
+- **Besluit:** beide kaarten tonen een vaste top 5 in één tabel, zonder knop.
+  `topPointsPlaces` en `hardestPlaces` zijn 5 en het bijschrift is "De eerste 5 clubs waartegen …".
+  Het minimum blijft: een kaart toont een lijst bij minstens 10 clubs (`topPointsClubs`) met minstens 5 wedstrijden per club in de keuze, en anders een zin.
+- **Waarom:** de projecteigenaar wil een top 5.
+  Met minstens 10 clubs staat geen club op allebei de kaarten.
+- **Alternatieven:** de top 10 houden; het minimum verlagen naar 5 clubs (dan kan dezelfde club op allebei de kaarten staan).
+- **Later:** vervangt de top 10 uit _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026).

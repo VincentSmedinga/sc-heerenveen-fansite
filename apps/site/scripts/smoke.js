@@ -1768,7 +1768,7 @@ await withEmptyDatabase((database) =>
       /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen 10 clubs met minstens 5 gespeelde wedstrijden\./,
     )
     // Without JavaScript the choice Alle, Thuis and Uit has no buttons that would do nothing,
-    // and nor has the table of a card: it has its ten places and no button.
+    // and nor has the table of a card: it has its five places and no button.
     assert.doesNotMatch(opponentsHtml, /aria-pressed/)
     assert.doesNotMatch(opponentsHtml, /Toon \d+ meer/)
     assert.doesNotMatch(opponentsHtml, /Herstel naar top 5/)

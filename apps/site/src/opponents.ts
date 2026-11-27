@@ -504,13 +504,13 @@ export const topPointsMinimum = 5
 export const topPointsClubs = 10
 
 /** How many places the card Het makkelijkst shows. */
-export const topPointsPlaces = 10
+export const topPointsPlaces = 5
 
 /** A place in the top of the average points per match: the club, its figures, its place. */
 export type PointsPlace = { name: string; place: number; played: number; points: number; slug: string }
 
 /**
- * The top 10 of the clubs against which sc Heerenveen took the most points per match, from the
+ * The top 5 of the clubs against which sc Heerenveen took the most points per match, from the
  * records the page already has, so for the choice of the page. The points are the ones of the
  * column Punten (`pointsOf`) and the average is those points per played match. Only a club with
  * at least `topPointsMinimum` played matches counts, because a club met once or twice would
@@ -539,7 +539,7 @@ export function topPointsOf(records: readonly PublicClubRecord[]) {
 }
 
 /** How many places the card Het moeilijkst shows. */
-export const hardestPlaces = 10
+export const hardestPlaces = 5
 
 /**
  * Where sc Heerenveen played the matches that a card counts: `all`, at home (`home`) or away
@@ -596,8 +596,8 @@ export function clubQuery(competition: CompetitionChoice, venue: Venue, page: nu
 }
 
 /**
- * The 10 clubs against which sc Heerenveen took the fewest points per match, for the card Het
- * moeilijkst under the top 10. It counts the same clubs (`topPointsMinimum` played matches) and
+ * The 5 clubs against which sc Heerenveen took the fewest points per match, for the card Het
+ * moeilijkst under the top 5. It counts the same clubs (`topPointsMinimum` played matches) and
  * the same points, and orders on the real ratio, lowest first. Level ratios go by the most
  * matches, then by name. It has places only when at least `topPointsClubs` clubs count;
  * otherwise `places` is empty and `played` is 0. `played` is the number of
