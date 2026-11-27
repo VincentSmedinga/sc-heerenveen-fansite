@@ -152,6 +152,7 @@ describe('the seed', () => {
       'https://www.rijnmond.nl/rss/sport.xml',
       'https://www.rtvnoord.nl/rss/sport.xml',
       'https://www.oogtv.nl/tag/fc-groningen/feed/',
+      'https://www.l1nieuws.nl/rss/sport.xml',
     ])
   })
 
@@ -436,6 +437,30 @@ describe('the seed', () => {
     expect(rtv?.description).toBeTruthy()
     expect(rtv?.description?.length).toBeLessThanOrEqual(300)
     expect(rtvFeeds.map((feed) => [feed.url, feed.filter])).toEqual([['https://www.rtvnoord.nl/rss/sport.xml', 'club']])
+  })
+
+  it('puts L1 Nieuws in the register with its sports feed on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const [l1] = await database.db.select().from(sources).where(eq(sources.domain, 'www.l1nieuws.nl'))
+    const l1Feeds = await database.db
+      .select()
+      .from(feeds)
+      .where(eq(feeds.sourceId, l1?.id ?? 0))
+
+    expect(l1).toMatchObject({
+      allowEmbed: false,
+      allowImage: false,
+      enabled: true,
+      introMaxLength: 0,
+      kind: 'news',
+      name: 'L1 Nieuws.nl',
+      slug: 'l1-nieuws',
+    })
+    expect(l1?.consentStatus).not.toBe('given')
+    expect(l1?.description).toBeTruthy()
+    expect(l1?.description?.length).toBeLessThanOrEqual(300)
+    expect(l1Feeds.map((feed) => [feed.url, feed.filter])).toEqual([['https://www.l1nieuws.nl/rss/sport.xml', 'club']])
   })
 
   it('puts OOG Groningen in the register with a plain feed of the club and a feed on the club filter', async () => {

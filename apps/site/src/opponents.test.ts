@@ -591,12 +591,10 @@ describe('topPointsOf', () => {
     won,
   })
 
-  /** The clubs given and clubs without a point, so that ten clubs count: the card needs ten. */
+  /** The clubs given and nine clubs without a point, which come after them. */
   const withFiller = (clubs: PublicClubRecord[]) => [
     ...clubs,
-    ...Array.from({ length: Math.max(0, 10 - clubs.filter(({ played }) => played >= 5).length) }, (_, index) =>
-      record(`Zzz vul ${index}`, 0, 0, 5),
-    ),
+    ...Array.from({ length: 9 }, (_, index) => record(`Zzz vul ${index}`, 0, 0, 5)),
   ]
 
   it('counts 3 points for a win and 1 for a draw, as the column Punten does', () => {
@@ -623,23 +621,23 @@ describe('topPointsOf', () => {
     expect(places.map(({ name }) => name)).toContain('Vijf')
     expect(places.map(({ name }) => name)).not.toContain('Eén keer')
     expect(places.map(({ name }) => name)).not.toContain('Vier keer')
-    // Vijf and nine clubs without a point, five matches each.
+    // Vijf and the nine other clubs without a point, five matches each.
     expect(played).toBe(50)
   })
 
-  it('counts the matches of every club that counts, up to 10 places', () => {
+  it('counts the matches of every club that counts, up to 5 places', () => {
     const records = Array.from({ length: 12 }, (_, index) =>
       record(`Club ${String(index).padStart(2, '0')}`, 5 - (index % 5), 0, index % 5),
     )
     const { places, played } = topPointsOf(records)
 
-    expect(places).toHaveLength(10)
+    expect(places).toHaveLength(5)
     expect(played).toBe(60)
 
     const many = Array.from({ length: 30 }, (_, index) => record(`Club ${index}`, 5 - (index % 5), 0, index % 5))
 
-    expect(topPointsOf(many).places).toHaveLength(10)
-    expect(topPointsOf(many).places.at(-1)?.place).toBe(10)
+    expect(topPointsOf(many).places).toHaveLength(5)
+    expect(topPointsOf(many).places.at(-1)?.place).toBe(5)
   })
 
   it('puts the club with more matches first on a level average, and then goes by name', () => {
@@ -667,13 +665,11 @@ describe('topPointsOf', () => {
     ])
   })
 
-  it('has places from ten clubs that count, and none with nine', () => {
-    const nine = Array.from({ length: 9 }, (_, index) => record(`Club ${index}`, index, 0, 5 - index))
+  it('has a place for each club that counts when there are fewer than five', () => {
+    const two = [record('Een', 5, 0, 0), record('Twee', 0, 0, 5), record('Vier', 4, 0, 0)]
 
-    expect(topPointsOf(nine)).toEqual({ places: [], played: 0 })
-    expect(topPointsOf([...nine, record('Tien', 5, 0, 0)]).places).toHaveLength(10)
-    // A club of four matches is no tenth club.
-    expect(topPointsOf([...nine, record('Vier', 4, 0, 0)])).toEqual({ places: [], played: 0 })
+    expect(topPointsOf(two).places.map(({ name }) => name)).toEqual(['Een', 'Twee'])
+    expect(topPointsOf(two).played).toBe(10)
   })
 
   it('has no places, and no matches, when no club has five played matches', () => {
@@ -716,7 +712,7 @@ describe('hardestOf', () => {
       [4, 'Vierde', 5],
       [5, 'Vijfde', 6],
     ])
-    expect(places).toHaveLength(10)
+    expect(places).toHaveLength(5)
   })
 
   it('puts the club with more matches first on a level ratio, and then goes by name', () => {
@@ -753,24 +749,19 @@ describe('hardestOf', () => {
     expect(hardestOf(many).played).toBe(55)
   })
 
-  it('shows from ten clubs that count, and has no places with nine', () => {
-    expect(hardestOf(many).places).toHaveLength(10)
-    expect(
-      hardestOf(Array.from({ length: 30 }, (_, index) => record(`Club ${index}`, index % 5, 0, 5 - (index % 5))))
-        .places,
-    ).toHaveLength(10)
-    expect(hardestOf(many.slice(0, 9))).toEqual({ places: [], played: 0 })
-    // A club of four matches is no tenth club.
-    expect(hardestOf([...many.slice(0, 9), record('Vier', 0, 0, 4)])).toEqual({ places: [], played: 0 })
+  it('has at most five places, and one for each club that counts when there are fewer', () => {
+    expect(hardestOf(many).places).toHaveLength(5)
+    expect(hardestOf([...many.slice(0, 2), record('Vier', 0, 0, 4)]).places).toHaveLength(2)
+    expect(hardestOf([record('Vier', 0, 0, 4)])).toEqual({ places: [], played: 0 })
   })
 
   it('has no places when there is no club', () => {
     expect(hardestOf([])).toEqual({ places: [], played: 0 })
   })
 
-  it('has no club among its first five that is also among the first five of the top 10, from fifteen clubs on', () => {
-    // Five matches each, with 0 to 13 and 15 points: no two clubs are level.
-    const clubs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15].map((points) =>
+  it('shares no club with the top 5 when there are ten clubs and no two are level', () => {
+    // Five matches each, with 0 to 8 and 10 points: no two clubs are level.
+    const clubs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10].map((points) =>
       record(
         `Club ${String(points).padStart(2, '0')}`,
         Math.floor(points / 3),
@@ -778,12 +769,8 @@ describe('hardestOf', () => {
         5 - Math.floor(points / 3) - (points % 3),
       ),
     )
-    const top = topPointsOf(clubs)
-      .places.slice(0, 5)
-      .map(({ slug }) => slug)
-    const hardest = hardestOf(clubs)
-      .places.slice(0, 5)
-      .map(({ slug }) => slug)
+    const top = topPointsOf(clubs).places.map(({ slug }) => slug)
+    const hardest = hardestOf(clubs).places.map(({ slug }) => slug)
 
     expect(hardest).toHaveLength(5)
     expect(hardest.filter((slug) => top.includes(slug))).toEqual([])

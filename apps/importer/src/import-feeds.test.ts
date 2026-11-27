@@ -1613,6 +1613,84 @@ describe('importing the sports feed of Rijnmond, the way the register has it', (
   })
 })
 
+describe('importing the sports feed of L1 Nieuws, the way the register has it', () => {
+  const sample = readFileSync(new URL('./fixtures/l1-nieuws-sample.xml', import.meta.url), 'utf8')
+  const l1Run = new Date('2026-11-27T22:00:00Z')
+
+  /** The sports feed of L1 Nieuws as the seed registers it, pointed at the test server. */
+  async function l1Feed(origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.l1nieuws.nl'))
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('reads the feed on the club filter, gives every item its value and keeps the times', async () => {
+    const server = await serve(sample)
+    const feed = await l1Feed(server.origin)
+
+    expect(feed.filter).toBe('club')
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, l1Run, [])
+    const rows = await itemsInDatabase()
+
+    expect(report).toMatchObject({ added: 6, relevance: { doubtful: 1, irrelevant: 3, relevant: 2 }, skipped: [] })
+    // The key is the guid, as the feed writes it.
+    expect(
+      Object.fromEntries(rows.map((row) => [row.key.replace(/^.*\/sport\/(\d+)\/-$/u, '$1'), row.relevance])),
+    ).toEqual({
+      '9200001': 'relevant',
+      '9200002': 'relevant',
+      '9200003': 'doubtful',
+      '9200004': 'irrelevant',
+      '9200005': 'irrelevant',
+      '9200006': 'irrelevant',
+    })
+    expect(rows.find((row) => row.key.includes('9200001'))).toMatchObject({
+      publishedAt: new Date('2026-11-27T16:31:34Z'),
+      title: 'Doelman uit Weert is blij met zijn kans bij sc Heerenveen',
+      url: 'https://www.l1nieuws.test/sport/9200001/doelman-uit-weert',
+    })
+  })
+
+  it('keeps nothing of the description, the author, the image or the logo', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await l1Feed(server.origin), l1Run, [])
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('verzonnen intro')
+    expect(stored).not.toContain('Verzonnen Auteur')
+    expect(stored).not.toContain('.jpg')
+    expect(stored).not.toContain('logo.png')
+  })
+
+  it('shows only the relevant items to a visitor, with the name L1 asks for', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await l1Feed(server.origin), l1Run, [])
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-28T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'Doelman uit Weert is blij met zijn kans bij sc Heerenveen',
+      'Talent uit Limburg tekent voor drie jaar bij SC Heerenveen',
+    ])
+    expect(shown.every((item) => item.sourceName === 'L1 Nieuws.nl')).toBe(true)
+  })
+})
+
 describe('importing the dailies of Mediahuis, the way the register has them', () => {
   const sample = readFileSync(new URL('./fixtures/mediahuis-sport-sample.xml', import.meta.url), 'utf8')
   const mediahuisRun = new Date('2026-11-18T09:30:00Z')

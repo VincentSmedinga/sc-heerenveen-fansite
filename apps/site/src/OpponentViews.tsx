@@ -61,7 +61,6 @@ import {
   startYearOf,
   timelineOf,
   timelineWindow,
-  topPointsClubs,
   topPointsMinimum,
   topPointsOf,
   type Venue,
@@ -292,8 +291,11 @@ export function ClubsCard({
 /** An average of points as the Dutch write it, with two decimals and a comma: `2,43`. */
 const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
-/** The legend of the card: the icons and words of its two columns. The place has no line. */
-const topPointsLegend = tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
+/**
+ * The legend of the card: the icons and words of its two columns. The place has no line. Each
+ * table makes its own: the server gives an element that two tables share the same ids twice.
+ */
+const topPointsLegend = () => tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
 
 /** The line under the heading of Het makkelijkst and Het moeilijkst: what the figure is. */
 const pointsIntro = 'Gemiddeld aantal punten per wedstrijd'
@@ -785,17 +787,17 @@ export function LastWinCard({
 
 /**
  * The cards Het makkelijkst and Het moeilijkst of the page Tegenstanders, on the soft surface
- * in the sidebar: the ten clubs against which sc Heerenveen took the most points per match (see
- * `topPointsOf`), and the ten against which it took the fewest (see `hardestOf`). `low` is
- * Het moeilijkst, which runs from low to high; the two are the same card with another heading,
- * anchor and order. A line under the heading says what the figure is, and a choice of Alle,
- * Thuis or Uit (`VenueSwitch`) picks the records of `records`. The card counts the same
- * matches as the list of all the opponents, so it follows the switch of the page, and its links
- * keep the choice (`address` and `query`, as in `ClubsCard`). The table has the place, the club
- * as a link, the average with two decimals and the number of matches, and it cannot be sorted:
- * its order is the point. The caption says they are our points, so the card is not read as the
- * average of the opponent. The line under the table says which clubs count. With fewer than ten
- * clubs that count there is a sentence and no table, and the card stays.
+ * in the sidebar: the five clubs against which sc Heerenveen took the most points per match
+ * (see `topPointsOf`), and the five against which it took the fewest (see `hardestOf`). `low`
+ * is Het moeilijkst, which runs from low to high; the two are the same card with another
+ * heading, anchor and order. A line under the heading says what the figure is, and a choice of
+ * Alle, Thuis or Uit (`VenueSwitch`) picks the records of `records`. The card counts the same
+ * matches as the list of all the opponents, so it follows the switch of the page, and its
+ * links keep the choice (`address` and `query`, as in `ClubsCard`). The table has the place,
+ * the club as a link, the average with two decimals and the number of matches, and it cannot
+ * be sorted: its order is the point. The caption says they are our points, so the card is not
+ * read as the average of the opponent. The line under the table says which clubs count. With
+ * fewer than five that count, the table has those; with none there is a sentence instead.
  */
 export function RankingCard({
   address,
@@ -940,8 +942,8 @@ function MeetingLine({ choice, match, now }: { choice: CompetitionChoice; match:
 }
 
 /**
- * What a ranking card shows for one venue: a sentence when fewer than `topPointsClubs` clubs
- * count, else the table with the ten places, the legend and the line "Gebaseerd op". The order
+ * What a ranking card shows for one venue: a sentence when no club counts, else the table
+ * with at most five places, the legend and the line "Gebaseerd op". The order
  * is the answer, and the caption says which way it runs, so the table does not sort. `low` is
  * the card Het moeilijkst, which runs from low to high; the caption names the venue and the
  * choice of competition.
@@ -965,7 +967,7 @@ function RankingPanel({
   venue: Venue
 }) {
   if (places.length === 0) {
-    return <Text>{`Nog geen ${topPointsClubs} clubs met minstens ${topPointsMinimum} ${venueMatches[venue]}.`}</Text>
+    return <Text>{`Nog geen club met minstens ${topPointsMinimum} ${venueMatches[venue]}.`}</Text>
   }
 
   const caption = (what: string) =>
@@ -977,9 +979,9 @@ function RankingPanel({
   return (
     <>
       <DataTable
-        caption={caption(`De eerste ${places.length} clubs ${lead}`)}
+        caption={caption(`${places.length === 1 ? 'De club' : `De eerste ${places.length} clubs`} ${lead}`)}
         columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
-        legend={topPointsLegend}
+        legend={topPointsLegend()}
         rows={places.map((place) => ({
           cells: [averageFormat.format(place.points / place.played), place.played],
           header: place.name,
