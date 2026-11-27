@@ -1658,8 +1658,8 @@ describe('importing the sports feed of L1 Nieuws, the way the register has it', 
     })
     expect(rows.find((row) => row.key.includes('9200001'))).toMatchObject({
       publishedAt: new Date('2026-11-27T16:31:34Z'),
-      title: 'Fries volkslied geeft speler van sc Heerenveen kippenvel',
-      url: 'https://www.l1nieuws.test/sport/9200001/fries-volkslied',
+      title: 'Doelman uit Weert is blij met zijn kans bij sc Heerenveen',
+      url: 'https://www.l1nieuws.test/sport/9200001/doelman-uit-weert',
     })
   })
 
@@ -1684,7 +1684,7 @@ describe('importing the sports feed of L1 Nieuws, the way the register has it', 
     const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-28T00:00:00Z') })
 
     expect(shown.map((item) => item.title)).toEqual([
-      'Fries volkslied geeft speler van sc Heerenveen kippenvel',
+      'Doelman uit Weert is blij met zijn kans bij sc Heerenveen',
       'Talent uit Limburg tekent voor drie jaar bij SC Heerenveen',
     ])
     expect(shown.every((item) => item.sourceName === 'L1 Nieuws.nl')).toBe(true)
