@@ -4421,6 +4421,7 @@
   De keuze bij het tonen laat de bewaarde berichten staan en kost geen import.
 - **Later:** vervangt in _Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant_ (1 november 2026) de regel dat de bron met `local` altijd voorgaat, en de afweging "de landelijke krant laten winnen" bij de alternatieven; wie wint hangt nu van het artikel af.
 - **Alternatieven:** de gevolgde clubs afleiden uit wat een bron vaak noemt (minder voorspelbaar, moeilijker te testen); de wedstrijden rond de publicatie als extra bewijs nemen (meer werk voor weinig winst); een eigen regel voor sc Heerenveen (geen bron heeft nu een landelijke tegenhanger voor een Friese regionale krant); bronnen van verschillende uitgevers samenvoegen (er is geen gedeelde sleutel).
+- **Later:** zie _Bij Mediahuis gaat de Leeuwarder Courant voor_ (27 november 2026): een `local` bron die `*` volgt, wint elk verhaal van haar uitgever, ook als geen kop een club noemt.
 
 ## We nemen de Nederlandse dagbladen van Mediahuis
 
