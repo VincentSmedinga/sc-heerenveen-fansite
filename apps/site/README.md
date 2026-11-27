@@ -326,6 +326,8 @@ De regel met `role="status"` zegt alleen een nieuw doelpunt en het einde van de 
 `getPublicReports` bewaart het seizoen met een wedstrijd die live is 15 seconden, en anders 5 minuten.
 Een wedstrijd die `scheduled` is, een club heeft en geen verslag, heeft de Voorbeschouwing op hetzelfde adres, tot er uitslaggegevens zijn (een verslag, of een andere status), dus ook na de aftrap (`getPreviewMatch` in `src/report-data.ts`, `listScheduledMatches` van `@fansite/db/match-reports`, de pagina in `preview-page.tsx`).
 De kop is `MatchHeader` met fase `upcoming` en de pil "Voorbeschouwing", daaronder staat de kaart Nieuws over de tegenstander (hoogstens drie koppen uit `getClubNews`) en de Bron.
+De kaarten van de smalle kolom staan samen in één `Page.Section`, hier en op de pagina van een wedstrijd.
+Op een telefoon staan de kaarten in de volgorde van de HTML (zie _De kaarten in de smalle kolom van een wedstrijdpagina staan in één sectie_ in `docs/beslissingen/site.md`).
 De pagina heeft `noindex` en staat niet in de sitemap, en in Programma en in de kaart Wedstrijden op de homepage is de regel met de twee clubs de link ernaar (`getPreviewAddresses`).
 Een wedstrijd met een verslag toont altijd het verslag, ook de geplande wedstrijd met een verslag.
 `src/report-view.ts` zet een verslag om in gewone gegevens (`matchPageDataOf`, het type `MatchPageData` van `src/match-page.ts`), en `buildMatchPage` maakt daar de eigenschappen van de onderdelen van: de gebeurtenissen voor `MatchTimeline`, het veld met de spelers en hun minuten voor `MatchPitch`, de wissels, de doelpuntenmakers van de kop, de balk Wedstrijdverloop en de rondes van de strafschoppenserie.
