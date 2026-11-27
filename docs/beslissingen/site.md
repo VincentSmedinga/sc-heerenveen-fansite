@@ -8605,3 +8605,15 @@
 - **Waarom:** zonder kopjes per positie zoek je een naam het snelst op alfabet.
 - **Alternatieven:** de volgorde van de kaart "Selectie".
   Ook de selectie op achternaam.
+
+## De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5
+
+- **Datum:** 27 november 2026
+- **Besluit:** beide kaarten tonen een vaste top 5 in één tabel, zonder knop (#1706).
+  `topPointsPlaces` en `hardestPlaces` zijn 5 en het bijschrift is "De eerste 5 clubs waartegen …".
+  Het minimum blijft: een kaart toont een lijst bij minstens 10 clubs (`topPointsClubs`) met minstens 5 wedstrijden per club in de keuze, en anders een zin.
+- **Waarom:** de kaarten worden korter en de pagina blijft overzichtelijk.
+  Met minstens 10 clubs en zonder gelijke gemiddelden staat geen club op allebei de kaarten.
+  Bij een gelijk gemiddelde kan dat wel, omdat beide kaarten dan eerst de meeste wedstrijden en daarna de naam volgen.
+- **Alternatieven:** de top 10 houden; het minimum verlagen, zodat een kaart ook bij weinig clubs een tabel toont.
+- **Later:** vervangt de top 10 uit _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026) in `redactie.md`.

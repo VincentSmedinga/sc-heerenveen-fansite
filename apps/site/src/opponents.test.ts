@@ -768,7 +768,7 @@ describe('hardestOf', () => {
     expect(hardestOf([])).toEqual({ places: [], played: 0 })
   })
 
-  it('has no club among its first five that is also among the first five of the top 5, from ten clubs on', () => {
+  it('shares no club with the top 5 when there are ten clubs and no two are level', () => {
     // Five matches each, with 0 to 8 and 10 points: no two clubs are level.
     const clubs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10].map((points) =>
       record(
@@ -778,12 +778,8 @@ describe('hardestOf', () => {
         5 - Math.floor(points / 3) - (points % 3),
       ),
     )
-    const top = topPointsOf(clubs)
-      .places.slice(0, 5)
-      .map(({ slug }) => slug)
-    const hardest = hardestOf(clubs)
-      .places.slice(0, 5)
-      .map(({ slug }) => slug)
+    const top = topPointsOf(clubs).places.map(({ slug }) => slug)
+    const hardest = hardestOf(clubs).places.map(({ slug }) => slug)
 
     expect(hardest).toHaveLength(5)
     expect(hardest.filter((slug) => top.includes(slug))).toEqual([])
