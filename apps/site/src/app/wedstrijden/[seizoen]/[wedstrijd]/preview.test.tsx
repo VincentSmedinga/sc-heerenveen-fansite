@@ -295,7 +295,7 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     expect(html).toContain('href="/wedstrijden/zoeken?tegen=testdorp-fc&amp;waar=uit"')
     expect(html).toContain('href="/tegenstanders/testdorp-fc"')
     expect(html).toContain('class="hf-outcome-bar"')
-    // On a phone it stands under Vorm and above Nieuws.
+    // On a phone it stands under the cards of the narrow column and above Nieuws.
     expect(text.indexOf('Vorm')).toBeLessThan(text.indexOf('Onderling in'))
     expect(text.indexOf('Onderling in')).toBeLessThan(text.indexOf('Nieuws over'))
   })
@@ -336,7 +336,7 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     expect(plain(await render())).not.toContain('Onderling')
   })
 
-  it('shows the card Onze schutters with the squad apart, between Onderling and Nieuws on a phone', async () => {
+  it('shows the card Onze schutters with the squad apart, between Vorm and Onderling', async () => {
     const goal = (player: string, personId: null | number, more: Record<string, unknown> = {}) => ({
       minute: 10,
       ours: true,
@@ -373,15 +373,16 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     expect(text).toContain('Onze schutters in Testdorp')
     expect(text).toContain('Uit de selectie van nu')
     expect(text).toContain('Het vaakst')
-    const card = text.slice(text.indexOf('Onze schutters in'), text.indexOf('Nieuws over'))
+    const card = text.slice(text.indexOf('Onze schutters in'), text.indexOf('Onderling in'))
 
     expect(card).toContain('Ada Aalders 2026 2')
     expect(card).toContain('Piet Proefman 2026 1')
     expect(card).not.toContain('Eigen Doelpunt')
     expect(html).toContain('href="/spelers/ada-aalders"')
     expect(html).not.toContain('href="/spelers/piet-proefman"')
-    expect(text.indexOf('Onderling in')).toBeLessThan(text.indexOf('Onze schutters in'))
-    expect(text.indexOf('Onze schutters in')).toBeLessThan(text.indexOf('Nieuws over'))
+    expect(text.indexOf('Vorm')).toBeLessThan(text.indexOf('Onze schutters in'))
+    expect(text.indexOf('Onze schutters in')).toBeLessThan(text.indexOf('Onderling in'))
+    expect(text.indexOf('Onderling in')).toBeLessThan(text.indexOf('Nieuws over'))
     // Bo Bakker is not in the squad, so the box holds Ada alone.
     expect(text.slice(text.indexOf('Uit de selectie van nu'), text.indexOf('Het vaakst'))).not.toContain('Bo Bakker')
   })
