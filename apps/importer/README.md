@@ -395,7 +395,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een redacteur verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De feeds van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), de sport- en voetbalfeeds van de andere dagbladen van Mediahuis en de sportfeed van De Flevopost (zie _De dagbladen van Mediahuis_), de sportfeeds van de kranten van DPG Media (zie _De kranten van DPG Media_) en de algemene feed van het Nederlands Dagblad.
+Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De feeds van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), de sportfeed van L1 Nieuws (zie _De sportfeed van L1 Nieuws_), de sport- en voetbalfeeds van de andere dagbladen van Mediahuis en de sportfeed van De Flevopost (zie _De dagbladen van Mediahuis_), de sportfeeds van de kranten van DPG Media (zie _De kranten van DPG Media_) en de algemene feed van het Nederlands Dagblad.
 
 ### De sportfeed van de Leeuwarder Courant
 
@@ -586,6 +586,17 @@ Een kop over schaatsen in Heerenveen krijgt de waarde `doubtful` en wordt dus ni
 Een run van 9 november 2026 bewaarde 50 berichten van RTV Noord (0 `relevant`, 50 `irrelevant`), 10 van de feed van sc Heerenveen van OOG (10 `relevant`) en 10 van de feed van FC Groningen van OOG (10 `irrelevant`), want er was geen wedstrijd tegen FC Groningen in de buurt.
 Elk bericht heeft een beschrijving en een afbeelding of een auteur; de adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
 De tests in `src/import-feeds.test.ts` ("importing RTV Noord and OOG Groningen, the way the register has them") lezen verzonnen feeds in deze vorm, [`src/fixtures/rtv-noord-sample.xml`](src/fixtures/rtv-noord-sample.xml), [`src/fixtures/oog-groningen-sample.xml`](src/fixtures/oog-groningen-sample.xml) en [`src/fixtures/oog-groningen-club-sample.xml`](src/fixtures/oog-groningen-club-sample.xml), met een proefwedstrijd tegen FC Groningen.
+
+## De sportfeed van L1 Nieuws
+
+L1 Nieuws is een bron met de feed `https://www.l1nieuws.nl/rss/sport.xml`, het sportnieuws van de regionale omroep van Limburg (#1705).
+De bron heet op de site "L1 Nieuws.nl", zoals de voorwaarden van L1 vragen.
+De feed is RSS 2.0, met 50 berichten en tijden in GMT, en heeft geen betaalmuur; de adapter leest hem zonder aanpassing.
+Bijna geen kop gaat over sc Heerenveen.
+De seed zet de feed op `club`, dus de site toont alleen een kop over de club, en rond een wedstrijd een kop over de tegenstander (zie _Het relevantiefilter_).
+Een run van 27 november 2026 bewaarde alle 50 berichten, en het filter vond er 1 `relevant`, 0 `doubtful` en 49 `irrelevant` (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
+Elk bericht heeft een beschrijving en een afbeelding (`enclosure`); de adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
+De test in `src/import-feeds.test.ts` ("importing the sports feed of L1 Nieuws, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/l1-nieuws-sample.xml`](src/fixtures/l1-nieuws-sample.xml).
 
 ## De dagbladen van Mediahuis
 

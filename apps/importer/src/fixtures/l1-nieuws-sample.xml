@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A small, made-up feed in the shape of the sports feed of L1 Nieuws (see docs/bronnen.md, L1
+  Nieuws): RSS 2.0, headlines and descriptions in CDATA, a guid that ends in "-", times in GMT,
+  a logo in the channel and an enclosure with an image. The headlines, links and texts are
+  invented; none is copied from a real feed. The description, the author and the enclosure are
+  here to show that the importer does not read them.
+-->
+<rss version="2.0">
+    <channel>
+        <title>L1 Nieuws.test - Sport</title>
+        <link>https://www.l1nieuws.test</link>
+        <description>Verzonnen sportnieuws</description>
+        <lastBuildDate>Fri, 27 Nov 2026 21:49:05 GMT</lastBuildDate>
+        <language>nl</language>
+        <image>
+            <url>https://www.l1nieuws.test/logo.png</url>
+            <title>L1 Nieuws.test - Sport</title>
+            <link>https://www.l1nieuws.test</link>
+        </image>
+        <item>
+            <title><![CDATA[Fries volkslied geeft speler van sc Heerenveen kippenvel]]></title>
+            <link>https://www.l1nieuws.test/sport/9200001/fries-volkslied</link>
+            <guid>https://www.l1nieuws.test/sport/9200001/-</guid>
+            <pubDate>Fri, 27 Nov 2026 16:31:34 GMT</pubDate>
+            <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+            <author><![CDATA[Een Verzonnen Auteur]]></author>
+            <category>breaking</category>
+            <enclosure url="https://www.l1nieuws.test/media/9200001.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Talent uit Limburg tekent voor drie jaar bij SC Heerenveen]]></title>
+            <link>https://www.l1nieuws.test/sport/9200002/tekent-bij-heerenveen</link>
+            <guid>https://www.l1nieuws.test/sport/9200002/-</guid>
+            <pubDate>Thu, 26 Nov 2026 10:10:15 GMT</pubDate>
+            <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+            <author><![CDATA[Een Verzonnen Auteur]]></author>
+            <category>breaking</category>
+            <enclosure url="https://www.l1nieuws.test/media/9200002.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Schaatsers uit Limburg stralen in Heerenveen]]></title>
+            <link>https://www.l1nieuws.test/sport/9200003/schaatsers</link>
+            <guid>https://www.l1nieuws.test/sport/9200003/-</guid>
+            <pubDate>Wed, 25 Nov 2026 09:00:00 GMT</pubDate>
+            <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+            <author><![CDATA[Een Verzonnen Auteur]]></author>
+            <category>breaking</category>
+            <enclosure url="https://www.l1nieuws.test/media/9200003.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Fortuna Sittard zoekt een nieuwe spits]]></title>
+            <link>https://www.l1nieuws.test/sport/9200004/fortuna-spits</link>
+            <guid>https://www.l1nieuws.test/sport/9200004/-</guid>
+            <pubDate>Tue, 24 Nov 2026 08:00:00 GMT</pubDate>
+            <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+            <author><![CDATA[Een Verzonnen Auteur]]></author>
+            <category>breaking</category>
+            <enclosure url="https://www.l1nieuws.test/media/9200004.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[MVV wint na een achterstand van Jong PSV]]></title>
+            <link>https://www.l1nieuws.test/sport/9200005/mvv-wint</link>
+            <guid>https://www.l1nieuws.test/sport/9200005/-</guid>
+            <pubDate>Mon, 23 Nov 2026 21:00:25 GMT</pubDate>
+            <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+            <author><![CDATA[Een Verzonnen Auteur]]></author>
+            <category>breaking</category>
+            <enclosure url="https://www.l1nieuws.test/media/9200005.jpg" length="0" type="image/jpg"/>
+        </item>
+        <item>
+            <title><![CDATA[Wielrenner uit Venlo verlengt zijn contract]]></title>
+            <link>https://www.l1nieuws.test/sport/9200006/wielrenner</link>
+            <guid>https://www.l1nieuws.test/sport/9200006/-</guid>
+            <pubDate>Sun, 22 Nov 2026 12:00:00 GMT</pubDate>
+            <description><![CDATA[Een verzonnen intro die we niet bewaren.]]></description>
+            <author><![CDATA[Een Verzonnen Auteur]]></author>
+            <category>breaking</category>
+            <enclosure url="https://www.l1nieuws.test/media/9200006.jpg" length="0" type="image/jpg"/>
+        </item>
+    </channel>
+</rss>

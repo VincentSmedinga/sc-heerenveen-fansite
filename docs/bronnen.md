@@ -22,6 +22,7 @@ De Gelderlander en de feed van de sport van Rijnmond lazen we op 1 november 2026
 Alle zes deden we met een run van de importer (zie bij de bron).
 De sportfeed van RTV Noord, de twee feeds van OOG Groningen en het Dagblad van het Noorden lazen we op 9 november 2026; de eerste twee met een run van de importer.
 De kranten van Mediahuis, de kranten van DPG Media, NRC, De Flevopost en het Nederlands Dagblad lazen we op 18 november 2026, allemaal met een run van de importer.
+De sportfeed van L1 Nieuws lazen we op 27 november 2026 nog eens, met een run van de importer.
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -74,12 +75,12 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 ### Overzicht
 
-| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf (de tagfeed en twee sportfeeds met het filter), Dagblad van het Noorden, Friesch Dagblad, De Limburger, Noordhollands Dagblad, De Gooi- en Eemlander, Haarlems Dagblad, Leidsch Dagblad, IJmuider Courant, De Flevopost (allemaal met het filter), De Stentor, Brabants Dagblad, Tubantia, Eindhovens Dagblad, BN DeStem, PZC, de Volkskrant, Trouw, Het Parool (allemaal met het filter, uitgever DPG Media), Nederlands Dagblad (met het filter), Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Afwijzen                            | RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, NRC, Reformatorisch Dagblad, Het Financieele Dagblad, Barneveldse Krant, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf (de tagfeed en twee sportfeeds met het filter), Dagblad van het Noorden, Friesch Dagblad, De Limburger, Noordhollands Dagblad, De Gooi- en Eemlander, Haarlems Dagblad, Leidsch Dagblad, IJmuider Courant, De Flevopost (allemaal met het filter), De Stentor, Brabants Dagblad, Tubantia, Eindhovens Dagblad, BN DeStem, PZC, de Volkskrant, Trouw, Het Parool (allemaal met het filter, uitgever DPG Media), Nederlands Dagblad (met het filter), Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), L1 Nieuws (sportfeed, met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Afwijzen                            | RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, Eredivisie.nl, NRC, Reformatorisch Dagblad, Het Financieele Dagblad, Barneveldse Krant, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## Nemen
 
@@ -542,6 +543,35 @@ Al in het register (#1004), met twee feeds.
   De projecteigenaar vroeg om deze bron en keurde het issue goed (9 november 2026).
 - **Importer:** leest beide feeds met één nieuwe regel: de `utm_`-tags gaan van de link af.
   De tests staan in `apps/importer/src/import-feeds.test.ts` (zie bij RTV Noord) en `apps/importer/src/read-feed.test.ts`.
+
+### L1 Nieuws
+
+Al in het register (#1705), met de feed van de sport en het filter `club`.
+Op de site heet de bron "L1 Nieuws.nl".
+Op 24 oktober 2026 stond de bron hier onder "Afwijzen": geen van de 50 berichten in de sportfeed ging toen over sc Heerenveen.
+
+- **Domein:** `www.l1nieuws.nl`
+- **Soort:** nieuws, regionale publieke omroep van Limburg
+- **Feed die we nemen:** `https://www.l1nieuws.nl/rss/sport.xml`
+  - Werkt: ja, RSS 2.0 met 50 berichten, de tijden in GMT.
+    Op 27 november 2026 was het nieuwste bericht van 27 november 2026 en het oudste van 7 november 2026.
+  - Over sc Heerenveen: geen enkele kop noemt Heerenveen; één intro doet dat, die van een [interview met Levi Smans](https://www.l1nieuws.nl/sport/3275474/het-fries-volkslied-geeft-hertenaar-levi-smans-kippenvel-maar-hij-weet-waar-hij-zijn-toekomst-ziet) van 21 november 2026.
+  - Betaalmuur: nee; de feed geeft er geen teken van.
+  - Het filter, in een run van 27 november 2026: van de 50 berichten bewaarde de import er 50 en sloeg er 0 over; 1 kreeg de waarde `relevant`, 0 `doubtful` en 49 `irrelevant`.
+    Het ene bericht is het interview met Smans; de naam van de speler laat het door.
+    De tijden klopten met de feed.
+- **`robots.txt`:** laat ons de feed toe (op 27 november 2026 gelezen, met onze user agent); een lange lijst crawlers is bij naam geweigerd, wij niet.
+- **Voorwaarden** (disclaimer en pagina over feeds, gelezen in oktober 2026): de feeds mogen niet voor commerciële doeleinden worden gebruikt.
+  Wie ze gebruikt, noemt "L1 Nieuws.nl" als bron, linkt elke kop naar het bericht en past niets aan.
+  L1 kan het gebruik stoppen.
+  Over datamining staat niets.
+- **Meer tonen:** de feeds staan een kop met een link toe; meer vraagt toestemming.
+  De beschrijving en de afbeelding in de feed bewaren we niet.
+- **Besluit: nemen na het relevantiefilter.**
+  Op 27 november 2026 besloten: L1 schrijft soms een eigen verhaal over een speler van sc Heerenveen uit Limburg, en dat misten we.
+  De opbrengst is klein, ongeveer één of twee berichten per maand, maar een extra feed kost weinig, en het filter houdt de rest van de site.
+- **Importer:** leest de feed zonder nieuwe code, met het filter `club`.
+  De test met een verzonnen feed staat in `apps/importer/src/import-feeds.test.ts` ("importing the sports feed of L1 Nieuws, the way the register has it").
 
 ### Dagblad van het Noorden
 
@@ -1135,23 +1165,6 @@ Hoort bij #16.
 - **Meer tonen:** de bron zegt er niets over.
 - **Besluit: afwijzen.**
   De feed is het regionieuws van Noord-Brabant, en geen van de 25 berichten gaat over sc Heerenveen.
-
-### L1 Nieuws
-
-- **Domein:** `www.l1nieuws.nl`
-- **Soort:** nieuws, regionale publieke omroep
-- **Feed:** `https://www.l1nieuws.nl/rss/sport.xml`
-  - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 7 oktober 2026.
-  - Over sc Heerenveen: geen enkel bericht in de kop, de categorieën of de intro.
-  - Betaalmuur: nee.
-- **`robots.txt`:** laat ons de feed toe; een lange lijst crawlers is bij naam geweigerd, wij niet.
-- **Voorwaarden** (disclaimer en pagina over feeds): de feeds mogen niet voor commerciële doeleinden worden gebruikt.
-  Wie ze gebruikt, noemt "L1 Nieuws.nl" als bron, linkt elke kop naar het bericht en past niets aan.
-  L1 kan het gebruik stoppen.
-  Over datamining staat niets.
-- **Meer tonen:** de feeds staan een kop met een link toe; meer vraagt toestemming.
-- **Besluit: afwijzen.**
-  De feed is het sportnieuws van Limburg, en geen van de 50 berichten gaat over sc Heerenveen.
 
 ### Eredivisie.nl
 
