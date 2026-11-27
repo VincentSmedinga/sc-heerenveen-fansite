@@ -514,6 +514,15 @@ export const realSources = [
     name: 'OOG Groningen',
     slug: 'oog-groningen',
   },
+  {
+    description:
+      'Regionale publieke omroep van Limburg. In de sportfeed staat vooral sport uit Limburg; we tonen alleen berichten over sc Heerenveen, en over de tegenstander rond een wedstrijd tegen ons.',
+    domain: 'www.l1nieuws.nl',
+    feeds: [{ filter: 'club', url: 'https://www.l1nieuws.nl/rss/sport.xml' }],
+    kind: 'news',
+    name: 'L1 Nieuws.nl',
+    slug: 'l1-nieuws',
+  },
 ] satisfies (NewSource & {
   feeds: (string | { filter: FeedFilter; url: string })[]
   followedClubs?: string[]

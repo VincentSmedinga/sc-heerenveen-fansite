@@ -245,6 +245,7 @@
   Het regionieuws van Rijnmond blijft afgewezen.
 - **Later:** zie _We nemen RTV Noord en OOG Groningen_; RTV Noord, op 24 oktober 2026 afgewezen om zijn regionieuws, staat met de feed van de sport in het register.
   Het regionieuws van RTV Noord blijft afgewezen.
+- **Later:** zie _We nemen L1 Nieuws, met het relevantiefilter_; L1 Nieuws, op 24 oktober 2026 afgewezen omdat geen bericht in de sportfeed over sc Heerenveen ging, staat met die feed in het register.
 
 ## De feeds van andere clubs nemen we niet
 
@@ -4966,3 +4967,18 @@
 - **Waarom:** een bron die de nieuwe schrijfwijze gebruikt, vindt dan dezelfde regel en maakt in dat seizoen geen tweede regel voor die persoon.
   Zonder merkteken op de naam blijft de naam van de bron gelijk aan wat de bron schrijft.
 - **Alternatieven:** alleen op de naam van de bron koppelen (na een wijziging een tweede rij); de naam als veld van de redactie houden (de import kan de naam van de bron dan niet meer bijhouden, en de redactie krijgt afwijkingen over een naam die niemand ziet).
+
+## We nemen L1 Nieuws, met het relevantiefilter
+
+- **Datum:** 27 november 2026
+- **Besluit:** we nemen de sportfeed van L1 Nieuws (`https://www.l1nieuws.nl/rss/sport.xml`) in het register, met het filter `club` (#1705).
+  De bron heet op de site "L1 Nieuws.nl", met de slug `l1-nieuws`.
+  We tonen de kop, de link, de bronnaam en de tijd, en bewaren niets van de beschrijving of de afbeelding.
+  Het filter en de regel voor de tegenstander bleven zoals ze waren: rond een wedstrijd tegen een club telt een kop over die club mee, en de beschrijving van de bron zegt dat.
+- **Gemeten op de echte feed** (27 november 2026, één run van de importer): 50 bewaard, 1 `relevant`, 0 `doubtful`, 49 `irrelevant`, 0 overgeslagen.
+- **Waarom:** L1 schrijft soms een eigen verhaal over een speler van sc Heerenveen uit Limburg, en dat misten we.
+  De opbrengst is klein, ongeveer één of twee berichten per maand, maar een extra feed kost weinig.
+  Het filter houdt de rest van de site.
+  De naam is de vermelding die de voorwaarden van L1 vragen.
+- **Alternatieven:** L1 afgewezen laten, omdat De Limburger al een bron is en de opbrengst klein is.
+  Of de naam "L1 Nieuws", die beter bij de andere namen past maar afwijkt van wat L1 vraagt.
