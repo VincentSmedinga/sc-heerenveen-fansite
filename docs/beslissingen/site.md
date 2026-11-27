@@ -799,6 +799,7 @@
   Een wedstrijd met zo'n pagina heeft wel een link, "Het verslag", als laatste regel van zijn plek in de lijst; de andere wedstrijden blijven een regel zonder link, en er zijn nog steeds geen clubwapens.
   Sinds 16 november 2026 heeft ook een geplande wedstrijd zonder verslag een pagina, en zijn link zegt "Voorbeschouwing" (zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_).
 - **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
+- **Later:** zie _De kaarten in de smalle kolom van een wedstrijdpagina staan in één sectie_ (26 november 2026): de bronvermelding staat vanaf 52 rem in de brede kolom, onder Nieuws.
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -7404,6 +7405,8 @@
   Op de pagina van een wedstrijd met verslag staat de kaart Prognose in de smalle kolom, boven de bronvermelding; op de voorbeschouwing staat hij onder "Onze schutters" en boven "Nieuws".
 - **Waarom:** een spel dat uit staat of niets te tonen heeft, laat zo geen gat, en elk issue bouwt zijn eigen kaart zonder die van een ander aan te raken.
 - **Alternatieven:** één kaart Fans met een regel per spel.
+- **Later:** zie _De kaarten in de smalle kolom van een wedstrijdpagina staan in één sectie_ (26 november 2026): op de voorbeschouwing staat de kaart Prognose onder "Onze schutters" en boven "Onderling" en "Nieuws".
+  Op de pagina van een wedstrijd staat hij in de sectie "Van de fans en de bron".
 
 - **Datum:** 21 november 2026
 - **Besluit:** de cijfers van de kaart Prognose komen uit één lezing per wedstrijd (`matchCrowd`), een minuut gecachet voor elk van de twee standen: voor de aftrap en vanaf de aftrap.
@@ -8605,3 +8608,17 @@
 - **Waarom:** zonder kopjes per positie zoek je een naam het snelst op alfabet.
 - **Alternatieven:** de volgorde van de kaart "Selectie".
   Ook de selectie op achternaam.
+
+## De kaarten in de smalle kolom van een wedstrijdpagina staan in één sectie
+
+- **Datum:** 26 november 2026
+- **Besluit:** op de pagina van een wedstrijd en op de Voorbeschouwing staan de kaarten van de smalle kolom samen in één `Page.Section` met een naam (#1702).
+  Op de pagina van een wedstrijd is dat "Van de fans en de bron", met Uitblinker, Prognose, Fjouwer en de bronvermelding.
+  Op de Voorbeschouwing is dat "Stand, vorm en prognose", met Stand, Vorm, Onze schutters en Prognose.
+  Op de Voorbeschouwing is de volgorde in de bron en op een telefoon Stand, Vorm, Onze schutters, Prognose, Onderling, Nieuws, bron, en staat de bronvermelding vanaf 52 rem in de brede kolom onder Nieuws.
+- **Waarom:** kaarten met elk een eigen gebied delen hun rijen met de brede kolom, en dat geeft gaten.
+  Eén sectie kan alleen blokken bevatten die in de bron achter elkaar staan, en zonder `order` is de bron de volgorde op een telefoon.
+  De bronvermelding sluit zo op elk scherm de pagina af.
+- **Alternatieven:** eerst Onderling en Nieuws en dan de smalle kaarten (de stand en de vorm zakken op een telefoon ver naar beneden).
+  Alleen de pagina van een gespeelde wedstrijd herstellen (de Voorbeschouwing houdt haar gaten).
+  De bronvermelding in de smalle sectie (dan staat de bron op een telefoon vóór Onderling).

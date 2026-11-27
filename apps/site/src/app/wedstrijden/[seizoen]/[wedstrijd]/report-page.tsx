@@ -149,9 +149,9 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
  * the result, the scorers and the facts, the score bar, the line-up on the pitch with the
  * substitutes, the course of the match in the halves and, after a shoot-out, its series. The
  * line-up of the opponent is there when its side of the report is complete, and otherwise one
- * sentence says so. The credit follows, in the sidebar: Wikipedia for the result and the goals,
- * and our own records for the rest. A match without a page, and an address that is not one, are
- * the page "niet gevonden".
+ * sentence says so. The cards of the games and the credit are one section, which is the narrow
+ * column on a wide screen: Wikipedia for the result and the goals, and our own records for the
+ * rest. A match without a page, and an address that is not one, are the page "niet gevonden".
  */
 export async function ReportPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadReport(seizoen, slug)
@@ -169,7 +169,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   const { data, editorSources, neighbours, reported, season } = loaded
   const now = new Date()
   const phase = phaseOf(reported.match, now)
-  // The card Prognose, in the narrow column under the line-ups; it has no cell without figures.
+  // The card Prognose, in the section of the narrow column; it is not there without figures.
   // An old match has the counts of the old fansite instead (see `OldPredictionCrowdCard`).
   const oldMatch = reported.match.dataSource === 'oude-fansite'
   const prediction = oldMatch ? undefined : await readPredictionCrowd(reported.match)
@@ -184,17 +184,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
 
   return (
     <>
-      <Page.Main
-        areas={pageAreas({
-          after: [
-            ...(oldRatings === undefined && newRatings === undefined ? [] : ['uitblinker']),
-            ...(prediction === undefined && oldPrediction === undefined ? [] : ['prediction']),
-            ...(fjouwer === undefined ? [] : ['fjouwer']),
-            'source',
-          ],
-          main: ['cards', 'neighbours'],
-        })}
-      >
+      <Page.Main areas={pageAreas({ after: ['side'], main: ['cards', 'neighbours'] })}>
         <Page.Cell area="head">
           <Text>
             <Link href={seasonAddress(matchesPath, season, seasonOf(now))} icon="arrow-left">
@@ -221,36 +211,18 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
         <Page.Cell area="neighbours">
           <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
         </Page.Cell>
-        {oldRatings === undefined ? null : (
-          <Page.Cell area="uitblinker">
-            <OldMatchRatingsCard names={reported.names} ratings={oldRatings} />
-          </Page.Cell>
-        )}
-        {newRatings === undefined ? null : (
-          <Page.Cell area="uitblinker">
-            <NewMatchRatingsCard data={newRatings} names={reported.names} />
-          </Page.Cell>
-        )}
-        {prediction === undefined ? null : (
-          <Page.Cell area="prediction">
+        <Page.Section area="side" aria-label="Van de fans en de bron">
+          {oldRatings === undefined ? null : <OldMatchRatingsCard names={reported.names} ratings={oldRatings} />}
+          {newRatings === undefined ? null : <NewMatchRatingsCard data={newRatings} names={reported.names} />}
+          {prediction === undefined ? null : (
             <PredictionCrowdCard
               data={prediction}
               matchId={reported.match.id}
               played={reported.match.status === 'played'}
             />
-          </Page.Cell>
-        )}
-        {oldPrediction === undefined ? null : (
-          <Page.Cell area="prediction">
-            <OldPredictionCrowdCard crowd={oldPrediction} />
-          </Page.Cell>
-        )}
-        {fjouwer === undefined ? null : (
-          <Page.Cell area="fjouwer">
-            <FjouwerCrowdCard crowd={fjouwer} />
-          </Page.Cell>
-        )}
-        <Page.Section area="source" aria-label="De bron">
+          )}
+          {oldPrediction === undefined ? null : <OldPredictionCrowdCard crowd={oldPrediction} />}
+          {fjouwer === undefined ? null : <FjouwerCrowdCard crowd={fjouwer} />}
           <ReportCredit data={data} editorSources={editorSources} reported={reported} />
         </Page.Section>
       </Page.Main>
