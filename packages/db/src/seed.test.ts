@@ -9,6 +9,7 @@ import type { TestDatabase } from './test-database.ts'
 import { withClubs } from './clubs.ts'
 import {
   consentStatuses,
+  everyStory,
   feeds,
   items,
   leagueResults,
@@ -183,7 +184,7 @@ describe('the seed', () => {
         enabled: true,
         introMaxLength: 0,
         kind: 'news',
-        publisher: null,
+        publisher: 'mediahuis',
       })
       expect(paper?.consentStatus).not.toBe('given')
       expect(paper?.slug).toBeTruthy()
@@ -203,7 +204,7 @@ describe('the seed', () => {
       'www.bndestem.nl': ['/sport/rss.xml', 'dpg-media'],
       'www.destentor.nl': ['/sport/rss.xml', 'dpg-media'],
       'www.ed.nl': ['/sport/rss.xml', 'dpg-media'],
-      'www.flevopost.nl': ['/sport/rss/', null],
+      'www.flevopost.nl': ['/sport/rss/', 'mediahuis'],
       'www.nd.nl': ['/sport/rss', null],
       'www.parool.nl': ['/sport/rss.xml', 'dpg-media'],
       'www.pzc.nl': ['/sport/rss.xml', 'dpg-media'],
@@ -656,10 +657,13 @@ describe('the seed', () => {
     }
   })
 
-  it('gives only the dailies of DPG Media a publisher, and makes only the regional papers with a club local', () => {
-    const withPublisher = realSources.filter((source) => 'publisher' in source)
+  it('gives the dailies of DPG Media and of Mediahuis their publisher, and makes only the regional papers with a club and the Leeuwarder Courant local', () => {
+    const namesOf = (publisher: string) =>
+      realSources
+        .filter((source) => 'publisher' in source && source.publisher === publisher)
+        .map((source) => source.name)
 
-    expect(withPublisher.map((source) => source.name)).toEqual([
+    expect(namesOf('dpg-media')).toEqual([
       'De Stentor',
       'Brabants Dagblad',
       'Tubantia',
@@ -672,8 +676,22 @@ describe('the seed', () => {
       'Algemeen Dagblad',
       'De Gelderlander',
     ])
-    expect(withPublisher.every((source) => source.publisher === 'dpg-media')).toBe(true)
+    expect(namesOf('mediahuis')).toEqual([
+      'Leeuwarder Courant',
+      'De Telegraaf',
+      'Dagblad van het Noorden',
+      'Friesch Dagblad',
+      'De Limburger',
+      'Noordhollands Dagblad',
+      'De Gooi- en Eemlander',
+      'Haarlems Dagblad',
+      'Leidsch Dagblad',
+      'IJmuider Courant',
+      'De Flevopost',
+    ])
+    expect(realSources.filter((source) => 'publisher' in source)).toHaveLength(22)
     expect(realSources.filter((source) => 'local' in source && source.local).map((source) => source.name)).toEqual([
+      'Leeuwarder Courant',
       'De Stentor',
       'Brabants Dagblad',
       'Tubantia',
@@ -681,6 +699,11 @@ describe('the seed', () => {
       'BN DeStem',
       'De Gelderlander',
     ])
+    expect(
+      realSources
+        .filter((source) => 'followedClubs' in source && source.followedClubs.includes(everyStory))
+        .map((source) => source.name),
+    ).toEqual(['Leeuwarder Courant'])
     expect(testSources.some((source) => 'publisher' in source || 'local' in source)).toBe(false)
   })
 

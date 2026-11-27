@@ -259,14 +259,21 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   Elke versie is dan een bericht met een eigen link en sleutel.
   De adapter kiest aan het domein van de bron of die versies een gedeelde sleutel krijgen (`threadRules` in [`src/read-feed.ts`](src/read-feed.ts)), en zet hem in `items.thread_key`.
   Bij de kranten van DPG Media (het Algemeen Dagblad, De Gelderlander, de zes regionale kranten, de Volkskrant, Trouw en Het Parool) is het de code `~` met acht of negen letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
-  Een bron zonder regel, en een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
-  Dezelfde code bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: alle kranten van DPG Media hebben `dpg-media`, en De Gelderlander en de regionale kranten met een club in hun regio zijn `local`.
+  Bij de elf kranten van Mediahuis geeft elke krant een gedeeld artikel een eigen artikelcode, maar bijna altijd dezelfde kop op dezelfde dag.
+  Daar komt de sleutel uit de kop en de dag: de dag van publicatie in Nederlandse tijd (`Europe/Amsterdam`) en een hash van de kop, zoals `2026-11-20:…`.
+  Hoofdletters, leestekens (rechte en kromme aanhalingstekens), symbolen en extra spaties tellen niet mee; woorden en cijfers wel.
+  Een kop zonder letters of cijfers geeft geen sleutel, en een bericht zonder tijd in de feed krijgt hem uit de tijd die we bewaren.
+  Verandert de kop of de dag in de feed, dan verandert de sleutel mee.
+  Een bron zonder regel, en bij DPG Media een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
+  Dezelfde sleutel bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: alle kranten van DPG Media hebben `dpg-media`, en De Gelderlander en de regionale kranten met een club in hun regio zijn `local`.
   Dan toont de site een artikel dat beide geven één keer, bij de regionale krant als de kop een club noemt die zij volgt (voor De Gelderlander N.E.C., Vitesse, De Graafschap en De Treffers), en anders bij het Algemeen Dagblad (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
+  De kranten van Mediahuis hebben `mediahuis`.
+  Daar gaat de Leeuwarder Courant voor bij elk verhaal: zij is `local` en volgt met `*` (`everyStory`) elk verhaal.
   `publisher`, `local` en de gevolgde clubs (`followedClubs`, per krant in _De kranten van DPG Media_ hieronder) staan in het register (`realSources` in `packages/db/src/seed.ts`) en de seed zet ze; de importer leest ze niet.
   De clubs van een kop komen uit `item_clubs`, dat de importer schrijft: een kop die N.E.C. noemt, maakt het artikel regionaal.
-  Een bron krijgt pas een `publisher` als de feeds van die bronnen bewezen dezelfde artikelcodes delen.
+  Een bron krijgt pas een `publisher` als de feeds van die bronnen bewezen dezelfde artikelen delen, met een sleutel die ze herkent.
   De importer bewaart elke versie en verwijdert er geen; de site toont de laatste (zie de [README van de database](../../packages/db/README.md), _De versies van een verhaal_).
-  Bij elke import van een bron met een regel krijgt een bericht dat de sleutel nog mist hem uit zijn bewaarde link, ook als de feed niet gewijzigd is (`backfillThreadKeys` in [`src/import-feeds.ts`](src/import-feeds.ts)); een verborgen bericht blijft zoals het is.
+  Bij elke import van een bron met een regel krijgt een bericht dat de sleutel nog mist hem uit wat we van het bericht bewaren, ook als de feed niet gewijzigd is (`backfillThreadKeys` in [`src/import-feeds.ts`](src/import-feeds.ts)); een verborgen bericht blijft zoals het is.
   Een bekend bericht dat de sleutel krijgt of verliest, telt als gewijzigd.
 - **Te lang:** een kop van meer dan 500 tekens, een link van meer dan 2048 of een sleutel van meer dan 700 slaat de adapter over, in plaats van hem af te kappen.
 - **Bijwerken:** een nieuw bericht komt erbij.
@@ -606,7 +613,8 @@ Een feed over alleen de club bestaat niet; alleen de sport- en voetbalfeeds, met
 Een rubriek die niet bestaat, geeft een 404 met een lege RSS-tekst: de fetcher meldt dat als fout (`http-status`), dus de feed bewaart niets en de gezondheid laat de fout zien.
 Een run van 18 november 2026 las 16 feeds van 10 kranten: 720 berichten, waarvan er 4 bij de kranten van het noorden en AZ `relevant` of `doubtful` waren; zie [`docs/bronnen.md`](../../docs/bronnen.md) voor de cijfers per feed.
 De Flevopost (Mediahuis Noord) heeft dezelfde opbouw, zonder `<premium>`, en staat met `/sport/rss/` in de seed.
-Geen artikelcode stond bij twee kranten, dus een gedeeld artikel krijgt geen regel (zie _We nemen de Nederlandse dagbladen van Mediahuis_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
+Geen artikelcode stond bij twee kranten, maar de kranten delen wel artikelen met dezelfde kop.
+Alle elf kranten van Mediahuis, ook de Leeuwarder Courant en De Telegraaf, staan daarom in `threadRules` met een sleutel uit de kop en de dag, en hebben `publisher` `mediahuis` (zie _Versies van een verhaal_ en _Mediahuis krijgt één uitgever, met een sleutel uit de kop en de dag_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
 De tests in `src/import-feeds.test.ts` ("importing the dailies of Mediahuis, the way the register has them") lezen een verzonnen feed in deze vorm, [`src/fixtures/mediahuis-sport-sample.xml`](src/fixtures/mediahuis-sport-sample.xml).
 
 ## De kranten van DPG Media

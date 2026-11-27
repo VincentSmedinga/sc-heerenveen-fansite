@@ -13,6 +13,7 @@ import {
   clubNames,
   clubs,
   discussions,
+  everyStory,
   groupStandings,
   itemClubs,
   items,
@@ -1656,8 +1657,10 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
  * counts as relevant when any of its versions is: the headline of the last version may say
  * "the final whistle" and nothing about the club. A version an editor hid is not a version:
  * the one before it is shown, and no version is left when all are hidden. Versions of one key
- * at two sources are two stories. Pass `until` to leave out the versions that are later than
- * that, as the query itself does for the item.
+ * at two sources are two stories, unless `merge` is set (see below). At the papers of
+ * Mediahuis the key is the headline and the day, so a paper that puts one headline in its feed
+ * twice on one day counts as two versions. Pass `until` to leave out the versions that are
+ * later than that, as the query itself does for the item.
  *
  * With `merge` the query must join `sources`, and the sources of one publisher (`publisher`)
  * that have a story under the same key are one story: see `isShownOnce`. Without it, a list
@@ -1697,7 +1700,8 @@ function isShown(until?: Date, { merge = false }: { merge?: boolean } = {}) {
  * the lowest `id`. A source is regional for a story when it is `local` and a headline of the
  * story, at any source of the publisher, names a club that the source follows (`source_clubs`,
  * and `item_clubs` for the clubs of a headline). So a story about another club is shown from
- * the other source. The others are not shown. An editor who hid
+ * the other source. A `local` source that follows `everyStory` is regional for every story,
+ * whatever its headline names. The others are not shown. An editor who hid
  * the item of the winner, or a winner that was never in the feed, leaves the item of another
  * source to be shown.
  */
@@ -1717,7 +1721,7 @@ function isShownOnce(until?: Date) {
   // follows), 1 when it is not local, and 0 when it is local but the story is about another
   // club.
   const regional = (source: Record<'id' | 'local' | 'publisher', AnyMySqlColumn>) =>
-    sql`(case when ${source.local} = false then 1 when exists (select 1 from source_clubs followed, sources of_publisher, items of_story, item_clubs named where followed.source_id = ${source.id} and of_publisher.publisher = ${source.publisher} and of_publisher.enabled = true and of_publisher.kind <> 'podcast' and of_story.source_id = of_publisher.id and of_story.thread_key = ${items.threadKey} and of_story.hidden_at is null${dated(named)} and named.item_id = of_story.id and named.club = followed.club) then 2 else 0 end)`
+    sql`(case when ${source.local} = false then 1 when exists (select 1 from source_clubs followed where followed.source_id = ${source.id} and followed.club = ${everyStory}) or exists (select 1 from source_clubs followed, sources of_publisher, items of_story, item_clubs named where followed.source_id = ${source.id} and of_publisher.publisher = ${source.publisher} and of_publisher.enabled = true and of_publisher.kind <> 'podcast' and of_story.source_id = of_publisher.id and of_story.thread_key = ${items.threadKey} and of_story.hidden_at is null${dated(named)} and named.item_id = of_story.id and named.club = followed.club) then 2 else 0 end)`
   const beats = sql`(${regional(otherSource)} > ${regional(sources)} or (${regional(otherSource)} = ${regional(sources)} and (${other.publishedAt} < ${items.publishedAt} or (${other.publishedAt} = ${items.publishedAt} and ${other.id} < ${items.id}))))`
 
   return and(

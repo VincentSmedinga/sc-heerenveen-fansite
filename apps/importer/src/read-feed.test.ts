@@ -1,3 +1,4 @@
+import { itemLimits } from '@fansite/db/schema'
 import { readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -996,13 +997,15 @@ describe('the paywall of the Algemeen Dagblad and De Gelderlander', () => {
 describe('the key of the versions of a story', () => {
   const rule = threadRuleFor('www.ad.nl')
 
+  const keyOfLink = (url: string) => threadKeyOf({ publishedAt: null, title: 'Kop', url }, rule!)
+
   const keyedFeed = (link: string) =>
     rss(`<item><title>Kop</title><link>${link}</link><guid isPermaLink="false">g</guid></item>`)
 
-  it('has a rule for the domains of DPG Media and for no other', () => {
+  it('has a rule for the domains of DPG Media and none for a source of its own', () => {
     expect(threadRuleFor('www.ad.nl')).toBeDefined()
     expect(threadRuleFor('www.gelderlander.nl')).toBe(threadRuleFor('www.ad.nl'))
-    expect(threadRuleFor('www.lc.nl')).toBeUndefined()
+    expect(threadRuleFor('omny.fm')).toBeUndefined()
     expect(threadRuleFor('www.vi.nl')).toBeUndefined()
     expect(threadRuleFor('')).toBeUndefined()
   })
@@ -1024,33 +1027,33 @@ describe('the key of the versions of a story', () => {
       expect(threadRuleFor(domain)).toBe(threadRuleFor('www.ad.nl'))
     }
 
-    for (const domain of ['www.nrc.nl', 'www.nd.nl', 'www.flevopost.nl', 'www.dvhn.nl']) {
+    for (const domain of ['www.nrc.nl', 'www.nd.nl']) {
       expect(threadRuleFor(domain)).toBeUndefined()
     }
   })
 
   it('is the code after the tilde at the end of the path, whatever the headline in front of it says', () => {
-    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd48/', rule!)).toBe('~a40dbd48')
-    expect(threadKeyOf('https://krant.test/regio/een-heel-andere-kop~a40dbd48/', rule!)).toBe('~a40dbd48')
-    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd48', rule!)).toBe('~a40dbd48')
+    expect(keyOfLink('https://krant.test/regio/een-kop~a40dbd48/')).toBe('~a40dbd48')
+    expect(keyOfLink('https://krant.test/regio/een-heel-andere-kop~a40dbd48/')).toBe('~a40dbd48')
+    expect(keyOfLink('https://krant.test/regio/een-kop~a40dbd48')).toBe('~a40dbd48')
   })
 
   it('does not look at the query or the fragment, and writes the code in lower case', () => {
-    expect(threadKeyOf('https://krant.test/regio/een-kop~A40DBD48/?ref=feed#top', rule!)).toBe('~a40dbd48')
+    expect(keyOfLink('https://krant.test/regio/een-kop~A40DBD48/?ref=feed#top')).toBe('~a40dbd48')
   })
 
   it('is the code of nine letters and digits as well as the code of eight', () => {
-    expect(threadKeyOf('https://krant.test/regio/een-kop~a25b60e29/', rule!)).toBe('~a25b60e29')
-    expect(threadKeyOf('https://krant.test/regio/een-kop~A25B60E29', rule!)).toBe('~a25b60e29')
+    expect(keyOfLink('https://krant.test/regio/een-kop~a25b60e29/')).toBe('~a25b60e29')
+    expect(keyOfLink('https://krant.test/regio/een-kop~A25B60E29')).toBe('~a25b60e29')
   })
 
   it('is null for a link without a code of eight or nine letters and digits at the end', () => {
-    expect(threadKeyOf('https://krant.test/regio/een-kop/', rule!)).toBeNull()
-    expect(threadKeyOf('https://krant.test/regio/een-kop~a40dbd4/', rule!)).toBeNull()
-    expect(threadKeyOf('https://krant.test/regio/een-kop~a25b60e290/', rule!)).toBeNull()
-    expect(threadKeyOf('https://krant.test/regio/een~a40dbd48/kop', rule!)).toBeNull()
-    expect(threadKeyOf('https://krant.test/regio/een-kop?id=~a40dbd48', rule!)).toBeNull()
-    expect(threadKeyOf('geen link', rule!)).toBeNull()
+    expect(keyOfLink('https://krant.test/regio/een-kop/')).toBeNull()
+    expect(keyOfLink('https://krant.test/regio/een-kop~a40dbd4/')).toBeNull()
+    expect(keyOfLink('https://krant.test/regio/een-kop~a25b60e290/')).toBeNull()
+    expect(keyOfLink('https://krant.test/regio/een~a40dbd48/kop')).toBeNull()
+    expect(keyOfLink('https://krant.test/regio/een-kop?id=~a40dbd48')).toBeNull()
+    expect(keyOfLink('geen link')).toBeNull()
   })
 
   it('is given to an item when the source has a rule, and null without one', () => {
@@ -1060,6 +1063,76 @@ describe('the key of the versions of a story', () => {
     expect(readFeed(encode(feed), { now })).toMatchObject({ items: [{ threadKey: null }] })
     expect(readFeed(encode(keyedFeed('https://krant.test/regio/een-kop/')), { now, threadRule: rule })).toMatchObject({
       items: [{ threadKey: null }],
+    })
+  })
+})
+
+describe('the key of a story of Mediahuis', () => {
+  const rule = threadRuleFor('www.lc.nl')!
+  const keyOf = (title: string, publishedAt: null | string = '2026-11-27T16:00:00Z') =>
+    threadKeyOf(
+      { publishedAt: publishedAt === null ? null : new Date(publishedAt), title, url: 'https://krant.test/1.html' },
+      rule,
+    )
+
+  it('has the same rule for the eleven papers of Mediahuis, and not the rule of DPG Media', () => {
+    const domains = [
+      'www.telegraaf.nl',
+      'www.dvhn.nl',
+      'www.frieschdagblad.nl',
+      'www.limburger.nl',
+      'www.noordhollandsdagblad.nl',
+      'www.gooieneemlander.nl',
+      'www.haarlemsdagblad.nl',
+      'www.leidschdagblad.nl',
+      'www.ijmuidercourant.nl',
+      'www.flevopost.nl',
+    ]
+
+    for (const domain of domains) {
+      expect(threadRuleFor(domain)).toBe(rule)
+    }
+    expect(rule).not.toBe(threadRuleFor('www.ad.nl'))
+  })
+
+  it('starts with the day in Dutch time and fits the column', () => {
+    expect(keyOf('Kop', '2026-11-27T22:59:00Z')).toMatch(/^2026-11-27:[0-9a-f]{64}$/u)
+    expect(keyOf('Kop', '2026-11-27T23:00:00Z')).toMatch(/^2026-11-28:/u)
+    expect(keyOf('Kop', '2026-07-01T22:00:00Z')).toMatch(/^2026-07-02:/u)
+    expect(keyOf('Kop')!.length).toBeLessThanOrEqual(itemLimits.threadKey)
+  })
+
+  it('ignores capitals, punctuation, straight and curly quotes, and extra spaces', () => {
+    const key = keyOf('Spits na zege: ’Dit is mooi’ - toch?')
+
+    expect(keyOf("spits na zege 'Dit is MOOI' toch")).toBe(key)
+    expect(keyOf('  Spits   na zege: ‘Dit is mooi’ – toch? ')).toBe(key)
+  })
+
+  it('tells other words, other numbers and another day apart', () => {
+    expect(keyOf('Heerenveen wint met 2-0')).not.toBe(keyOf('Heerenveen wint met 3-0'))
+    expect(keyOf('Heerenveen wint thuis')).not.toBe(keyOf('Heerenveen wint uit'))
+    expect(keyOf('Heerenveen wint', '2026-11-27T12:00:00Z')).not.toBe(keyOf('Heerenveen wint', '2026-11-28T12:00:00Z'))
+  })
+
+  it('tells long headlines apart that differ at the end only', () => {
+    const start = 'Een lange kop '.repeat(20)
+
+    expect(keyOf(`${start}links`)).not.toBe(keyOf(`${start}rechts`))
+  })
+
+  it('is null for a headline without letters or digits, and for an item without a time', () => {
+    expect(keyOf('?! …')).toBeNull()
+    expect(keyOf('Kop', null)).toBeNull()
+  })
+
+  it('is given to an item that the feed gives a time', () => {
+    const feed = rss(
+      '<item><title>Kop</title><link>https://krant.test/1.html</link><pubDate>Fri, 06 Nov 2026 16:00:00 GMT</pubDate></item>',
+    )
+
+    expect(readFeed(encode(feed), { now: new Date('2026-11-07T00:00:00Z'), threadRule: rule })).toMatchObject({
+      items: [{ threadKey: keyOf('Kop', '2026-11-06T16:00:00Z') }],
     })
   })
 })
