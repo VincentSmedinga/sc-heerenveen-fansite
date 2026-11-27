@@ -7,8 +7,8 @@ import { screenNameInitials } from './initials'
 
 export type AccountButtonProps = Omit<ComponentPropsWithoutRef<'a'>, 'aria-label' | 'children' | 'href'> & {
   /**
-   * The screen name of the supporter who is logged in, or nothing when nobody is. With a name
-   * the button goes to Mijn account and shows the initials; without one it goes to Inloggen.
+   * The screen name of the fan who is logged in, or nothing when nobody is. With a name the
+   * button goes to Mijn account and shows the initials; without one it goes to Inloggen.
    */
   screenName?: string | undefined
 }
@@ -19,19 +19,28 @@ export const accountButtonTargets = {
   signedOut: { href: '/fans/inloggen', label: 'Inloggen' },
 } as const
 
+/** A glyph is 4 wide in its own units, drawn at 0.7: 2.8 wide, with 0.8 to the next one. */
+const glyphScale = 0.7
+const glyphStep = 3.6
+const glyphGap = 0.8
+
+/** The left edge of initial `index` of `count`, so that together they are centred on x 8. */
+const initialX = (index: number, count: number): number =>
+  Math.round((8 - (count * glyphStep - glyphGap) / 2 + index * glyphStep) * 100) / 100
+
 /**
- * The account button of the header: a RoundButton on the header with a supporter in it, the
- * upper body with an egg-shaped head and a scarf. It is a link: without a `screenName` to
- * Inloggen, with the arms down and the scarf around the neck; with one to Mijn account, with
- * the arms up holding the scarf above the head and the initials on the chest. Under the mouse
- * and with the keyboard the arms come up and wave the scarf. The name of the link says where it
- * goes, "Inloggen" or "Mijn account". The supporter, initials included, is a drawing hidden
- * from assistive technology: the initials are lines (glyphs.ts), not text, so they are part of
- * the picture and not a label of the link. It has no state and no script, so it works without
- * JavaScript. account-button.css moves it.
+ * The account button of the header: a RoundButton on the header with a ring that holds a head
+ * and shoulders, on the grid of 16 by 16 of the icons. It is a link: without a `screenName` to
+ * Inloggen, with the head and shoulders; with one to Mijn account, with the torso moved up so
+ * that it fills the ring as a disc, and the initials cut out of it. Logged out the torso rises
+ * under the mouse and with the keyboard, to show where the click leads. A change between logged
+ * out and logged in shows at once. The name of the link says where it goes, "Inloggen" or "Mijn
+ * account". The drawing, initials included, is hidden from assistive technology: the initials
+ * are lines (glyphs.ts), not text, so they are part of the picture and not a label of the link.
+ * It has no state and no script, so it works without JavaScript. account-button.css moves it.
  *
- * The shapes are cut out of the body with a mask, the scarf around the neck and the initials,
- * so they show the colour behind the button, also in forced colours.
+ * The initials are cut out with a mask, so they show the colour behind the button, also in
+ * forced colours.
  */
 export const AccountButton = ({ className, screenName, ...props }: AccountButtonProps) => {
   const id = useId()
@@ -40,8 +49,8 @@ export const AccountButton = ({ className, screenName, ...props }: AccountButton
     .filter((glyph): glyph is string => glyph !== undefined)
   const signedIn = screenName !== undefined
   const target = signedIn ? accountButtonTargets.signedIn : accountButtonTargets.signedOut
-  const bodyMask = `${id}-body`
-  const scarfMask = `${id}-scarf`
+  const ringClip = `${id}-ring`
+  const initialsMask = `${id}-initials`
 
   return (
     <RoundButton
@@ -52,74 +61,56 @@ export const AccountButton = ({ className, screenName, ...props }: AccountButton
       label={target.label}
       surface="header"
     >
+      {/* No class hf-icon: its CSS would draw the line thinner than the 1.5 given here. */}
       <svg
         aria-hidden="true"
-        className="hf-account-button-fan"
-        fill="currentColor"
+        fill="none"
         focusable="false"
-        viewBox="0 0 32 32"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        viewBox="0 0 16 16"
       >
         <defs>
-          <mask height="32" id={bodyMask} maskUnits="userSpaceOnUse" width="32" x="0" y="0">
-            <rect fill="white" height="32" width="32" />
-            {/* The scarf around the neck: a loop and two ends that hang down, cut out. */}
-            <g
-              className="hf-account-button-neck"
-              fill="none"
-              stroke="black"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            >
-              <path d="M12.7 21.4c2 1.4 4.6 1.4 6.6 0" />
-              <path d="M13.5 22.7v5.4l2 .3M18.5 22.7v5.4l-2 .3" />
-            </g>
-            {/* The initials on the chest: letters of 4 by 5, 1.2 apart. */}
-            <g
-              className="hf-account-button-initials"
-              fill="none"
-              stroke="black"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.1"
-            >
+          <clipPath id={ringClip}>
+            <circle cx="8" cy="8" r="5.75" />
+          </clipPath>
+          <mask height="16" id={initialsMask} maskUnits="userSpaceOnUse" width="16" x="0" y="0">
+            <rect fill="white" height="16" stroke="none" width="16" />
+            <g className="hf-account-button-initials" stroke="black" strokeWidth="1.3">
               {initials.map((glyph, index) => (
                 <path
                   d={glyph}
                   key={index}
-                  transform={`translate(${16 - (initials.length * 5.2 - 1.2) / 2 + index * 5.2} 24.6)`}
+                  transform={`translate(${initialX(index, initials.length)} 6.25) scale(${glyphScale})`}
                 />
               ))}
             </g>
           </mask>
-          <mask height="32" id={scarfMask} maskUnits="userSpaceOnUse" width="32" x="0" y="0">
-            <rect fill="white" height="32" width="32" />
-            {/* The stripes of the scarf above the head. */}
-            <path d="M11.4 4.5h1.8v4h-1.8zM15.1 4.5h1.8v4h-1.8zM18.8 4.5h1.8v4h-1.8z" fill="black" />
-          </mask>
         </defs>
-        {/* The arms and the scarf above the head, which come up and wave. */}
-        <g className="hf-account-button-wave">
-          <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.6">
-            <path d="M10.4 22.4C8.6 19 7.6 14.4 8 9.4" />
-            <path d="M21.6 22.4C23.4 19 24.4 14.4 24 9.4" />
+        {/* The ring. */}
+        <circle cx="8" cy="8" r="5.75" />
+        <g mask={`url(#${initialsMask})`}>
+          {/* The head. */}
+          <circle cx="8" cy="6.4" fill="currentColor" r="1.75" />
+          {/* The clip path is on this group, so it stays where it is when the torso moves. */}
+          <g clipPath={`url(#${ringClip})`}>
+            {/*
+             * The torso, as large as the ring and far below it, so only the shoulders show.
+             * The key makes a new element when someone logs in or out, which has nothing to
+             * move from: the change shows at once, also while a page loads.
+             */}
+            <circle
+              className="hf-account-button-torso"
+              cx="8"
+              cy="15.5"
+              fill="currentColor"
+              key={signedIn ? 'signed-in' : 'signed-out'}
+              r="5.75"
+              stroke="none"
+            />
           </g>
-          <rect height="4" mask={`url(#${scarfMask})`} rx="1.3" width="21" x="5.5" y="4.5" />
-          <path
-            d="M6.3 9v2.3M7.8 9v1.7M24.2 9v1.7M25.7 9v2.3"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="1"
-          />
-        </g>
-        <g mask={`url(#${bodyMask})`}>
-          {/* The head, an egg that is a little narrower at the chin. */}
-          <path d="M16 8.5c2.5 0 4.1 2 4.1 4.6 0 2.8-1.9 5-4.1 5s-4.1-2.2-4.1-5c0-2.6 1.6-4.6 4.1-4.6z" />
-          {/* The neck, short, that widens into the shoulders. */}
-          <path d="M14.2 16.6h3.6v2.4c0 .9 1 1.6 2.5 2H11.7c1.5-.4 2.5-1.1 2.5-2z" />
-          {/* The shoulders and the chest, with rounded corners, cut off by the edge. */}
-          <path d="M7.4 32v-3.5c0-3.5 2.3-6.1 5.5-7.1l1.6-.5 1.5 1.1 1.5-1.1 1.6.5c3.2 1 5.5 3.6 5.5 7.1V32z" />
         </g>
       </svg>
     </RoundButton>

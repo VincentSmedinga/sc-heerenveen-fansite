@@ -148,10 +148,10 @@ export const motionChanges: MotionChange[] = [
     why: 'Muis, focus',
   },
   {
-    component: 'AccountButton, sjaal',
+    component: 'AccountButton, romp',
     group: 'aanwijzen',
-    now: 'De armen en de sjaal komen omhoog in 0,4 seconde, en zwaaien daarna twee keer, elke keer in 1 seconde (#1490).',
-    what: 'Plaats van de armen en de sjaal',
+    now: 'Uitgelogd schuift de romp in 0,4 seconde omhoog tot hij de ring vult, en terug (#1710).',
+    what: 'Plaats van de romp',
     why: 'Muis, focus',
   },
   {

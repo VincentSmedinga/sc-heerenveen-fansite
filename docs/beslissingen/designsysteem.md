@@ -4120,6 +4120,9 @@
 - **Waarom:** de header is op een telefoon vol, en een ronde knop past bij de twee andere.
   De sjaal past bij de toon van het hoofdstuk Fans.
 - **Alternatieven:** de schermnaam als tekst; een tekstlink Inloggen.
+- **Later:** zie _De accountknop toont een ring met een hoofd en schouders_ (27 november 2026, #1710).
+  De ronde knop, de links en de naam zonder tekst blijven.
+  De supporter met de sjaal en zijn beweging zijn vervangen.
 
 ## De initialen van de supporterknop zijn een tekening, geen tekst
 
@@ -4137,6 +4140,8 @@
   Lijnen tekenen ook overal hetzelfde, zonder lettertype in een masker.
   De site heeft de regel alleen via de knop nodig, dus `@fansite/shared` hoeft hem niet te hebben.
 - **Alternatieven:** de initialen als tekst en de naam "Mijn account, BS" (de eigenaar wil de naam van het issue); de regel van axe uitzetten (dat verzwakt een test); de regel in `@fansite/shared` (niemand anders gebruikt hem).
+- **Later:** (27 november 2026, #1710) de initialen zijn nu uit de schijf in de ring gesneden, niet meer uit de borst.
+  Ze blijven een tekening, met dezelfde letters en dezelfde regel.
 
 ## Het woordmerk is vloeiend en blijft op één regel
 
@@ -4826,3 +4831,34 @@
 - **Waarom:** de tekst van de delen lijnt dan uit met de kop van de kaart, en een smal scherm verliest geen breedte.
 - **Alternatieven:** een nieuw component voor kolommen binnen een kaart.
   De ruimte houden, zodat de delen inspringen.
+
+## De accountknop toont een ring met een hoofd en schouders
+
+- **Datum:** 27 november 2026
+- **Besluit:** de accountknop (`AccountButton`) toont een ring met een hoofd en schouders; ingelogd is het een gevulde schijf met uitgesneden initialen (#1710).
+  - Het pictogram staat op het raster van 16 bij 16, met een lijn van 1,5, op de 26 pixels van `RoundButton`.
+  - Uitgelogd is de romp een schijf, even groot als de ring, die ver eronder staat.
+    De ring snijdt hem af, zodat alleen de schouders te zien zijn.
+  - Ingelogd staat de romp in het midden en bedekt hij het hoofd.
+    De initialen zijn eruit gesneden met een masker, op 0,7 van de maat in `glyphs.ts`.
+    Een naam zonder letter die we kunnen tekenen, geeft de dichte schijf.
+- **Waarom:** het pictogram past in maat en lijn bij de zon en de maan ernaast.
+- **Alternatieven:** de supporter met de sjaal houden; vijf andere nieuwe tekeningen.
+
+## Alleen uitgelogd schuift de romp van de accountknop omhoog
+
+- **Datum:** 27 november 2026
+- **Besluit:** alleen uitgelogd schuift de romp onder de muis en bij toetsenbordfocus omhoog tot hij de ring vult, en daarna terug (#1710).
+  Ingelogd verandert onder de muis en bij focus alleen de kleur.
+- **Waarom:** de klik van wie uitgelogd is, leidt naar inloggen, dus de beweging toont wat volgt.
+  Ingelogd gaat de klik naar Mijn account, en een zakkende romp zou op uitloggen lijken.
+- **Alternatieven:** in beide toestanden een voorproef van de andere; geen beweging.
+
+## Inloggen en uitloggen zijn meteen te zien op de accountknop
+
+- **Datum:** 27 november 2026
+- **Besluit:** een verandering tussen ingelogd en uitgelogd is meteen te zien, ook bij het laden van een pagina (#1710).
+  De romp heeft per toestand een eigen sleutel in React, zodat er een nieuw element komt dat nergens vandaan beweegt.
+- **Waarom:** beweging op elke pagina trekt de aandacht zonder reden.
+  De server tekent altijd de uitgelogde knop, dus zonder dit zou de romp bij elke keer laden stijgen.
+- **Alternatieven:** de romp bij elke keer laden laten stijgen; de overgang alleen op de toestanden onder de muis en bij focus zetten (dan schuift de romp niet terug als de muis weggaat).
