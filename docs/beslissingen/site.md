@@ -4052,6 +4052,7 @@
   De regels voor wat bezoekers zien staan in _De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs_ in `redactie.md`.
 - **Waarom:** een eigen kaart en een eigen functie houden de top 10 zoals hij was, en de kaart verdwijnt zonder lege staat, want een zin "geen clubs" zou hier niets toevoegen.
 - **Alternatieven:** `topPointsOf` laten kiezen tussen boven- en onderkant (de teruggegeven vorm wordt dan voor twee dingen gebruikt); de kaart een zin laten tonen als er te weinig clubs zijn.
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5_ (27 november 2026): het minimum van 10 clubs is weg, en `hardestOf` geeft een plaats aan elke club die meetelt, hoogstens vijf.
 
 ## Het aantal toeschouwers staat als feit op de pagina van een wedstrijd, met de bron en de melding dat het een schatting is
 
@@ -8611,9 +8612,12 @@
 - **Datum:** 27 november 2026
 - **Besluit:** beide kaarten tonen een vaste top 5 in één tabel, zonder knop (#1706).
   `topPointsPlaces` en `hardestPlaces` zijn 5 en het bijschrift is "De eerste 5 clubs waartegen …".
-  Het minimum blijft: een kaart toont een lijst bij minstens 10 clubs (`topPointsClubs`) met minstens 5 wedstrijden per club in de keuze, en anders een zin.
+  - **Geen minimum aantal clubs meer:** een kaart toont de clubs die meetellen, hoogstens vijf, ook als dat er minder dan tien zijn.
+    `topPointsClubs` is weg.
+    Een club telt nog steeds mee vanaf 5 gespeelde wedstrijden in de keuze.
+  - **Geen enkele club:** dan staat er "Nog geen club met minstens 5 gespeelde wedstrijden." in plaats van een lege tabel.
+  - **Op beide kaarten:** een club kan op allebei de kaarten staan.
 - **Waarom:** de kaarten worden korter en de pagina blijft overzichtelijk.
-  Met minstens 10 clubs en zonder gelijke gemiddelden staat geen club op allebei de kaarten.
-  Bij een gelijk gemiddelde kan dat wel, omdat beide kaarten dan eerst de meeste wedstrijden en daarna de naam volgen.
-- **Alternatieven:** de top 10 houden; het minimum verlagen, zodat een kaart ook bij weinig clubs een tabel toont.
-- **Later:** vervangt de top 10 uit _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026) in `redactie.md`.
+  De projecteigenaar wil bij weinig clubs liever een tabel dan een zin.
+- **Alternatieven:** de top 10 houden; het minimum van 10 clubs houden, zodat een club minder vaak op beide kaarten staat; ook zonder clubs een tabel tonen (een tabel zonder rijen).
+- **Later:** vervangt de top 10 uit _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026) in `redactie.md`, en het minimum van 10 clubs daaruit.

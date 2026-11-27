@@ -2951,6 +2951,7 @@
   Met 10 tot en met 14 clubs staat een club nog in allebei de lijsten (bij 10 clubs staan alle tien in de top 10); pas vanaf 15 clubs zijn de lijsten gescheiden.
 - **Alternatieven:** beide lijsten in één kaart (twee tabellen, twee bijschriften, één "Gebaseerd op" die voor beide niet klopt); drie clubs (dun naast tien); de kaart ook tonen met minder dan 10 clubs; "Lastigste tegenstanders" als kop (leest als het gemiddelde van de tegenstander).
 - **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026): de kaart toont tien plaatsen in plaats van vijf, eerst vijf met "Toon 5 meer" voor de rest, heeft een keuze Alle, Thuis en Uit, en blijft met minder dan 10 clubs bestaan als zin.
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5_ (27 november 2026) in `site.md`: een kaart toont de clubs die meetellen, hoogstens vijf, zonder minimum van 10 clubs.
 
 ## De zin onder een kaart met cijfers zegt alleen waarop de telling rust
 
@@ -3183,6 +3184,7 @@
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: de kaart heet sinds deze beslissing "Het makkelijkst".
 - **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026): "Toon 5 meer" is geen `Disclosure` meer maar een knop die vijf rijen toevoegt.
   Daarna vervangen door _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026): de top 5 en "Toon 5 meer" zijn weg, de kaart toont tien clubs in één tabel.
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5_ (27 november 2026) in `site.md`: een kaart toont de clubs die meetellen, hoogstens vijf, zonder minimum van 10 clubs.
 
 ## De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5
 
@@ -3225,7 +3227,7 @@
 - **Alternatieven:** terug naar een top 5 met de plaatsen 6 tot en met 10 achter een `Disclosure` (de opzet van #1416); `MoreRows` houden voor een volgende kaart; één kaart die beide lijsten toont (zichtbaar anders, met nieuwe koppen en ankers); twee onderdelen houden.
 - **Later:** vervangt _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026) en de top 5 uit _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026).
 - **Later:** vervangen door _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 5_ (27 november 2026) in `site.md`: de kaarten tonen vijf clubs.
-  Het ene onderdeel `RankingCard` en het minimum van 10 clubs blijven.
+  Het ene onderdeel `RankingCard` blijft, het minimum van 10 clubs is weg.
 
 ## De eerste termijn van Foppe de Haan eindigt op de laatste dag van 2003/04
 

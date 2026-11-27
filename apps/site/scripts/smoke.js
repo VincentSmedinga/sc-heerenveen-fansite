@@ -1759,13 +1759,13 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /punten(?:<!-- -->)? \(3 per winst, 1 per gelijkspel\).*?doelsaldo/)
     assert.match(opponentsHtml, /Sinds \d{4}\/\d{2}/)
     // The sidebar has the cards Het makkelijkst and Het moeilijkst: a table with the first five
-    // places for the clubs with five played matches, or the sentence when fewer than ten count.
+    // places for the clubs with five played matches, or the sentence when no club counts.
     assert.match(opponentsHtml, /<h2[^>]*id="het-makkelijkst">Het makkelijkst<\/h2>/)
     assert.match(opponentsHtml, /<h2[^>]*id="het-moeilijkst">Het moeilijkst<\/h2>/)
     assert.match(opponentsHtml, /Gemiddeld aantal punten per wedstrijd/)
     assert.match(
       opponentsHtml,
-      /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen 10 clubs met minstens 5 gespeelde wedstrijden\./,
+      /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen club met minstens 5 gespeelde wedstrijden\./,
     )
     // Without JavaScript the choice Alle, Thuis and Uit has no buttons that would do nothing,
     // and nor has the table of a card: it has its five places and no button.

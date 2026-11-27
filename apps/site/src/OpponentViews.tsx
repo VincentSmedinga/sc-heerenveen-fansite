@@ -61,7 +61,6 @@ import {
   startYearOf,
   timelineOf,
   timelineWindow,
-  topPointsClubs,
   topPointsMinimum,
   topPointsOf,
   type Venue,
@@ -795,7 +794,7 @@ export function LastWinCard({
  * the club as a link, the average with two decimals and the number of matches, and it cannot
  * be sorted: its order is the point. The caption says they are our points, so the card is not
  * read as the average of the opponent. The line under the table says which clubs count. With
- * fewer than ten clubs that count there is a sentence and no table, and the card stays.
+ * fewer than five that count, the table has those; with none there is a sentence instead.
  */
 export function RankingCard({
   address,
@@ -940,8 +939,8 @@ function MeetingLine({ choice, match, now }: { choice: CompetitionChoice; match:
 }
 
 /**
- * What a ranking card shows for one venue: a sentence when fewer than `topPointsClubs` clubs
- * count, else the table with the five places, the legend and the line "Gebaseerd op". The order
+ * What a ranking card shows for one venue: a sentence when no club counts, else the table
+ * with at most five places, the legend and the line "Gebaseerd op". The order
  * is the answer, and the caption says which way it runs, so the table does not sort. `low` is
  * the card Het moeilijkst, which runs from low to high; the caption names the venue and the
  * choice of competition.
@@ -965,7 +964,7 @@ function RankingPanel({
   venue: Venue
 }) {
   if (places.length === 0) {
-    return <Text>{`Nog geen ${topPointsClubs} clubs met minstens ${topPointsMinimum} ${venueMatches[venue]}.`}</Text>
+    return <Text>{`Nog geen club met minstens ${topPointsMinimum} ${venueMatches[venue]}.`}</Text>
   }
 
   const caption = (what: string) =>
@@ -977,7 +976,7 @@ function RankingPanel({
   return (
     <>
       <DataTable
-        caption={caption(`De eerste ${places.length} clubs ${lead}`)}
+        caption={caption(`${places.length === 1 ? 'De club' : `De eerste ${places.length} clubs`} ${lead}`)}
         columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
         legend={topPointsLegend}
         rows={places.map((place) => ({

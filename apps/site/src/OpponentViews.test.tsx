@@ -265,11 +265,24 @@ describe.each([
     expect(status.textContent).toBe('Thuis gekozen')
   })
 
-  it('says one sentence, and shows no table, for a choice with fewer than ten clubs that count', () => {
+  it('shows the clubs that count, though fewer than five, in the table', () => {
     render(make({}))
     chooseVenue('Uit')
 
-    expect(screen.getByText('Nog geen 10 clubs met minstens 5 gespeelde uitwedstrijden.')).toBeTruthy()
+    expect(namesIn(tables()[0] ?? null)).toHaveLength(4)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 4 clubs ${caption}, uit`)
+  })
+
+  it('names one club in the singular', () => {
+    render(make({ records: { ...venueRecords, all: venueRecords.all.slice(0, 1) } }))
+
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De club ${caption}`)
+  })
+
+  it('says one sentence, and shows no table, when no club counts', () => {
+    render(make({ records: { ...venueRecords, all: [] } }))
+
+    expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
     expect(tables()).toEqual([])
     expect(screen.getByRole('heading', { level: 2, name: title })).toBeTruthy()
   })

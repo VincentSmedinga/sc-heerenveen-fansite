@@ -314,7 +314,7 @@ describe('the page /tegenstanders', () => {
   it('follows the choice: with ?competitie=eredivisie no club has five matches, so there is a sentence and no table', async () => {
     const html = await render({ competitie: 'eredivisie' })
 
-    expect(sidebarOf(html)).toContain('Nog geen 10 clubs met minstens 5 gespeelde wedstrijden.')
+    expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
     expect(sidebarOf(html)).not.toContain('<table')
     expect(html).toContain('id="het-makkelijkst"')
     expect(html).toContain('id="het-moeilijkst"')
@@ -358,7 +358,7 @@ describe('the page /tegenstanders', () => {
 
     const html = await render()
 
-    expect(sidebarOf(html)).toContain('Nog geen 10 clubs met minstens 5 gespeelde wedstrijden.')
+    expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
   })
 
   it('says so, and has no table, while there is no club', async () => {
