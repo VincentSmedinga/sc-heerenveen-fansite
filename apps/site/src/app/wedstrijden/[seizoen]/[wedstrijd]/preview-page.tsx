@@ -35,7 +35,7 @@ import { withBranch } from '#src/title'
 // The page of a match that is still `scheduled` and has no report: the Voorbeschouwing. It has
 // the address of the match, so once there is a report it is the page of the match (see
 // `ReportPage`); until then it stays, also after the kick-off. Each part that comes after the
-// header is a card of its own in a cell of the page.
+// header is a card of its own.
 
 /** How many headlines the card Nieuws shows at most. */
 const newsLimit = 3
@@ -135,11 +135,11 @@ const clubsOf = (match: ScheduledMatch['match']) =>
   match.home ? ['sc Heerenveen', match.opponent] : [match.opponent, 'sc Heerenveen']
 
 /**
- * The page of the Voorbeschouwing: the header, the table, the form, the matches against the
- * opponent on this side, our scorers there, the news about the opponent and the credit. On a
- * phone the cards stand under each other, and on a wide screen the cards of the main column
- * (Onderling and Nieuws) stand beside those of the narrow column (Stand, Vorm, Onze schutters
- * and Bron). Any other address is "niet gevonden".
+ * The page of the Voorbeschouwing: the header, the table, the form, our scorers against the
+ * opponent on this side, the prediction, the earlier matches, the news about the opponent and
+ * the credit. On a phone the cards stand under each other in that order, and on a wide screen
+ * the section with Stand, Vorm, Onze schutters and Prognose is the narrow column beside
+ * Onderling, Nieuws and the credit. Any other address is "niet gevonden".
  */
 export async function PreviewPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadPreview(seizoen, slug)
@@ -162,31 +162,16 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
   const form = forms.length > 0
   const together = headToHead !== undefined
   const shooters = scorers !== undefined
-  // On a phone the cards stand in this order: Stand, Vorm, Onderling, Onze schutters, Nieuws,
-  // Bron. On a wide screen Onderling and Nieuws have the wide column and the others the narrow.
-  const before = [
-    ...(standing ? ['standing'] : []),
-    ...(form ? ['form'] : []),
-    ...(shooters ? ['scorers'] : []),
-    ...(prediction === undefined ? [] : ['prediction']),
-  ]
-  const main = [...(together ? ['headToHead'] : []), ...(news ? ['news'] : [])]
-  const areas =
-    main.length > 0 ? pageAreas({ after: ['source'], before, main }) : pageAreas({ before, main: ['source'] })
-  // The scorers stand in the narrow column on a wide screen, but under Onderling on a phone.
-  const phone = [
-    'head',
-    ...(standing ? ['standing'] : []),
-    ...(form ? ['form'] : []),
-    ...(together ? ['headToHead'] : []),
-    ...(shooters ? ['scorers'] : []),
-    ...(prediction === undefined ? [] : ['prediction']),
-    ...(news ? ['news'] : []),
-    'source',
-  ]
+  // The cards of the narrow column are one section, so they stack by their own height. The
+  // source order is the order on a phone: that section, Onderling, Nieuws and the credit.
+  const side = standing || form || shooters || prediction !== undefined
+  const areas = pageAreas({
+    before: side ? ['side'] : [],
+    main: [...(together ? ['headToHead'] : []), ...(news ? ['news'] : []), 'source'],
+  })
 
   return (
-    <Page.Main areas={main.length > 0 ? { ...areas, narrow: phone } : areas}>
+    <Page.Main areas={areas}>
       <Page.Cell area="head">
         <Text>
           <Link href={seasonAddress(matchesPath, season, seasonOf(now))} icon="arrow-left">
@@ -200,15 +185,15 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
           title={`${first} – ${second}`}
         />
       </Page.Cell>
-      {standing && (
-        <Page.Cell area="standing">
-          <PreviewStandingCard opponent={match.opponent} slice={slice} standings={data.standings} />
-        </Page.Cell>
-      )}
-      {form && (
-        <Page.Cell area="form">
-          <PreviewFormCard forms={forms} />
-        </Page.Cell>
+      {side && (
+        <Page.Section area="side" aria-label="Stand, vorm en prognose">
+          {standing && <PreviewStandingCard opponent={match.opponent} slice={slice} standings={data.standings} />}
+          {form && <PreviewFormCard forms={forms} />}
+          {shooters && <PreviewScorersCard home={match.home} name={match.opponent} place={place} scorers={scorers} />}
+          {prediction === undefined ? null : (
+            <PredictionCrowdCard data={prediction} matchId={match.id} played={false} />
+          )}
+        </Page.Section>
       )}
       {together && (
         <Page.Cell area="headToHead">
@@ -221,16 +206,6 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
             place={place}
             slug={found.clubSlug}
           />
-        </Page.Cell>
-      )}
-      {shooters && (
-        <Page.Cell area="scorers">
-          <PreviewScorersCard home={match.home} name={match.opponent} place={place} scorers={scorers} />
-        </Page.Cell>
-      )}
-      {prediction === undefined ? null : (
-        <Page.Cell area="prediction">
-          <PredictionCrowdCard data={prediction} matchId={match.id} played={false} />
         </Page.Cell>
       )}
       {news && (
