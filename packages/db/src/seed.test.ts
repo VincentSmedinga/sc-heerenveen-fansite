@@ -344,6 +344,20 @@ describe('the seed', () => {
     expect(followed.map((row) => row.club).toSorted()).toEqual(['De Graafschap', 'De Treffers', 'N.E.C.', 'Vitesse'])
   })
 
+  it('gives the Leeuwarder Courant of an existing database its publisher and its priority', async () => {
+    await seedSources(database.db)
+    await database.pool.query("UPDATE sources SET publisher = NULL, local = false WHERE domain = 'www.lc.nl'")
+    await database.pool.query('DELETE FROM source_clubs')
+
+    await seedRealSources(database.db)
+
+    const [rows] = await database.pool.query(
+      "SELECT publisher, `local`, club FROM sources JOIN source_clubs ON source_id = id WHERE domain = 'www.lc.nl'",
+    )
+
+    expect(rows).toEqual([{ club: everyStory, local: 1, publisher: 'mediahuis' }])
+  })
+
   it('keeps the clubs of a regional source in step with the register, without duplicates', async () => {
     await seedSources(database.db)
     await database.pool.query(
