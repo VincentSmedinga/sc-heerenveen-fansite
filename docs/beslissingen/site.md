@@ -799,7 +799,6 @@
   Een wedstrijd met zo'n pagina heeft wel een link, "Het verslag", als laatste regel van zijn plek in de lijst; de andere wedstrijden blijven een regel zonder link, en er zijn nog steeds geen clubwapens.
   Sinds 16 november 2026 heeft ook een geplande wedstrijd zonder verslag een pagina, en zijn link zegt "Voorbeschouwing" (zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_).
 - **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
-- **Later:** zie _De kaarten in de smalle kolom van een wedstrijdpagina staan in één sectie_ (26 november 2026): de bronvermelding staat vanaf 52 rem in de brede kolom, onder Nieuws.
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -6229,6 +6228,8 @@
 - **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat een wedstrijd zonder verslag geen pagina heeft.
 - **Later:** zie _De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn_ (16 november 2026): de pagina verdwijnt niet bij de aftrap, en de delen van de Voorbeschouwing blijven staan.
 - **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
+- **Later:** zie _De kaarten in de smalle kolom van een wedstrijdpagina staan in één sectie_ (26 november 2026): de bronvermelding staat vanaf 52 rem in de brede kolom, onder Nieuws.
+  De kaarten van de smalle kolom krijgen niet elk een eigen cel, maar staan samen in één `Page.Section`.
 
 ## De Voorbeschouwing is gebouwd met onderdelen van het designsysteem en heeft geen invulveld voor de redactie
 
