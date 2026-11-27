@@ -53,6 +53,12 @@ export const SignedOut = meta.story({
   play: async ({ canvas, canvasElement }) => {
     await expect(canvas.getByRole('link', { name: 'Inloggen' })).toHaveAttribute('href', '/fans/inloggen')
     await expectTorso(canvasElement, 'none')
+
+    // The size of a RoundButton, with a line of 1.5 on the grid of 16.
+    const drawing = canvasElement.querySelector('.hf-account-button > svg') as SVGElement
+
+    await expect(getComputedStyle(drawing).inlineSize).toBe('26px')
+    await expect(getComputedStyle(drawing.querySelector(':scope > circle') as Element).strokeWidth).toBe('1.5px')
   },
   render: inHeader,
 })

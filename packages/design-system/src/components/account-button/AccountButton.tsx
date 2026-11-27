@@ -61,9 +61,9 @@ export const AccountButton = ({ className, screenName, ...props }: AccountButton
       label={target.label}
       surface="header"
     >
+      {/* No class hf-icon: its CSS would draw the line thinner than the 1.5 given here. */}
       <svg
         aria-hidden="true"
-        className="hf-icon"
         fill="none"
         focusable="false"
         stroke="currentColor"
