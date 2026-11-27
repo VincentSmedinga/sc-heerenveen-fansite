@@ -150,8 +150,9 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
  * substitutes, the course of the match in the halves and, after a shoot-out, its series. The
  * line-up of the opponent is there when its side of the report is complete, and otherwise one
  * sentence says so. The cards of the games and the credit are one section, which is the narrow
- * column on a wide screen: Wikipedia for the result and the goals, and our own records for the
- * rest. A match without a page, and an address that is not one, are the page "niet gevonden".
+ * column on a wide screen. The credit names Wikipedia for the result and the goals, and our own
+ * records for the rest. A match without a page, and an address that is not one, are the page
+ * "niet gevonden".
  */
 export async function ReportPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadReport(seizoen, slug)
