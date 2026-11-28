@@ -96,7 +96,6 @@
    */
   .hf-pitch-sketch-field > .hf-pitch-sketch-disc {
     block-size: min(1.625rem, 20cqw);
-    font-size: min(var(--hf-meta-font-size), 12cqw);
     inline-size: min(1.625rem, 20cqw);
     position: absolute;
     transform: translate(-50%, -50%);
