@@ -8657,6 +8657,7 @@
   `scorerNameOf` en `goalsWithInitials` zijn weg.
   Fjouwer toont de volledige naam op de kaarten, bij de keuze van de supporters en bij de punten.
 - **Alternatieven:** overal in de doelpuntenregel de achternaam, met zelf splitsen zonder persoon; de verdeling van eerder, met de achternaam waar de ruimte krap is; Fjouwer helemaal kort of helemaal lang.
+- **Later:** 28 november 2026 (#1715): de vakjes van "Jouw vier" zijn de namen bij het veld, zie _Een klein half veld met de namen ernaast_ in `designsysteem.md`.
 
 ## Naamgenoten krijgen een beginletter
 
@@ -8666,6 +8667,7 @@
 - **Hoe:** op het veld gelden de regels van nu (`leadOfNamesake` en `shortOpponentNames`).
   Op de vakjes van "Jouw vier" geldt het voor twee spelers met dezelfde achternaam in de selectie waaruit je kiest (`withLeads` in `apps/site/src/player-name.ts`).
 - **Alternatieven:** de hele voornaam.
+- **Later:** 28 november 2026 (#1715): wat hier over de vakjes van "Jouw vier" staat, geldt voor de namen bij het veld, zie _Een klein half veld met de namen ernaast_ in `designsysteem.md`.
 
 ## Een achternaam die vooraan staat, krijgt een hoofdletter
 
