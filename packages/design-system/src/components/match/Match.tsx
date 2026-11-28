@@ -29,7 +29,7 @@ export type MatchGoal = {
   ownGoal?: boolean
   /** Whether it was scored from the penalty spot. */
   penalty?: boolean
-  /** The name of the scorer as plain text, such as `Van Bergen`. */
+  /** The whole name of the scorer as plain text, such as `Thom van Bergen`. */
   player: string
   /** The minutes of added time after `minute`: 1 for "45+1". Leave it out in regular time. */
   stoppageMinutes?: null | number
@@ -471,7 +471,8 @@ export const Match = ({
             <Fragment key={index}>
               {index > 0 ? (
                 <>
-                  <span aria-hidden="true">, </span>
+                  {/* The dot stays with the goal before it, so no line starts with one. */}
+                  <span aria-hidden="true">{'\u00a0·'} </span>
                   <span className="hf-visually-hidden">; </span>
                 </>
               ) : null}

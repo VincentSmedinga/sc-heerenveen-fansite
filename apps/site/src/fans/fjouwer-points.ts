@@ -11,7 +11,7 @@ import {
   players,
   supporters,
 } from '@fansite/db/schema'
-import { shownPlayerName } from '@fansite/db/shown-name'
+import { nameInFront, shownPlayerName } from '@fansite/db/shown-name'
 import {
   type FantasyFacts,
   fantasyFacts,
@@ -26,7 +26,6 @@ import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import { cacheForKey } from '#src/cache'
 import { getDatabase } from '#src/database'
 
-import { personNameParts, splitPersonName } from '../player-name'
 import { closesAt, type Four, fourOf, usesBefore, usesLeft } from './fjouwer-rules'
 
 // The points of the game Fjouwer (issue 1471): what each of our players scored in a match with
@@ -138,9 +137,9 @@ export const cachedResults: ResultsReader = (matchId) => readCached(String(match
 export const pointsOf = (results: MatchResults, playerId: number) => results.get(playerId)?.points.total ?? 0
 
 /**
- * What a supporter's four came to in one match that has closed. `names` are the surnames in the
- * order of the form; `rows` and `total` are there when the report is finished, and `ready` says
- * so.
+ * What a supporter's four came to in one match that has closed. `names` are the names in the
+ * order of the form; `rows` and `total` are there when the report is finished, and `ready`
+ * says so.
  */
 export type FourPoints = {
   match: PointsMatch
@@ -159,7 +158,6 @@ export type FourRow = {
   points: FantasyPoints
   /** What happened, or "Niet gespeeld", or why he did not count. */
   summary: string
-  surname: string
 }
 
 /** The match of a card of points, with what the cards show of it. */
@@ -393,19 +391,18 @@ export async function supporterFours(
   return Promise.all(
     newestFirst.map(async ({ four, match, uses }): Promise<FourPoints> => {
       const worked = pointsOfFour(four, uses, await read(match.id))
-      const nameOf = (playerId: number) => names.get(playerId) ?? { name: 'Onbekende speler', surname: 'Onbekend' }
+      const nameOf = (playerId: number) => names.get(playerId) ?? 'Onbekende speler'
 
       return {
         match,
-        names: four.map((playerId) => nameOf(playerId).surname),
+        names: four.map(nameOf),
         ready: worked !== undefined,
         rows:
           worked?.rows.map((row) => ({
             counted: row.counted,
-            name: nameOf(row.playerId).name,
+            name: nameOf(row.playerId),
             points: row.points,
             summary: row.summary,
-            surname: nameOf(row.playerId).surname,
           })) ?? [],
         total: worked?.total,
       }
@@ -413,35 +410,18 @@ export async function supporterFours(
   )
 }
 
-/** The name and the surname of players, by id. */
+/** The names of players, by id. */
 async function namesOf(db: Database, playerIds: readonly number[]) {
   if (playerIds.length === 0) {
-    return new Map<number, { name: string; surname: string }>()
+    return new Map<number, string>()
   }
 
   const rows = await db
-    .select({
-      familyName: persons.familyName,
-      familyNamePrefix: persons.familyNamePrefix,
-      givenName: persons.givenName,
-      id: players.id,
-      name: shownPlayerName(),
-    })
+    .select({ id: players.id, name: nameInFront(shownPlayerName()) })
     .from(players)
-    .leftJoin(persons, eq(players.personId, persons.id))
     .where(inArray(players.id, [...playerIds]))
 
-  return new Map(
-    rows.map((row) => {
-      const parts = personNameParts({
-        personFamilyName: row.familyName,
-        personFamilyNamePrefix: row.familyNamePrefix,
-        personGivenName: row.givenName,
-      })
-
-      return [row.id, { name: row.name, surname: parts?.surname || splitPersonName(row.name).surname }] as const
-    }),
-  )
+  return new Map(rows.map((row) => [row.id, row.name]))
 }
 
 const readStanding = cacheForKey(minute, (key) => matchStanding(getDatabase().db, Number(key)))

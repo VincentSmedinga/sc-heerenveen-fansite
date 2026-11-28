@@ -3,6 +3,7 @@ import type { Person, PlayerPosition } from '@fansite/db/schema'
 import { findPlayerBySlug, playerSlugs } from '@fansite/db/person-slugs'
 import { players, wikidataItems } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { capitaliseName } from '@fansite/shared/player-name'
 import { asc, desc, eq } from 'drizzle-orm'
 import { cache } from 'react'
 
@@ -148,7 +149,7 @@ export function playerPageOf(
   birthPlace: string | undefined,
   today = new Date(),
 ): PlayerPage {
-  const name = person.name || rows[0]?.sourceName || ''
+  const name = capitaliseName(person.name || rows[0]?.sourceName || '')
   const parts = personNameParts({
     personFamilyName: person.familyName,
     personFamilyNamePrefix: person.familyNamePrefix,

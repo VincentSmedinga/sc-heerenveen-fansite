@@ -232,7 +232,7 @@ describe('the fours of a supporter', () => {
     // The second match has no row of its own, so it inherits the four of the first one.
     expect(fours.map((item) => item.match.id)).toEqual([second, first])
     expect(fours[1]).toMatchObject({ names: ['Noppert', 'Hilgers', 'Proper', 'Vente'], ready: true, total: 40 })
-    expect(fours[1]?.rows.map((row) => [row.surname, row.points.total, row.summary])).toEqual([
+    expect(fours[1]?.rows.map((row) => [row.name, row.points.total, row.summary])).toEqual([
       ['Noppert', 5, '90 min, tegengoal'],
       ['Hilgers', 0, '90 min, eigen goal, tegengoal'],
       ['Proper', 13, '72 min, assist'],

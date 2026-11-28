@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { coachRatings, matchAppearances, matches, playerRatings, staff } from '@fansite/db/schema'
-import { shownAppearanceName } from '@fansite/db/shown-name'
+import { nameInFront, shownAppearanceName } from '@fansite/db/shown-name'
 import { desc, eq } from 'drizzle-orm'
 
 import type { GameData } from './my-data'
@@ -31,7 +31,7 @@ export async function ratingData(db: Database, supporterId: number): Promise<Gam
       home: matches.home,
       matchDate: matches.matchDate,
       matchId: matches.id,
-      name: shownAppearanceName(),
+      name: nameInFront(shownAppearanceName()),
       opponent: matches.opponent,
     })
     .from(playerRatings)

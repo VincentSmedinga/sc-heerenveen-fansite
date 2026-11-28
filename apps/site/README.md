@@ -349,15 +349,17 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een geannuleerde wedstrijd staat er niet in: hij wordt niet meer gespeeld en staat in Uitslagen, in zijn speelronde, met "Geannuleerd".
   Een wedstrijd is begonnen als zijn aanvangstijd voorbij is, of, zonder aanvangstijd, als zijn dag in Nederlandse tijd voorbij is (`overviewOf` in `src/matches.ts`, met het moment van het verzoek).
   Een weekend telt tot het einde van zijn laatste dag.
-- **De doelpuntenmakers in een wedstrijdregel:** de achternaam zoals Wikipedia hem schrijft.
-  Hebben twee verschillende personen in dezelfde regel dezelfde naam, dan krijgen ze de beginletter van hun voornaam erbij, zoals `J. Trenskow`, en de hele voornaam als die beginletter ook gelijk is (`goalsWithInitials` in `src/matches.ts`).
-  De namen vergelijken zoals de wedstrijdpagina ze schrijft, dus met het voorvoegsel.
-  De beginletter en de hele voornaam komen uit één functie, `leadOfName` in `src/player-name.ts`.
-- **De beginletter op de wedstrijdpagina:** een speler van ons krijgt op het veld en bij de doelpuntenmakers boven de score de beginletter van zijn voornaam voor zijn achternaam, zoals `J. Drost`, als een andere persoon met dezelfde achternaam (het voorvoegsel telt mee) in `players` een seizoen heeft dat hooguit één seizoen van een seizoen van hem afligt (`leadOfNamesake` in `src/player-name.ts`).
+- **Een speler met zijn volledige naam:** in de doelpuntenregel, boven de score, in zinnen, lijsten en tabellen staat de volledige naam (#1714).
+  De doelpuntenregel toont de naam van de persoon van het doelpunt, en zonder persoon die van de bron (`shownGoalName`).
+  Alleen het veld van de wedstrijdpagina en de vakjes van "Jouw vier" tonen de achternaam.
+- **De hoofdletter:** een achternaam die vooraan staat, zonder voornaam of beginletter, begint met een hoofdletter (`capitaliseName` in `@fansite/shared/player-name`).
+  Een query voor bezoekers gebruikt daarvoor `nameInFront` uit `@fansite/db/shown-name`; het beheer en lijsten op achternaam houden de naam zoals hij is opgeslagen.
+- **De vakjes van "Jouw vier":** delen twee spelers in de selectie een achternaam, dan staat de beginletter ervoor, en de hele voornaam bij dezelfde beginletter (`withLeads` in `src/player-name.ts`).
+- **De beginletter op de wedstrijdpagina:** een speler van ons krijgt op het veld de beginletter van zijn voornaam voor zijn achternaam, zoals `J. Drost`, als een andere persoon met dezelfde achternaam (het voorvoegsel telt mee) in `players` een seizoen heeft dat hooguit één seizoen van een seizoen van hem afligt (`leadOfNamesake` in `src/player-name.ts`).
   Hebben ze dezelfde beginletter, dan komt de hele voornaam.
   Een speler van ons zonder persoon, voornaam of achternaam blijft zoals hij is.
   De opstellingenlijst, de wissels en het verloop tonen de hele naam, en de zin voor een schermlezer ook.
-- **De tegenstander op het veld:** op het veld en bij de doelpuntenmakers boven de score staat een speler van de tegenstander zonder voornaam (`shortOpponentNames` in `src/player-name.ts`).
+- **De tegenstander op het veld:** op het veld staat een speler van de tegenstander zonder voornaam (`shortOpponentNames` in `src/player-name.ts`).
   Met een persoon komt de naam uit de persoon, anders valt het eerste woord weg.
   Een naam van één woord, of een die met een voorvoegsel begint, blijft heel.
   Delen twee spelers van de tegenstander in het verslag een naam, dan krijgen ze de beginletter van hun voornaam, of de hele voornaam bij dezelfde letter.

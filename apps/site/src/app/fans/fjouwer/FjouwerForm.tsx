@@ -60,9 +60,9 @@ export function FjouwerForm({
   const answered = state.saved !== undefined || state.failure !== undefined || hasErrors(state)
   const byId = new Map(players.map((player) => [String(player.id), player]))
   const places: StripPlace[] = answered
-    ? state.values.map((id) => ({ name: byId.get(id)?.surname }))
+    ? state.values.map((id) => ({ name: byId.get(id)?.shortName }))
     : startFour.map((id) => ({
-        name: byId.get(String(id))?.surname,
+        name: byId.get(String(id))?.shortName,
         note: struck.includes(id) ? noteForStruck : undefined,
       }))
   const summary = [

@@ -143,6 +143,30 @@ describe('the squad', () => {
     expect(match).toBeGreaterThan(0)
   })
 
+  it('shortens a name for the strip, with a capital, and an initial for a shared surname', async () => {
+    await addMatch(at(30))
+    await database.db.insert(players).values(
+      ['Thom van Testma', 'Tim van Testma', 'Bo van Testma', 'Sam da Proef'].map((sourceName) => ({
+        position: 'aanvaller' as const,
+        searchTerm: sourceName.slice(sourceName.indexOf(' ') + 1),
+        season: '2026/27',
+        source: 'selectie' as const,
+        sourceName,
+      })),
+    )
+
+    const squad = await fjouwerSquad(database.db, (await fjouwerMatch(database.db, now))!)
+    const shortOf = (name: string) => squad.find((player) => player.name === name)?.shortName
+
+    expect(['Thom van Testma', 'Tim van Testma', 'Bo van Testma', 'Sam da Proef'].map(shortOf)).toEqual([
+      'Thom van Testma',
+      'Tim van Testma',
+      'B. van Testma',
+      'Da Proef',
+    ])
+    expect(shortOf('Vente')).toBe('Vente')
+  })
+
   it('keeps a player who left for matches before he left, and keeps the line from the first use', async () => {
     await addMatch(at(30))
     await database.db

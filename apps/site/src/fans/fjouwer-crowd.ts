@@ -1,13 +1,12 @@
 import type { Database } from '@fansite/db/client'
 
-import { fantasyPicks, matches, persons, players, supporters } from '@fansite/db/schema'
-import { shownPlayerName } from '@fansite/db/shown-name'
+import { fantasyPicks, matches, players, supporters } from '@fansite/db/schema'
+import { nameInFront, shownPlayerName } from '@fansite/db/shown-name'
 import { and, eq, inArray } from 'drizzle-orm'
 
 import { cacheForKey } from '#src/cache'
 import { getDatabase } from '#src/database'
 
-import { personNameParts, splitPersonName } from '../player-name'
 import { closesAt, type Four, fourOf, playersNotCounting, usesBefore } from './fjouwer-rules'
 import { countsInPrognose, crowdMinimum } from './prediction-results'
 
@@ -118,53 +117,30 @@ export async function loadFjouwerCrowd(db: Database, matchId: number): Promise<F
 }
 
 /**
- * The players of the card from their numbers of choices: the most chosen first, then by
- * surname, five of them and more when the fifth place is shared. A surname that two of them
- * share gets the whole name.
+ * The players of the card from their numbers of choices: the most chosen first, then by name,
+ * five of them and more when the fifth place is shared.
  */
 async function chosenPlayers(db: Database, tally: ReadonlyMap<number, number>, count: number): Promise<ChosenPlayer[]> {
   const sorted = [...tally].toSorted((a, b) => b[1] - a[1])
   const limit = sorted[listedPlayers - 1]?.[1] ?? 0
   const top = sorted.filter(([, times]) => times >= limit && times > 0)
-  const names = await db
-    .select({
-      familyName: persons.familyName,
-      familyNamePrefix: persons.familyNamePrefix,
-      givenName: persons.givenName,
-      id: players.id,
-      name: shownPlayerName(),
-    })
+  const rows = await db
+    .select({ id: players.id, name: nameInFront(shownPlayerName()) })
     .from(players)
-    .leftJoin(persons, eq(players.personId, persons.id))
     .where(
       inArray(
         players.id,
         top.map(([id]) => id),
       ),
     )
-  const surnames = new Map(
-    names.map((row) => {
-      const parts = personNameParts({
-        personFamilyName: row.familyName,
-        personFamilyNamePrefix: row.familyNamePrefix,
-        personGivenName: row.givenName,
-      })
-
-      return [row.id, { full: row.name, surname: parts?.surname || splitPersonName(row.name).surname }]
-    }),
-  )
-  const shared = (surname: string) => [...surnames.values()].filter((other) => other.surname === surname).length > 1
+  const names = new Map(rows.map((row) => [row.id, row.name]))
 
   return top
-    .map(([id, times]) => {
-      const found = surnames.get(id)
-
-      return {
-        name: found === undefined ? '' : shared(found.surname) ? found.full : found.surname,
-        percentage: Math.round((times / count) * 100),
-        times,
-      }
-    })
+    .map(([id, times]) => ({
+      name: names.get(id) ?? '',
+      percentage: Math.round((times / count) * 100),
+      times,
+    }))
     .filter((player) => player.name !== '')
     .toSorted((a, b) => b.times - a.times || a.name.localeCompare(b.name, 'nl'))
     .map(({ name, percentage }) => ({ name, percentage }))

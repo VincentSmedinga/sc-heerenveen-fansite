@@ -11,6 +11,7 @@ import type {
 } from '@fansite/design-system'
 
 import { type MatchReport, minutesPlayed } from '@fansite/shared/match-report'
+import { capitaliseName } from '@fansite/shared/player-name'
 
 import { type PersonName, shortOpponentNames } from './player-name'
 
@@ -168,32 +169,39 @@ export type MatchPageSubstitution = {
   stoppageMinutes: null | number
 }
 
-/** The surname of a name, or the whole name when it has no surname: for a list of scorers. */
-const surnameOf = (name: MatchPlayerName) => (name.surname === '' ? (name.givenName ?? '') : name.surname)
+/** The whole name, for a list of scorers. */
+const fullName = (name: MatchPlayerName) => [name.givenName, name.surname].filter(Boolean).join(' ')
 
 /** A player as the page shows him: an opponent also has the name without the given name. */
 type ShownPlayer = MatchPagePlayer & { shortName?: string | undefined }
 
 /**
+ * What the pitch needs to show a player without a given name: the lead of a namesake, and
+ * without one the surname with a capital, when that differs from the surname of his name.
+ */
+function pitchNameOf({ lead, name, shortName }: ShownPlayer) {
+  if (lead !== undefined && lead !== '') {
+    return { lead, ...(shortName === undefined ? {} : { shortName }) }
+  }
+
+  const short = shortName ?? name.surname
+  const shown = capitaliseName(short)
+
+  return shortName === undefined && shown === short ? {} : { shortName: shown }
+}
+
+/**
  * The players with the short names of the opponent (see `shortOpponentNames`): all of his
- * players in the report are one line-up, so one player has one short name on the whole page.
+ * players in the report are one line-up, so the names on the pitch are told apart over all of
+ * them, the substitutes too.
  */
 function withShortOpponentNames(players: readonly MatchPagePlayer[]): ShownPlayer[] {
   const theirs = players.filter((player) => !player.ours)
-  const short = shortOpponentNames(
-    theirs.map(({ name, person }) => ({
-      name: [name.givenName, name.surname].filter(Boolean).join(' '),
-      person,
-    })),
-  )
+  const short = shortOpponentNames(theirs.map(({ name, person }) => ({ name: fullName(name), person })))
   const byId = new Map(theirs.map((player, index) => [player.id, short[index]]))
 
   return players.map((player) => ({ ...player, ...byId.get(player.id) }))
 }
-
-/** A short name with the lead before it (see `MatchPagePlayer.lead`), when it has one. */
-const withLead = (lead: string | undefined, short: string) =>
-  lead === undefined || lead === '' ? short : `${lead} ${short}`
 
 /** A moment as a number to sort on: 45+2 comes after 45 and before 46. */
 const clock = (moment: { minute: number; stoppageMinutes?: null | number | undefined }) =>
@@ -346,20 +354,19 @@ function withScores(data: MatchPageData, events: MatchTimelineEvent[]): MatchTim
 }
 
 /** The goals under a club in the header, in the order of the clock. */
-const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, ShownPlayer>, ours: boolean) =>
+const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>, ours: boolean) =>
   data.goals
     .filter((goal) => goal.ours === ours && byId.has(goal.playerId))
     .toSorted(byClock)
     .map((goal): MatchHeaderScorer => {
-      const scorer = byId.get(goal.playerId)
-      const name = scorer?.name ?? { surname: '' }
+      const name = byId.get(goal.playerId)?.name ?? { surname: '' }
 
       return {
         ...(name.href === undefined ? {} : { href: name.href }),
         minute: goal.minute,
         ownGoal: goal.ownGoal,
         penalty: goal.penalty,
-        player: withLead(scorer?.lead, scorer?.shortName ?? surnameOf(name)),
+        player: fullName(name),
         stoppageMinutes: goal.stoppageMinutes,
       }
     })
@@ -443,10 +450,9 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, ShownPlayer>, our
         captain: player.captain,
         card: cardOf(player),
         goals: goalsOf(player),
-        ...(player.lead === undefined || player.lead === '' ? {} : { lead: player.lead }),
         minutesPlayed: minutes.played,
         name: player.name,
-        ...(player.shortName === undefined ? {} : { shortName: player.shortName }),
+        ...pitchNameOf(player),
         shirtNumber: player.shirtNumber,
         substitutedOffAt: minutes.off,
       }

@@ -18,6 +18,7 @@
     "./reminder-code": "./src/reminder-code.ts",
     "./mail-env": "./src/mail-env.ts",
     "./match-report": "./src/match-report.ts",
+    "./player-name": "./src/player-name.ts",
     "./prediction-points": "./src/prediction-points.ts",
     "./quiz-score": "./src/quiz-score.ts",
     "./site-env": "./src/site-env.ts"

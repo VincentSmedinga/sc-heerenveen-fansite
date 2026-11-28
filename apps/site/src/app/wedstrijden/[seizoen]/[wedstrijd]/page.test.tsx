@@ -99,8 +99,8 @@ describe('the page of a match', () => {
   it('names the goals under each club in the header, and gives the facts with the round of its own', async () => {
     const text = plain(await render())
 
-    expect(text).toContain('Doelpunten sc Heerenveen: Demo 12’')
-    expect(text).toContain('Doelpunten Testdorp FC: Dummydijk 40’')
+    expect(text).toContain('Doelpunten sc Heerenveen: Rick Demo 12’')
+    expect(text).toContain('Doelpunten Testdorp FC: Frank Dummydijk 40’')
     expect(text).toContain('Competitie Eredivisie Ronde Speelronde 1 Datum')
   })
 

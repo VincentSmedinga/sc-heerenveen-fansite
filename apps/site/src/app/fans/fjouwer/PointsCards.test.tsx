@@ -31,26 +31,25 @@ const points = (total: number) => ({ lines: [], total })
 
 const finished = (id: number, total = 40, more: Partial<PointsMatch> = {}): FourPoints => ({
   match: match(id, more),
-  names: ['Noppert', 'Hilgers', 'Proper', 'Vente'],
+  names: ['Andries Noppert', 'Mees Hilgers', 'Dirk Proper', 'Dylan Vente'],
   ready: true,
   rows: [
-    { counted: true, name: 'Andries Noppert', points: points(5), summary: '90 min, tegengoal', surname: 'Noppert' },
-    { counted: true, name: 'Mees Hilgers', points: points(-3), summary: '30 min, rood', surname: 'Hilgers' },
+    { counted: true, name: 'Andries Noppert', points: points(5), summary: '90 min, tegengoal' },
+    { counted: true, name: 'Mees Hilgers', points: points(-3), summary: '30 min, rood' },
     {
       counted: false,
       name: 'Dirk Proper',
       points: points(0),
       summary: 'Telde niet mee: al 10 keer gekozen',
-      surname: 'Proper',
     },
-    { counted: true, name: 'Dylan Vente', points: points(22), summary: '90 min, 2 goals, geel', surname: 'Vente' },
+    { counted: true, name: 'Dylan Vente', points: points(22), summary: '90 min, 2 goals, geel' },
   ],
   total,
 })
 
 const waiting = (id: number): FourPoints => ({
   match: match(id, { goalsAgainst: null, goalsFor: null, status: 'scheduled' }),
-  names: ['Noppert', 'Hilgers', 'Proper', 'Vente'],
+  names: ['Andries Noppert', 'Mees Hilgers', 'Dirk Proper', 'Dylan Vente'],
   ready: false,
   rows: [],
   total: undefined,
@@ -101,7 +100,7 @@ describe('the card with the points of the last match', () => {
   it('shows only the names and a sentence while the report is not finished', () => {
     const html = render(waiting(7))
 
-    expect(html).toContain('Jouw vier: Noppert, Hilgers, Proper, Vente.')
+    expect(html).toContain('Jouw vier: Andries Noppert, Mees Hilgers, Dirk Proper, Dylan Vente.')
     expect(html).toContain('De punten staan er als het verslag af is.')
     expect(html).not.toContain('<table')
     expect(html).not.toContain('hf-key-figures')
@@ -132,7 +131,7 @@ describe('the card Eerdere wedstrijden', () => {
     expect(html).toMatch(/<h2[^>]*>Eerdere wedstrijden<\/h2>/)
     expect(html).toContain('FC Groningen')
     expect(html).toContain('1–2')
-    expect(html).toContain('Noppert, Hilgers, Proper, Vente')
+    expect(html).toContain('Andries Noppert, Mees Hilgers, Dirk Proper, Dylan Vente')
     expect(html).toContain('>10<')
     expect(html).toContain('>11<')
     expect(html).not.toContain('<button')

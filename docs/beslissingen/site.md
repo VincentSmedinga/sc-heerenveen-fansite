@@ -2597,6 +2597,7 @@
   De gok bij het tonen verbeteren (een gok blijft een gok, en elke pagina doet hem opnieuw).
 - **Later:** zie _Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels_ (8 november 2026): zonder persoon staat de naam van de wedstrijdpagina niet meer helemaal als achternaam.
 - **Later:** zie _De naam van een speler hoort bij de persoon, de tekst op een regel is de naam van de bron_ in `hosting-en-data.md` (26 november 2026): de doelpuntenregel haalt de achternaam uit de persoon, en de zoekterm volgt de persoon.
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): `goalsWithInitials` is weg, want de doelpuntenregel toont de volledige naam.
 
 ## Een vastgehouden wijziging van Wikipedia beslist een beheerder in het beheer, in de schermen van de wedstrijden
 
@@ -7899,6 +7900,7 @@
 - **Waarom:** een kaart met alleen getallen laat zien op wie de fans rekenden, zonder dat een keuze van een persoon te herleiden is.
   Pas vanaf de aftrap tonen houdt de eigen keuze een eigen keuze.
 - **Alternatieven:** de aantallen ook vóór de aftrap tonen (iedereen kiest dan hetzelfde als de massa); de geërfde vier niet meetellen (dan telt een fan die niet opnieuw koos niet mee, terwijl zijn vier bij de aftrap stond).
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): de kaart toont van elke speler de volledige naam.
 
 ## De kop van de kaart Jouw voorspellingen is het totaal
 
@@ -8051,6 +8053,8 @@
 - **Alternatieven:** altijd bij een gedeelde achternaam (ook "J. de Jong" voor wie nooit samen speelde); alleen in hetzelfde seizoen (mist de Drosts); alleen het veld; een schakelaar per persoon.
 - **Later:** de beslissing _`goalsWithInitials` vergelijkt de namen_ in _Doelpunten tellen per persoon_ hierboven blijft gelden voor de doelpuntenmakers in een wedstrijdregel; alleen de letter komt nu uit de gedeelde functie.
 - **Later:** zie _Op het veld staat een speler van de tegenstander zonder voornaam_ (25 november 2026): spelers van tegenstanders vallen er niet meer buiten.
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): de beginletter geldt niet meer bij de doelpuntenmakers boven de score, want daar staat de volledige naam.
+  Op het veld blijft de regel.
 
 ## De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers
 
@@ -8390,6 +8394,8 @@
   De regel staat in `shortOpponentNames` in `apps/site/src/player-name.ts`.
 - **Waarom:** het veld toont onze spelers al met hun achternaam, en een hele naam neemt op een smal veld veel ruimte.
 - **Alternatieven:** de hele naam houden; alleen het laatste woord tonen (dan wordt "da Silva Moreira" alleen "Moreira"); een veld voor de korte naam in het beheer.
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): bij de doelpuntenmakers boven de score staat de volledige naam.
+  Op het veld blijft de regel, en een achternaam die vooraan staat begint met een hoofdletter.
 
 ## Per seizoen toont de minuten van een speler, als elke wedstrijd een opstelling heeft
 
@@ -8639,3 +8645,46 @@
   De projecteigenaar wil bij weinig clubs liever een tabel dan een zin.
 - **Alternatieven:** de top 10 houden; het minimum van 10 clubs houden, zodat een club minder vaak op beide kaarten staat; ook zonder clubs een tabel tonen (een tabel zonder rijen).
 - **Later:** vervangt de top 10 uit _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026) in `redactie.md`, en het minimum van 10 clubs daaruit.
+
+## De volledige naam, behalve op het veld en de vakjes van Fjouwer
+
+- **Datum:** 28 november 2026
+- **Besluit:** een speler staat met zijn volledige naam, ook in de doelpuntenregel en boven de score (#1714).
+  Alleen het veld en de vakjes van "Jouw vier" tonen de achternaam.
+- **Waarom:** namen door elkaar lezen rommelig, en de volledige naam is de enige die we ook zonder persoon hebben.
+  Op het veld en de vakjes is te weinig ruimte.
+- **Hoe:** de doelpuntenregel toont de naam die we tonen (`shownGoalName`): die van de persoon, en zonder persoon die van de bron.
+  `scorerNameOf` en `goalsWithInitials` zijn weg.
+  Fjouwer toont de volledige naam op de kaarten, bij de keuze van de supporters en bij de punten.
+- **Alternatieven:** overal in de doelpuntenregel de achternaam, met zelf splitsen zonder persoon; de verdeling van eerder, met de achternaam waar de ruimte krap is; Fjouwer helemaal kort of helemaal lang.
+
+## Naamgenoten krijgen een beginletter
+
+- **Datum:** 28 november 2026
+- **Besluit:** waar alleen de achternaam staat, krijgen twee spelers met dezelfde achternaam de beginletter, en bij dezelfde beginletter de hele voornaam.
+- **Waarom:** dat is kort en het is al de regel op het veld.
+- **Hoe:** op het veld gelden de regels van nu (`leadOfNamesake` en `shortOpponentNames`).
+  Op de vakjes van "Jouw vier" geldt het voor twee spelers met dezelfde achternaam in de selectie waaruit je kiest (`withLeads` in `apps/site/src/player-name.ts`).
+- **Alternatieven:** de hele voornaam.
+
+## Een achternaam die vooraan staat, krijgt een hoofdletter
+
+- **Datum:** 28 november 2026
+- **Besluit:** zonder voornaam of beginletter begint de getoonde naam met een hoofdletter, ook bij een buitenlands voorvoegsel.
+  De opgeslagen naam verandert niet.
+- **Waarom:** zo schrijf je het in het Nederlands, en één regel voor alle voorvoegsels is voorspelbaar.
+- **Hoe:** de regel staat op één plek, `capitaliseName` in `packages/shared/src/player-name.ts`.
+  Een naam die met een apostrof begint, zoals "’t Hart", blijft zo.
+  Een query voor bezoekers gebruikt `nameInFront` in `packages/db/src/shown-name.ts`; het beheer en de importer tonen en koppelen de naam zoals hij is opgeslagen.
+  Lijsten op achternaam, zoals "Aken, Joost van", splitsen de opgeslagen naam (`splitStoredName`).
+- **Alternatieven:** alleen Nederlandse voorvoegsels; alleen in de doelpuntenregel, zoals eerder.
+
+## Een middenpunt tussen de doelpunten
+
+- **Datum:** 28 november 2026
+- **Besluit:** de doelpuntenregel zet een middenpunt tussen de doelpunten.
+  De minuut blijft vóór de naam.
+- **Waarom:** met volledige namen scheidt een middenpunt de doelpunten duidelijker, en de andere regels op de kaart gebruiken het ook.
+- **Hoe:** het punt zit met een spatie die niet afbreekt aan het doelpunt ervoor, dus geen regel begint ermee.
+  Het is `aria-hidden`; een schermlezer houdt "; " tussen de doelpunten.
+- **Alternatieven:** de komma houden; de naam vóór de minuut; elk doelpunt op een eigen regel.

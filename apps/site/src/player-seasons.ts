@@ -13,7 +13,7 @@ import {
   players,
   playerSeasonStats,
 } from '@fansite/db/schema'
-import { shownAppearanceName } from '@fansite/db/shown-name'
+import { nameInFront, shownAppearanceName } from '@fansite/db/shown-name'
 import { minutesPlayed } from '@fansite/shared/match-report'
 import { and, count, countDistinct, eq, inArray, or } from 'drizzle-orm'
 import { cache } from 'react'
@@ -420,7 +420,7 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
       .from(playerSeasonStats)
       .where(inArray(playerSeasonStats.playerId, playerIds)),
     db
-      .select({ name: shownAppearanceName(), slug: persons.slug })
+      .select({ name: nameInFront(shownAppearanceName()), slug: persons.slug })
       .from(matchGoals)
       .innerJoin(matchAppearances, eq(matchAppearances.id, matchGoals.assistAppearanceId))
       .leftJoin(players, eq(players.id, matchAppearances.playerId))

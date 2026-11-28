@@ -7,7 +7,7 @@ import { reasonOf } from '#src/errors'
 import { fantestPath } from '#src/fans/fantest'
 import { currentMonth, findEntry, loadMonthQuiz } from '#src/fans/fantest-entry'
 import { rankingOf as fantestRankingOf, monthScores } from '#src/fans/fantest-ranking'
-import { fjouwerPath, fjouwerSquad, fjouwerState, fjouwerSurnames } from '#src/fans/fjouwer'
+import { fjouwerNames, fjouwerPath, fjouwerSquad, fjouwerState } from '#src/fans/fjouwer'
 import { pointsText } from '#src/fans/fjouwer-form'
 import { cachedStanding, supporterFours } from '#src/fans/fjouwer-points'
 import { seasonRanking as fjouwerSeasonRanking, rankedSeasons as rankedFjouwerSeasons } from '#src/fans/fjouwer-ranking'
@@ -180,8 +180,8 @@ export function readFjouwerCard(supporter: CardSupporter | undefined, now = new 
     const rows = seasons.includes(season)
       ? shortRanking(await fjouwerSeasonRanking(season), player?.id, fjouwerRows)
       : []
-    const surnames = await fjouwerSurnames(db, state?.four ?? [])
-    const named = (ids: readonly number[]) => ids.flatMap((id) => surnames.get(id) ?? [])
+    const names = await fjouwerNames(db, state?.four ?? [])
+    const named = (ids: readonly number[]) => ids.flatMap((id) => names.get(id) ?? [])
     const inSquad = new Set(squad.map((member) => member.id))
     // A player who left the squad counts no more than one who was chosen ten times. While the
     // squad of the season is not known, there is nothing to hold the four against.

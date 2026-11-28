@@ -87,7 +87,7 @@ export const Opponent = meta.story({
     name: { givenName: 'Hein van Testma', surname: '' },
     ours: false,
     shirtNumber: 1,
-    shortName: 'van Testma',
+    shortName: 'Van Testma',
   },
   name: 'Een speler van de tegenstander',
 })

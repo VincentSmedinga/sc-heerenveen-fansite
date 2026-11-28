@@ -205,11 +205,11 @@ describe('the header', () => {
     // The own goal of the opponent's player Dirk Proefland counts for us: it is under
     // sc Heerenveen.
     expect(scorersFor.map((scorer) => [scorer.player, scorer.minute, scorer.ownGoal, scorer.penalty])).toEqual([
-      ['Demo', 12, false, false],
-      ['Proefland', 78, true, false],
+      ['Rick Demo', 12, false, false],
+      ['Dirk Proefland', 78, true, false],
     ])
     expect(scorersAgainst.map((scorer) => [scorer.player, scorer.minute, scorer.penalty])).toEqual([
-      ['Dummydijk', 40, true],
+      ['Frank Dummydijk', 40, true],
     ])
   })
 
@@ -449,8 +449,8 @@ describe('a goal and a yellow card without a minute', () => {
     const { scorersFor } = unknown()
 
     expect(scorersFor.map((scorer) => [scorer.player, scorer.minute])).toEqual([
-      ['Proefland', 78],
-      ['Demo', null],
+      ['Dirk Proefland', 78],
+      ['Rick Demo', null],
     ])
   })
 
@@ -555,6 +555,14 @@ describe('a player with a namesake', () => {
       href: '/spelers/ruben-ten-hove',
       surname: 'ten Hove',
     })
+    // With an initial before it, the surname keeps the stored prefix.
+    expect(pitch.ours.players[3]).not.toHaveProperty('shortName')
+  })
+
+  it('has the surname with a capital on the pitch without a namesake', () => {
+    const { pitch } = buildMatchPage(matchPageDataOf(reportedMatch(), [], true))
+
+    expect(pitch.ours.players[3]).toMatchObject({ name: { surname: 'ten Hove' }, shortName: 'Ten Hove' })
   })
 })
 
@@ -567,25 +575,26 @@ describe('a player of the opponent', () => {
     return buildMatchPage(matchPageDataOf(reported, [], true))
   }
 
-  it('has no given name on the pitch, from the person or from the text, and ours stay as they are', () => {
+  it('has no given name on the pitch, from the person or from the text', () => {
     const { pitch } = page()
     const theirs = pitch.opponent?.players ?? []
 
-    expect(theirs[2]).toMatchObject({ name: { givenName: 'Dirk Proefland', surname: '' }, shortName: 'van Proefland' })
+    expect(theirs[2]).toMatchObject({ name: { givenName: 'Dirk Proefland', surname: '' }, shortName: 'Van Proefland' })
     expect(theirs[8]?.shortName).toBe('Dummydijk')
-    expect(pitch.ours.players.every((one) => !('shortName' in one))).toBe(true)
+    // Ours have a short name only for the capital of a surname that stands alone.
+    expect(pitch.ours.players.flatMap((one) => one.shortName ?? [])).toEqual(['Ten Hove'])
   })
 
-  it('has no given name among the scorers, and the whole name in the course of the match', () => {
+  it('has the whole name among the scorers and in the course of the match', () => {
     const { events, scorersAgainst } = page()
 
-    expect(scorersAgainst.map((scorer) => scorer.player)).toEqual(['Dummydijk'])
+    expect(scorersAgainst.map((scorer) => scorer.player)).toEqual(['Frank Dummydijk'])
     expect(events).toContainEqual(
       expect.objectContaining({ kind: 'goal', player: { givenName: 'Frank Dummydijk', surname: '' } }),
     )
   })
 
-  it('gets the initial on the pitch and among the scorers when he shares his name', () => {
+  it('gets the initial on the pitch when he shares his name, and keeps the whole name above the score', () => {
     const reported = reportedMatch()
     const other = reported.stored.appearances.find((player) => player.id === 110)!
 
@@ -594,7 +603,7 @@ describe('a player of the opponent', () => {
     const built = buildMatchPage(matchPageDataOf(reported, [], true))
 
     expect(built.pitch.opponent?.players[8]?.lead).toBe('F.')
-    expect(built.scorersAgainst[0]?.player).toBe('F. Dummydijk')
+    expect(built.scorersAgainst[0]?.player).toBe('Frank Dummydijk')
     expect(built.substitutes.opponent?.[0]?.name.surname).toBe('')
   })
 })
