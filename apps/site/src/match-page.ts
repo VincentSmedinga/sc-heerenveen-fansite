@@ -192,7 +192,8 @@ function pitchNameOf({ lead, name, shortName }: ShownPlayer) {
 
 /**
  * The players with the short names of the opponent (see `shortOpponentNames`): all of his
- * players in the report are one line-up, so one player has one short name on the whole page.
+ * players in the report are one line-up, so the names on the pitch are told apart over all of
+ * them, the substitutes too.
  */
 function withShortOpponentNames(players: readonly MatchPagePlayer[]): ShownPlayer[] {
   const theirs = players.filter((player) => !player.ours)

@@ -112,10 +112,10 @@ export const shortNameWith = (lead: string, shortName: string): string =>
   lead === '' ? capitaliseName(shortName) : `${lead} ${shortName}`
 
 /**
- * How the players of the opponent in one line-up are shortened, on the pitch of a match and
- * among the scorers above the score (#1672): the name without the given name, in the order of
- * `players`. When two or more have the same short name, each gets a lead before it (see
- * `leadOfName`): `J.`, or the whole given name when the initial is shared too.
+ * How the players of the opponent in one line-up are shortened on the pitch of a match
+ * (#1672): the name without the given name, in the order of `players`. When two or more have
+ * the same short name, each gets a lead before it (see `leadOfName`): `J.`, or the whole
+ * given name when the initial is shared too.
  */
 export function shortOpponentNames(players: readonly OpponentPlayer[]): { lead: string; shortName: string }[] {
   return withLeads(players.map(withoutGivenName))

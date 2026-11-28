@@ -1,4 +1,5 @@
 import { listSeasonPlayerPersons } from '@fansite/db/queries'
+import { capitaliseName } from '@fansite/shared/player-name'
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
@@ -112,8 +113,11 @@ function onlyIn(season: ComparedSeason, other: ComparedSeason) {
 
     if (person !== null && people.has(person)) return false
 
+    // The card shows a name with a capital in front (`Van Testma`), and a row has it as it is
+    // stored, so both sides are compared with the capital.
+    const own = new Set([name, sourceName].map(capitaliseName))
     const namesakes = other.persons.filter((row) =>
-      [row.name, row.sourceName].some((one) => one === name || one === sourceName),
+      [row.name, row.sourceName].some((one) => own.has(capitaliseName(one))),
     )
 
     // A row with the same name is the same player, unless both have a person of their own.

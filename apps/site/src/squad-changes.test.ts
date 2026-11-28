@@ -102,6 +102,24 @@ describe('squadChanges', () => {
     expect(changes.departed).toEqual([])
   })
 
+  it('sees one player in a name with and without the capital in front (#1714)', () => {
+    // The card has the name as a visitor reads it, the rows have it as it is stored.
+    const shown = { name: 'Van Testma', sourceName: 'van Testma' }
+    const changes = squadChanges(
+      {
+        ...compared('2026/27', [['van Testma', 1, shown]]),
+        persons: [{ name: 'van Testma', personId: 1, sourceName: 'van Testma' }],
+      },
+      {
+        ...compared('2025/26', [['van Testma', null, { name: 'Van Testma', sourceName: 'Testma, van' }]]),
+        persons: [{ name: 'van Testma', personId: null, sourceName: 'Testma, van' }],
+      },
+    )
+
+    expect(changes.arrived).toEqual([])
+    expect(changes.departed).toEqual([])
+  })
+
   it('leaves a player who is only in our reports in one season out of both lists', () => {
     const report = { source: 'verslag' } as const
     const changes = squadChanges(
