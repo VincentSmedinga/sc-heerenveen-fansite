@@ -4869,11 +4869,13 @@
 
 - **Datum:** 28 november 2026
 - **Besluit:** "Jouw vier" toont de spelers op een klein liggend half veld met hun rugnummer, en de namen in twee kolommen ernaast of eronder (#1715).
-  - Het veld is onze helft, 11:10, op dezelfde schaal uit het hele veld gesneden.
+  - Het veld is onze helft, 11:10, met de lijnen op dezelfde schaal uit het hele veld gesneden.
+    Over de helft lopen tien banen, tegen vijf op de wedstrijdpagina, zodat het kleine veld zijn banen houdt.
     Een speler staat op zijn linie: keeper op 10%, verdedigers op 36%, middenvelders op 62% en aanvallers op 86% van onze doellijn.
     Twee op een linie staan op 30% en 70%, in de volgorde van de lijst.
   - Het veld is hoogstens 18 rem breed.
-    Heeft het component 28 rem of meer (een kaart van ongeveer 30 rem), dan is het veld 15 rem en staat de lijst ernaast.
+    Heeft het component 31 rem of meer, dan is het veld 15 rem en staat de lijst ernaast.
+    In een smallere kaart breken gewone achternamen naast het veld middenin af, zoals bij 30 rem op een scherm van 900 pixels.
   - Wie niet meetelt en een lege plek hebben een streepjesrand, en in de lijst staat er tekst bij.
   - Het veld is verborgen voor een schermlezer; de lijst heeft per plek één zin met de volledige naam.
 - **Waarom:** je ziet je vier in één keer als ploeg, en omdat er geen tekst op het gras staat, past het ook bij 400% zoom en bij lange namen.

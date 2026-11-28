@@ -1,12 +1,13 @@
 /*
  * A few players on a small half pitch beside a list of their names. The pitch is the half of
  * sc Heerenveen of the pitch of a match, lying down at every width: the grass, the border and
- * the lines are those of match-pitch.css, and this file only turns them a quarter. It is cut
- * from the whole pitch at the same scale, 11 to 10: the stripes are those of the whole pitch
- * (twice as wide, with the left half in view), the goal on the left is the only one, and the
- * halfway line lies on the right edge with half the centre circle. The pitch is at most 18 rem
- * wide and centred above the list; from 28 rem of room, a card of about 30 rem, it is 15 rem
- * wide with the list beside it. The list has two columns at every width.
+ * the lines are those of match-pitch.css, and this file only turns them a quarter. The lines
+ * are cut from the whole pitch at the same scale, 11 to 10: the goal on the left is the only
+ * one, and the halfway line lies on the right edge with half the centre circle. The grass has
+ * ten stripes across the half, so a small pitch keeps its stripes. The pitch is at most 18 rem
+ * wide and centred above the list; from 31 rem of room, where a surname still fits in half of
+ * what is left, it is 15 rem wide with the list beside it. The list has two columns at every
+ * width.
  *
  * A disc is filled in our blue. A player who does not count has an open disc with a dashed rim
  * in that blue, and an empty place in the list a dashed rim in the graphic line colour, which
@@ -31,8 +32,8 @@
       var(--hf-colour-background-pitch) 0 10%,
       var(--hf-colour-background-pitch-stripe) 10% 20%
     );
-    background-size: 200% 100%;
     border-radius: 0.5rem 0 0 0.5rem;
+    box-sizing: border-box;
     inline-size: 100%;
     justify-self: center;
     max-inline-size: 18rem;
@@ -89,10 +90,14 @@
     line-height: 1;
   }
 
-  /* On the pitch a disc is a little bigger, with its middle on its spot. */
+  /*
+   * On the pitch a disc is a little bigger, with its middle on its spot. With much larger text
+   * it stops at a fifth of the pitch, so the discs of two lines don't run into each other.
+   */
   .hf-pitch-sketch-field > .hf-pitch-sketch-disc {
-    block-size: 1.625rem;
-    inline-size: 1.625rem;
+    block-size: min(1.625rem, 20cqw);
+    font-size: min(var(--hf-meta-font-size), 12cqw);
+    inline-size: min(1.625rem, 20cqw);
     position: absolute;
     transform: translate(-50%, -50%);
   }
@@ -117,16 +122,20 @@
     margin: 0;
     padding: 0;
 
+    /* With much larger text the name goes under the disc, where it has the whole column. */
     > li {
+      align-content: flex-start;
       align-items: flex-start;
       display: flex;
-      gap: var(--hf-space-xs);
+      flex-wrap: wrap;
+      gap: var(--hf-space-xs) var(--hf-space-s);
       min-inline-size: 0;
     }
   }
 
   .hf-pitch-sketch-text {
     display: grid;
+    flex: 1 1 4.5em;
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
@@ -144,15 +153,19 @@
     margin: 0;
   }
 
-  @container hf-pitch-sketch (min-width: 28rem) {
+  @container hf-pitch-sketch (min-width: 31rem) {
     .hf-pitch-sketch-layout {
       align-items: center;
       grid-template-columns: 15rem minmax(0, 1fr);
     }
   }
 
-  /* The grass goes by itself; every disc keeps a rim in the colour of text. */
+  /* In forced colours the grass goes and every disc keeps a rim in the colour of text. */
   @media (forced-colors: active) {
+    .hf-pitch-sketch-field {
+      background: none;
+    }
+
     .hf-pitch-sketch-disc {
       background-color: Canvas;
       border-color: CanvasText;

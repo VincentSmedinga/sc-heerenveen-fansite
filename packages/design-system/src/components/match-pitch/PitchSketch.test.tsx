@@ -125,9 +125,9 @@ describe('pitch-sketch.css', () => {
 
   it('is a half of 11 to 10 lying down, at most 18 rem, and 15 rem beside the list in a wide card', () => {
     expect(css).toMatch(/\.hf-pitch-sketch-field \{\s*aspect-ratio: 11 \/ 10;/u)
-    expect(css).toMatch(/background-size: 200% 100%;\s*border-radius: 0\.5rem 0 0 0\.5rem;/u)
+    expect(css).toMatch(/border-radius: 0\.5rem 0 0 0\.5rem;\s*box-sizing: border-box;/u)
     expect(css).toMatch(/max-inline-size: 18rem/u)
-    expect(css).toMatch(/@container hf-pitch-sketch \(min-width: 28rem\)[^}]*\{[^}]*grid-template-columns: 15rem/u)
+    expect(css).toMatch(/@container hf-pitch-sketch \(min-width: 31rem\)[^}]*\{[^}]*grid-template-columns: 15rem/u)
   })
 
   it('has two columns of names at every width', () => {
