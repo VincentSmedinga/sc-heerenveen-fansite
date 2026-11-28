@@ -173,11 +173,11 @@ describe('the font weights in the CSS of tables', () => {
     expect(surname?.value).toBe(token('name'))
   })
 
-  it('sets every surname, in a list, a pick list and a name, in the weight of a name', () => {
+  it('sets every surname, in the lists of players and a name, in the weight of a name', () => {
     for (const [file, name] of [
       ['components/player-list/player-list.css', 'hf-player-list-surname'],
       ['components/pick-list/pick-list.css', 'hf-pick-list-name'],
-      ['components/pick-list/pick-list.css', 'hf-pick-list-strip-name'],
+      ['components/match-pitch/pitch-sketch.css', 'hf-pitch-sketch-name'],
     ] as const) {
       const rule = weightRules(read(file)).find(({ selector }) => selector.includes(name))
 

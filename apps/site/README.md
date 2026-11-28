@@ -351,10 +351,10 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een weekend telt tot het einde van zijn laatste dag.
 - **Een speler met zijn volledige naam:** in de doelpuntenregel, boven de score, in zinnen, lijsten en tabellen staat de volledige naam (#1714).
   De doelpuntenregel toont de naam van de persoon van het doelpunt, en zonder persoon die van de bron (`shownGoalName`).
-  Alleen het veld van de wedstrijdpagina en de vakjes van "Jouw vier" tonen de achternaam.
+  Alleen het veld van de wedstrijdpagina en de namen bij het veld van "Jouw vier" tonen de achternaam.
 - **De hoofdletter:** een achternaam die vooraan staat, zonder voornaam of beginletter, begint met een hoofdletter (`capitaliseName` in `@fansite/shared/player-name`).
   Een query voor bezoekers gebruikt daarvoor `nameInFront` uit `@fansite/db/shown-name`; het beheer en lijsten op achternaam houden de naam zoals hij is opgeslagen.
-- **De vakjes van "Jouw vier":** delen twee spelers in de selectie een achternaam, dan staat de beginletter ervoor, en de hele voornaam bij dezelfde beginletter (`withLeads` in `src/player-name.ts`).
+- **De namen bij het veld van "Jouw vier":** delen twee spelers in de selectie een achternaam, dan staat de beginletter ervoor, en de hele voornaam bij dezelfde beginletter (`withLeads` in `src/player-name.ts`).
 - **De beginletter op de wedstrijdpagina:** een speler van ons krijgt op het veld de beginletter van zijn voornaam voor zijn achternaam, zoals `J. Drost`, als een andere persoon met dezelfde achternaam (het voorvoegsel telt mee) in `players` een seizoen heeft dat hooguit één seizoen van een seizoen van hem afligt (`leadOfNamesake` in `src/player-name.ts`).
   Hebben ze dezelfde beginletter, dan komt de hele voornaam.
   Een speler van ons zonder persoon, voornaam of achternaam blijft zoals hij is.

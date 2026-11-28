@@ -49,44 +49,6 @@ export type PickListProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
   groups: readonly PickListGroup[]
 }
 
-export type PickListStripPlace = {
-  /** The surname to show. Without it the place is empty and shows only its number. */
-  name?: string | undefined
-  /**
-   * Text that says the player does not count, such as "telt niet mee". The name is struck
-   * through and this text stands under it, so the strike-through is not the only sign.
-   */
-  note?: string | undefined
-}
-
-export type PickListStripProps = Omit<ComponentPropsWithoutRef<'ol'>, 'children'> & {
-  /** The places, in order. They are numbered from 1. */
-  places: readonly PickListStripPlace[]
-}
-
-/**
- * The strip of the chosen players: a place for each, side by side, also on a phone. A place is
- * a dark tile with its number and the surname. An empty place shows only its number. A player
- * who does not count has a struck-through name and a note. pick-list.css gives it its look.
- */
-const Strip = ({ className, places, ...props }: PickListStripProps) => (
-  <ol {...props} className={classNames('hf-pick-list-strip', className)}>
-    {places.map((place, index) => (
-      <li data-empty={place.name ? undefined : ''} key={index}>
-        <span className="hf-pick-list-strip-number">{index + 1}</span>
-        {place.name ? (
-          <span className="hf-pick-list-strip-name" data-struck={place.note ? '' : undefined}>
-            {place.name}
-          </span>
-        ) : null}
-        {place.note ? <span className="hf-pick-list-strip-note">{place.note}</span> : null}
-      </li>
-    ))}
-  </ol>
-)
-
-Strip.displayName = 'PickList.Strip'
-
 /**
  * A group of checkboxes for each line of a team, to tick players: one `fieldset` with a
  * `legend` for each group. Behind the legend stands a counter such as "1 van 2", as text
@@ -158,5 +120,3 @@ export const PickList = ({ className, groups, ...props }: PickListProps) => (
     })}
   </div>
 )
-
-PickList.Strip = Strip

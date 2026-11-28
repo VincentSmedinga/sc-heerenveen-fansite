@@ -8688,3 +8688,11 @@
 - **Hoe:** het punt zit met een spatie die niet afbreekt aan het doelpunt ervoor, dus geen regel begint ermee.
   Het is `aria-hidden`; een schermlezer houdt "; " tussen de doelpunten.
 - **Alternatieven:** de komma houden; de naam vóór de minuut; elk doelpunt op een eigen regel.
+
+## Na een geweigerde keuze blijft staan wat is opgeslagen
+
+- **Datum:** 28 november 2026
+- **Besluit:** weigert de server de keuze in Fjouwer, dan tonen het veld en de lijst de vier die de server kent, niet de vakjes die je had aangevinkt (#1715).
+  Na opslaan vraagt de actie met `refresh()` de pagina opnieuw op, zodat het veld ook met JavaScript de opgeslagen vier toont.
+- **Waarom:** het veld laat zo nooit een ploeg zien die niet is opgeslagen of die niet mag, zoals drie spelers op een linie.
+- **Alternatieven:** de aangevinkte spelers tonen, zoals de tegels deden (dan moet het veld ook plek maken voor drie of meer op een linie, en vallen spelers na de vierde weg); de opgeslagen vier uit het antwoord van de actie lezen (na een latere weigering is dat antwoord weg).

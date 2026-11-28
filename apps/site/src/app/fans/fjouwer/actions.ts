@@ -1,6 +1,7 @@
 'use server'
 
 import { requireFansPart } from '@fansite/shared/fans-env'
+import { refresh } from 'next/cache'
 import { notFound } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
@@ -33,6 +34,10 @@ export async function saveFjouwerAction(_previous: FjouwerFormState, formData: F
     case 'invalid':
       return { errors: result.errors, values }
     case 'saved':
+      // The page reads the four again, so the pitch shows what is stored, also after a later
+      // choice that is refused.
+      refresh()
+
       return {
         errors: { general: [], lines: {} },
         saved: { until: kickoffText(result.closesAt) },

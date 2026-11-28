@@ -1,6 +1,16 @@
 'use client'
 
-import { Button, ErrorSummary, Form, Notice, PickList, Text } from '@fansite/design-system'
+import {
+  Button,
+  ErrorSummary,
+  Form,
+  Notice,
+  PickList,
+  PitchSketch,
+  type PitchSketchLine,
+  type PitchSketchPlayer,
+  Text,
+} from '@fansite/design-system'
 import { useActionState, useEffect, useState } from 'react'
 
 import {
@@ -14,13 +24,28 @@ import {
   playerLine,
   savedMessage,
 } from '#src/fans/fjouwer-form'
-import { fjouwerLines, lineWords, maxPerLine, maxUsesPerSeason, picksPerMatch } from '#src/fans/fjouwer-rules'
+import {
+  type FjouwerLine,
+  fjouwerLines,
+  lineWords,
+  maxPerLine,
+  maxUsesPerSeason,
+  picksPerMatch,
+} from '#src/fans/fjouwer-rules'
 
 import { saveFjouwerAction } from './actions'
 
 const instruction = `Kies ${picksPerMatch} spelers, hoogstens ${maxPerLine} per linie. Elke speler kun je ${maxUsesPerSeason} wedstrijden per seizoen kiezen.`
 
-// The form of the four: the strip with the four, the list of players to tick and one button. It
+// The line of a player as the pitch names it.
+const pitchLines: Record<FjouwerLine, PitchSketchLine> = {
+  aanvaller: 'aanvaller',
+  doelman: 'keeper',
+  middenvelder: 'middenvelder',
+  verdediger: 'verdediger',
+}
+
+// The form of the four: the pitch with the four, the list of players to tick and one button. It
 // is a client component only to show what the server says and to count what is ticked: the form
 // is a plain POST that works without JavaScript, and with JavaScript the page doesn't reload.
 // The notice is in the page from the start, empty, so a screen reader announces it when it
@@ -37,13 +62,13 @@ export function FjouwerForm({
   /** The line about an inherited four, in a notice, or nothing. */
   inheritedLine?: string | undefined
   matchId: number
-  /** The text next to a name in the strip of a player who does not count. */
+  /** The text in the list of a player who does not count. */
   noteForStruck: string
   /** The squad in the order of the form. */
   players: readonly FormPlayer[]
   /** Whether the supporter saved a four for this match. */
   saved: boolean
-  /** The ids of the four the supporter has now, in the order of the strip. */
+  /** The ids of the four the supporter has now, in the order of the list. */
   startFour: readonly number[]
   /** The ids in the four who have their ten and do not count. */
   struck: readonly number[]
@@ -59,12 +84,22 @@ export function FjouwerForm({
   const noticeId = `fjouwer-${matchId}-melding`
   const answered = state.saved !== undefined || state.failure !== undefined || hasErrors(state)
   const byId = new Map(players.map((player) => [String(player.id), player]))
-  const places: StripPlace[] = answered
-    ? state.values.map((id) => ({ name: byId.get(id)?.shortName }))
-    : startFour.map((id) => ({
-        name: byId.get(String(id))?.shortName,
-        note: struck.includes(id) ? noteForStruck : undefined,
-      }))
+  // Always the four the server knows, never what is ticked: after a save the action refreshes
+  // the page, and after a refusal nothing has changed.
+  const places = Array.from({ length: picksPerMatch }, (_, index): null | PitchSketchPlayer => {
+    const id = startFour[index]
+    const player = id === undefined ? undefined : byId.get(String(id))
+
+    return player === undefined
+      ? null
+      : {
+          line: pitchLines[player.line],
+          name: player.name,
+          note: struck.includes(player.id) ? noteForStruck : undefined,
+          shirtNumber: player.shirtNumber,
+          shortName: player.shortName,
+        }
+  })
   const summary = [
     ...fjouwerLines.flatMap((line) => {
       const messages = state.errors.lines[line]
@@ -103,10 +138,7 @@ export function FjouwerForm({
         {notice}
       </Notice>
       {inheritedLine === undefined || answered ? null : <Notice>{inheritedLine}</Notice>}
-      <PickList.Strip
-        aria-label="Jouw vier"
-        places={Array.from({ length: picksPerMatch }, (_, index) => places[index] ?? {})}
-      />
+      <PitchSketch label="Jouw vier" places={places} />
       <Text>{instruction}</Text>
       <Form
         action={action}
@@ -149,5 +181,3 @@ export function FjouwerForm({
 
 const hasErrors = (state: FjouwerFormState) =>
   state.errors.general.length > 0 || Object.keys(state.errors.lines).length > 0
-
-type StripPlace = { name?: string | undefined; note?: string | undefined }

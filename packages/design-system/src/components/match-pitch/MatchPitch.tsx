@@ -8,6 +8,7 @@ import { PlayerName } from '../player-name/PlayerName'
 import { Tag } from '../tag/Tag'
 import { checkedClubColour } from './club-colour'
 import { isCrowdedFormation, parseFormation, pitchSpots } from './pitch-layout'
+import { PitchLines } from './PitchLines'
 import { PitchPlayer, type PitchPlayerData } from './PitchPlayer'
 
 export type MatchPitchProps = ComponentPropsWithoutRef<'div'> & {
@@ -206,12 +207,7 @@ export const MatchPitch = ({
               crowded && 'hf-match-pitch-crowded',
             )}
           >
-            <span className="hf-match-pitch-line hf-match-pitch-line-half" />
-            <span className="hf-match-pitch-line hf-match-pitch-line-circle" />
-            <span className="hf-match-pitch-line hf-match-pitch-line-penalty-area hf-match-pitch-line-first" />
-            <span className="hf-match-pitch-line hf-match-pitch-line-penalty-area hf-match-pitch-line-second" />
-            <span className="hf-match-pitch-line hf-match-pitch-line-goal-area hf-match-pitch-line-first" />
-            <span className="hf-match-pitch-line hf-match-pitch-line-goal-area hf-match-pitch-line-second" />
+            <PitchLines ends={['first', 'second']} />
             {drawn.map(({ ours: isOurs, placed }) => (
               <Team extraTime={extraTime} half={half} key={placed.team.name} ours={isOurs} placed={placed} />
             ))}

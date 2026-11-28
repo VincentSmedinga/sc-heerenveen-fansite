@@ -166,6 +166,8 @@ export type {
   PitchPlayerGoal,
   PitchPlayerProps,
 } from './components/match-pitch/PitchPlayer'
+export { PitchSketch } from './components/match-pitch/PitchSketch'
+export type { PitchSketchLine, PitchSketchPlayer, PitchSketchProps } from './components/match-pitch/PitchSketch'
 export { MatchScoreBar } from './components/match-score-bar/MatchScoreBar'
 export type { MatchScoreBarGoal, MatchScoreBarProps } from './components/match-score-bar/MatchScoreBar'
 export { MatchSubstitutes, substituteSentence } from './components/match-substitutes/MatchSubstitutes'
@@ -216,13 +218,7 @@ export type {
 export { Pagination } from './components/pagination/Pagination'
 export type { PaginationProps } from './components/pagination/Pagination'
 export { PickList } from './components/pick-list/PickList'
-export type {
-  PickListGroup,
-  PickListOption,
-  PickListProps,
-  PickListStripPlace,
-  PickListStripProps,
-} from './components/pick-list/PickList'
+export type { PickListGroup, PickListOption, PickListProps } from './components/pick-list/PickList'
 export { PlaceCell, sharedPlaces } from './components/place-cell/PlaceCell'
 export type { PlaceCellProps } from './components/place-cell/PlaceCell'
 export { PlayerFiguresTable } from './components/player-figures-table/PlayerFiguresTable'
