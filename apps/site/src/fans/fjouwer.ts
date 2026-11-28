@@ -6,6 +6,7 @@ import { utcToAmsterdam } from '@fansite/db/season'
 import { nameInFront, shownPlayerName } from '@fansite/db/shown-name'
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm'
 
+import { shirtNumberOn } from '../beheer/match-reports'
 import { personNameParts, personSortName, shortNameWith, splitStoredName, withLeads } from '../player-name'
 import {
   checkPicks,
@@ -47,10 +48,11 @@ const matchColumns = {
 const orderOf = (match: FjouwerMatch) => closesAt(match).getTime() - match.id / 1e9
 
 /**
- * A player of the squad as the form shows him: `shortName` is the name on the strip of the
- * four, the surname without the given name (see `withLeads`).
+ * A player of the squad as the form shows him: `shirtNumber` is the number he wears on the
+ * day of the match, and `shortName` is the name in the list of the four, the surname without
+ * the given name (see `withLeads`).
  */
-export type SquadPlayer = SquadMember & { shortName: string }
+export type SquadPlayer = SquadMember & { shirtNumber: null | number; shortName: string }
 
 /**
  * The match of the card: the first match of the first team that is still to be played and has
@@ -128,6 +130,9 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
       leftSquadAt: players.leftSquadAt,
       name: nameInFront(shownPlayerName()),
       position: sql<FjouwerLine | null>`coalesce(${players.position}, ${persons.line})`,
+      previousShirtNumber: players.previousShirtNumber,
+      shirtNumber: players.shirtNumber,
+      shirtNumberFrom: players.shirtNumberFrom,
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))
@@ -156,7 +161,9 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
       }) || surname.replace(prefixes, '')
     ).toLowerCase()
 
-    return [{ givenName, id: row.id, line, name: row.name, shortName: surname, sortName }]
+    const shirtNumber = shirtNumberOn(match.matchDate, row)
+
+    return [{ givenName, id: row.id, line, name: row.name, shirtNumber, shortName: surname, sortName }]
   })
   const leads = withLeads(squad)
 
@@ -168,7 +175,7 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
         a.sortName.localeCompare(b.sortName, 'nl') ||
         a.name.localeCompare(b.name, 'nl'),
     )
-    .map(({ id, line, name, shortName }) => ({ id, line, name, shortName }))
+    .map(({ id, line, name, shirtNumber, shortName }) => ({ id, line, name, shirtNumber, shortName }))
 }
 
 /**

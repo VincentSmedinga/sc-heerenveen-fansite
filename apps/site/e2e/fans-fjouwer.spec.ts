@@ -34,6 +34,12 @@ const player = (page: Page, name: string) => page.getByRole('checkbox', { name: 
 
 const goodFour = ['Tjerk Brandsma', 'Daan Boerema', 'Milan Reitsma', 'Sjoerd Altena']
 
+/** The places of the list "Jouw vier" beside the pitch. */
+const four = (page: Page) => page.getByRole('list', { name: 'Jouw vier' }).getByRole('listitem')
+
+/** The sentences of the list for these players, by name. */
+const places = (names: readonly string[]) => names.map((name) => new RegExp(`^${name}, `))
+
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
@@ -53,6 +59,7 @@ test.describe('without JavaScript', () => {
     await expect(page.getByText(/^Je vier staan\. Je kunt ze wijzigen tot .+ uur\.$/)).toBeVisible()
     await expect(page.getByRole('button', { name: 'Wijziging opslaan' })).toBeVisible()
     await expect(player(page, 'Tjerk Brandsma')).toBeChecked()
+    await expect(four(page)).toContainText(places(goodFour))
 
     // A new visit keeps the four, and a change replaces it.
     await page.goto('/fans/fjouwer')
@@ -63,6 +70,8 @@ test.describe('without JavaScript', () => {
     await expect(page.getByText(/^Je vier staan\./)).toBeVisible()
     await expect(player(page, 'Jesse Postma')).toBeChecked()
     await expect(player(page, 'Sjoerd Altena')).not.toBeChecked()
+    await expect(four(page).filter({ hasText: 'Jesse Postma' })).toHaveCount(1)
+    await expect(four(page).filter({ hasText: 'Sjoerd Altena' })).toHaveCount(0)
   })
 
   test('shows the error at the line that is full, and keeps what was ticked', async ({ page }) => {
@@ -134,5 +143,12 @@ test('chooses four with the page, counts what is ticked, and the focus goes to t
   await expect(page.getByText('4 van 4 gekozen')).toBeVisible()
   await page.getByRole('button', { name: 'Opslaan' }).click()
   await expect(page.getByText(/^Je vier staan\./)).toBeVisible()
+  await expect(four(page)).toContainText(places(goodFour))
   await checkPage(page)
+
+  // A refused choice after a save: the list still has what was saved, not what is ticked.
+  await player(page, 'Sjoerd Altena').uncheck()
+  await page.getByRole('button', { name: 'Wijziging opslaan' }).click()
+  await expect(summary).toBeFocused()
+  await expect(four(page)).toContainText(places(goodFour))
 })

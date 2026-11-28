@@ -1,3 +1,5 @@
+import type * as React from 'react'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -7,6 +9,18 @@ import type { FormPlayer } from '#src/fans/fjouwer-form'
 import { type FjouwerChoice, JouwVierCard, NoMatchCard } from './FjouwerCards'
 
 vi.mock('./actions', () => ({ saveFjouwerAction: vi.fn() }))
+
+// The answer of the server the form shows: none, unless a test sets one.
+const answer = vi.hoisted(() => ({ state: undefined as unknown }))
+
+vi.mock('react', async (importOriginal) => {
+  const react = await importOriginal<typeof React>()
+
+  return {
+    ...react,
+    useActionState: (_action: unknown, initial: unknown) => [answer.state ?? initial, () => undefined, false],
+  }
+})
 
 // Read with the morning of Friday 20 November 2026 (Dutch time) as now.
 const now = new Date('2026-11-20T10:00:00Z')
@@ -30,6 +44,7 @@ const player = (id: number, line: FormPlayer['line'], name: string, usesLeft = 1
   line,
   name,
   points: 31,
+  shirtNumber: id,
   shortName: name.split(' ').at(-1) ?? name,
   usesLeft,
 })
@@ -50,6 +65,13 @@ const choice = (extra: Partial<FjouwerChoice> = {}): FjouwerChoice => ({
   saved: false,
   ...extra,
 })
+
+/** The sentences of the list "Jouw vier", in order. */
+const sentences = (html: string) => {
+  const list = /<ol aria-label="Jouw vier"[^>]*>(.*?)<\/ol>/s.exec(html)?.[1] ?? ''
+
+  return [...list.matchAll(/<span class="hf-visually-hidden">([^<]*)<\/span>/g)].map((found) => found[1])
+}
 
 const render = (props: { choice: FjouwerChoice | undefined; match?: FjouwerMatch }) =>
   renderToStaticMarkup(<JouwVierCard match={match} now={now} {...props} />)
@@ -92,12 +114,17 @@ describe('the card Jouw vier', () => {
     expect(html).toContain('>Opslaan<')
   })
 
-  it('shows the saved four in the strip, ticked, with the button Wijziging opslaan', () => {
+  it('shows the saved four on the pitch and in the list, ticked, with the button Wijziging opslaan', () => {
     const html = render({ choice: choice({ four: [1, 2, 4, 5], saved: true }) })
 
     expect(html).toContain('4 van 4 gekozen')
     expect(html).toContain('>Wijziging opslaan<')
-    expect(html).toContain('Noppert')
+    expect(sentences(html)).toEqual([
+      'Andries Noppert, keeper, rugnummer 1',
+      'Luca Hilgers, verdediger, rugnummer 2',
+      'Levi Smans, middenvelder, rugnummer 4',
+      'Dylan Vente, aanvaller, rugnummer 5',
+    ])
     expect(html.match(/checked=""/g)).toHaveLength(4)
     expect(html).not.toContain('Kijk even')
   })
@@ -109,7 +136,7 @@ describe('the card Jouw vier', () => {
     expect(html).toContain(
       'Je vier van vorige keer staan nog. Dirk Proper is al 10 keer gekozen en telt niet mee. Kies een andere middenvelder, dan heb je er weer vier.',
     )
-    expect(html).toContain('telt niet mee')
+    expect(sentences(html)[2]).toBe('Dirk Proper, middenvelder, rugnummer 3, telt niet mee')
     expect(html).toContain('3 van 4 gekozen')
     expect(html.match(/checked=""/g)).toHaveLength(3)
   })
@@ -120,6 +147,34 @@ describe('the card Jouw vier', () => {
     expect(html).not.toContain('Kijk even')
     expect(html).toContain('Dit zijn je vier van vorige keer. Je kunt ze wijzigen tot de aftrap.')
     expect(html).toContain('>Opslaan<')
+  })
+
+  it('has four empty places for a supporter who never chose, and for a player who left the squad', () => {
+    const empty = [1, 2, 3, 4].map((place) => `Plek ${place}, nog te kiezen`)
+
+    expect(sentences(render({ choice: choice() }))).toEqual(empty)
+    expect(sentences(render({ choice: choice({ four: [99, 2, 4, 5], inherited: true }) }))[0]).toBe(empty[0])
+  })
+
+  it('shows the four the server knows after a refused choice, and keeps what was ticked', () => {
+    for (const refused of [
+      { errors: { general: [], lines: { middenvelder: ['Kies hoogstens 2 middenvelders.'] } } },
+      { errors: { general: [], lines: {} }, failure: 'closed' },
+    ]) {
+      answer.state = { ...refused, values: ['3'] }
+
+      const html = render({ choice: choice({ four: [1, 2, 4, 5], saved: true }) })
+
+      answer.state = undefined
+
+      expect(sentences(html)).toEqual([
+        'Andries Noppert, keeper, rugnummer 1',
+        'Luca Hilgers, verdediger, rugnummer 2',
+        'Levi Smans, middenvelder, rugnummer 4',
+        'Dylan Vente, aanvaller, rugnummer 5',
+      ])
+      expect(html.match(/checked=""/g)).toHaveLength(1)
+    }
   })
 
   it('closes at 00.00 on the day of a match without an hour, and says why', () => {

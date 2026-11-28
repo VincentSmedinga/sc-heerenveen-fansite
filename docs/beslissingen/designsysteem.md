@@ -4311,6 +4311,7 @@
 - **Waarom:** de koppeling van vakje, reden en fout staat zo op één plek, en een andere pagina die iets aanvinkt kan hem later gebruiken.
   De `CheckboxGroup` heeft geen teller, geen regel per vakje, geen reden en geen fout, en de rijen zien er anders uit.
 - **Alternatieven:** de `CheckboxGroup` uitbreiden (elke wijziging raakt de bronnenfilter, dat een gewone reeks vakjes is); de vakjes op de pagina zelf opbouwen; vier keuzelijsten (je ziet de selectie niet in één keer).
+- **Later:** 28 november 2026 (#1715): `PickList.Strip` is weg, zie _Een klein half veld met de namen ernaast_ en _Een eigen component naast MatchPitch_.
 
 ## QuizQuestion voor een vraag van de Fantest
 
@@ -4863,3 +4864,29 @@
 - **Waarom:** beweging op elke pagina trekt de aandacht zonder reden.
   De server tekent altijd de uitgelogde knop, dus zonder dit zou de romp bij elke keer laden stijgen.
 - **Alternatieven:** de romp bij elke keer laden laten stijgen; de overgang alleen op de toestanden onder de muis en bij focus zetten (dan schuift de romp niet terug als de muis weggaat).
+
+## Een klein half veld met de namen ernaast
+
+- **Datum:** 28 november 2026
+- **Besluit:** "Jouw vier" toont de spelers op een klein liggend half veld met hun rugnummer, en de namen in twee kolommen ernaast of eronder (#1715).
+  - Het veld is onze helft, 11:10, met de lijnen op dezelfde schaal uit het hele veld gesneden.
+    Over de helft lopen tien banen, tegen vijf op de wedstrijdpagina, zodat het kleine veld zijn banen houdt.
+    Een speler staat op zijn linie: keeper op 10%, verdedigers op 36%, middenvelders op 62% en aanvallers op 86% van onze doellijn.
+    Twee op een linie staan op 30% en 70%, in de volgorde van de lijst.
+  - Het veld is hoogstens 18 rem breed.
+    Heeft het component 31 rem of meer, dan is het veld 15 rem en staat de lijst ernaast.
+    In een smallere kaart breken gewone achternamen naast het veld middenin af, zoals bij 30 rem op een scherm van 900 pixels.
+  - Wie niet meetelt en een lege plek hebben een streepjesrand, en in de lijst staat er tekst bij.
+  - Het veld is verborgen voor een schermlezer; de lijst heeft per plek één zin met de volledige naam.
+- **Waarom:** je ziet je vier in één keer als ploeg, en omdat er geen tekst op het gras staat, past het ook bij 400% zoom en bij lange namen.
+- **Alternatieven:** de vier tegels houden; een groot half veld met de namen op het gras (twee lange namen op een linie passen niet); het veld in de kaart "Je punten", met ringen, tekens en punten.
+
+## Een eigen component naast MatchPitch
+
+- **Datum:** 28 november 2026
+- **Besluit:** het veld met de lijst is een eigen component, `PitchSketch`, dat de tekening van het veld met `MatchPitch` deelt, en `PickList.Strip` verdwijnt (#1715).
+  - De lijnen staan in `PitchLines`, en het gras, de rand en de lijnen komen uit `match-pitch.css`.
+    `pitch-sketch.css` draait ze alleen een kwartslag.
+  - Het component weet niets van de regels van Fjouwer: het toont de plekken die het krijgt.
+- **Waarom:** formaties, wissels en de legenda van `MatchPitch` horen niet bij vier gekozen spelers, en Fjouwer was de enige die de tegels gebruikte.
+- **Alternatieven:** een variant van `MatchPitch`; `PickList.Strip` laten staan zonder gebruik.

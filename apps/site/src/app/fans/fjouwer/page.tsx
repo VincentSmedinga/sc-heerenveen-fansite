@@ -69,6 +69,7 @@ export default async function FjouwerPage() {
         line: player.line,
         name: player.name,
         points: points.get(player.id) ?? 0,
+        shirtNumber: player.shirtNumber,
         shortName: player.shortName,
         usesLeft: usesLeft(state.uses, player.id),
       })),

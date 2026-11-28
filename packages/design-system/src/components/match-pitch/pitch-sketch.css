@@ -1,0 +1,174 @@
+/*
+ * A few players on a small half pitch beside a list of their names. The pitch is the half of
+ * sc Heerenveen of the pitch of a match, lying down at every width: the grass, the border and
+ * the lines are those of match-pitch.css, and this file only turns them a quarter. The lines
+ * are cut from the whole pitch at the same scale, 11 to 10: the goal on the left is the only
+ * one, and the halfway line lies on the right edge with half the centre circle. The grass has
+ * ten stripes across the half, so a small pitch keeps its stripes. The pitch is at most 18 rem
+ * wide and centred above the list; from 31 rem of room, where a surname still fits in half of
+ * what is left, it is 15 rem wide with the list beside it. The list has two columns at every
+ * width.
+ *
+ * A disc is filled in our blue. A player who does not count has an open disc with a dashed rim
+ * in that blue, and an empty place in the list a dashed rim in the graphic line colour, which
+ * reaches 3:1 on the card.
+ */
+
+@layer hf.components {
+  .hf-pitch-sketch {
+    container: hf-pitch-sketch / inline-size;
+  }
+
+  .hf-pitch-sketch-layout {
+    display: grid;
+    gap: var(--hf-space-m) var(--hf-space-l);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hf-pitch-sketch-field {
+    aspect-ratio: 11 / 10;
+    background: repeating-linear-gradient(
+      to right,
+      var(--hf-colour-background-pitch) 0 10%,
+      var(--hf-colour-background-pitch-stripe) 10% 20%
+    );
+    border-radius: 0.5rem 0 0 0.5rem;
+    box-sizing: border-box;
+    inline-size: 100%;
+    justify-self: center;
+    max-inline-size: 18rem;
+  }
+
+  .hf-pitch-sketch-field .hf-match-pitch-line-half {
+    block-size: 100%;
+    border-width: 0 0 0 2px;
+    inline-size: auto;
+    inset-block: 0;
+    inset-inline-start: calc(100% - 2px);
+  }
+
+  .hf-pitch-sketch-field .hf-match-pitch-line-circle {
+    block-size: 30%;
+    inline-size: auto;
+    inset-block-start: 35%;
+    inset-inline-start: 100%;
+    transform: translateX(-50%);
+  }
+
+  /* The areas at our goal on the left: no goal line, and as deep as on the half of a match. */
+  .hf-pitch-sketch-field .hf-match-pitch-line-penalty-area.hf-match-pitch-line-first {
+    block-size: 58%;
+    border-width: 2px 2px 2px 0;
+    inline-size: 26%;
+    inset-block-start: 21%;
+    inset-inline-start: -2px;
+  }
+
+  .hf-pitch-sketch-field .hf-match-pitch-line-goal-area.hf-match-pitch-line-first {
+    block-size: 28%;
+    border-width: 2px 2px 2px 0;
+    inline-size: 10%;
+    inset-block-start: 36%;
+    inset-inline-start: -2px;
+  }
+
+  .hf-pitch-sketch-disc {
+    align-items: center;
+    background-color: var(--hf-colour-background-button);
+    block-size: 1.5rem;
+    border: 2px solid var(--hf-colour-background-button);
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-on-button);
+    display: grid;
+    flex: none;
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    inline-size: 1.5rem;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /*
+   * On the pitch a disc is a little bigger, with its middle on its spot. With much larger text
+   * it stops at a fifth of the pitch, so the discs of two lines don't run into each other.
+   */
+  .hf-pitch-sketch-field > .hf-pitch-sketch-disc {
+    block-size: min(1.625rem, 20cqw);
+    inline-size: min(1.625rem, 20cqw);
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+
+  .hf-pitch-sketch-disc-struck {
+    background-color: var(--hf-card-surface, var(--hf-colour-background-surface));
+    border-style: dashed;
+    color: var(--hf-colour-text-default);
+  }
+
+  .hf-pitch-sketch-disc-empty {
+    background-color: transparent;
+    border-color: var(--hf-card-line-graphic, var(--hf-colour-line-graphic-surface));
+    border-style: dashed;
+  }
+
+  .hf-pitch-sketch-names {
+    display: grid;
+    gap: var(--hf-space-s) var(--hf-space-m);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    /* With much larger text the name goes under the disc, where it has the whole column. */
+    > li {
+      align-content: flex-start;
+      align-items: flex-start;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--hf-space-xs) var(--hf-space-s);
+      min-inline-size: 0;
+    }
+  }
+
+  .hf-pitch-sketch-text {
+    display: grid;
+    flex: 1 1 4.5em;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .hf-pitch-sketch-name {
+    font-weight: var(--hf-name-font-weight);
+    hyphens: auto;
+
+    &[data-struck] {
+      text-decoration: line-through;
+    }
+  }
+
+  .hf-pitch-sketch-line {
+    margin: 0;
+  }
+
+  @container hf-pitch-sketch (min-width: 31rem) {
+    .hf-pitch-sketch-layout {
+      align-items: center;
+      grid-template-columns: 15rem minmax(0, 1fr);
+    }
+  }
+
+  /* In forced colours the grass goes and every disc keeps a rim in the colour of text. */
+  @media (forced-colors: active) {
+    .hf-pitch-sketch-field {
+      background: none;
+    }
+
+    .hf-pitch-sketch-disc {
+      background-color: Canvas;
+      border-color: CanvasText;
+      color: CanvasText;
+    }
+  }
+}

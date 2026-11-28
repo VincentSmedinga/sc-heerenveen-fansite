@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { PickList, type PickListGroup } from './PickList'
@@ -89,22 +89,5 @@ describe('PickList', () => {
     )
 
     expect(new FormData(container.querySelector('form') as HTMLFormElement).getAll('middenvelder')).toEqual(['a'])
-  })
-})
-
-describe('PickList.Strip', () => {
-  it('numbers the places from 1 and shows the surname; an empty place shows only its number', () => {
-    render(<PickList.Strip aria-label="Jouw vier" places={[{ name: 'Testspeler' }, {}]} />)
-    const places = within(screen.getByRole('list', { name: 'Jouw vier' })).getAllByRole('listitem')
-
-    expect(places.map((place) => place.textContent)).toEqual(['1Testspeler', '2'])
-  })
-
-  it('strikes a name through and says in text that the player does not count', () => {
-    render(<PickList.Strip places={[{ name: 'Testspeler', note: 'telt niet mee' }]} />)
-    const place = screen.getByRole('listitem')
-
-    expect(place.textContent).toBe('1Testspelertelt niet mee')
-    expect(place.querySelector('[data-struck]')?.textContent).toBe('Testspeler')
   })
 })

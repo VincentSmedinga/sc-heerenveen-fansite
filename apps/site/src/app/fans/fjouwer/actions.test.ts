@@ -8,8 +8,9 @@ import { emptyFjouwerState } from '#src/fans/fjouwer-form'
 
 import { saveFjouwerAction } from './actions'
 
-const { holder, requireSupporter } = vi.hoisted(() => ({
+const { holder, refresh, requireSupporter } = vi.hoisted(() => ({
   holder: { db: undefined as unknown },
+  refresh: vi.fn(),
   requireSupporter: vi.fn(),
 }))
 
@@ -23,6 +24,7 @@ vi.mock('#src/database', () => ({
   },
 }))
 vi.mock('#src/fans/require-supporter', () => ({ requireSupporter }))
+vi.mock('next/cache', () => ({ refresh }))
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('NEXT_NOT_FOUND')
@@ -109,6 +111,7 @@ beforeEach(async () => {
 afterEach(() => {
   vi.unstubAllEnvs()
   requireSupporter.mockReset()
+  refresh.mockReset()
 })
 
 const fourIds = () => ['Noppert', 'Hilgers', 'Proper', 'Vente'].map((name) => ids[name] as number)
@@ -132,6 +135,8 @@ describe('saveFjouwerAction', () => {
     expect(state.errors).toEqual({ general: [], lines: {} })
     expect(state.values).toEqual(fourIds().map(String))
     expect(await rows()).toHaveLength(1)
+    // The page reads the four again, for the pitch and the list.
+    expect(refresh).toHaveBeenCalledOnce()
   })
 
   it('shows the errors, with the ticked players, and writes nothing', async () => {
@@ -146,6 +151,7 @@ describe('saveFjouwerAction', () => {
 
     expect(five.errors.general).toEqual(['Kies 4 spelers. Je hebt er nu 5.'])
     expect(await rows()).toHaveLength(0)
+    expect(refresh).not.toHaveBeenCalled()
   })
 
   it('ignores what is not an id, and refuses a match that is not the one of the card', async () => {

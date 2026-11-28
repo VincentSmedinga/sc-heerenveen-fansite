@@ -143,7 +143,7 @@ describe('the squad', () => {
     expect(match).toBeGreaterThan(0)
   })
 
-  it('shortens a name for the strip, with a capital, and an initial for a shared surname', async () => {
+  it('shortens a name for the list of the four, with a capital, and an initial for a shared surname', async () => {
     await addMatch(at(30))
     await database.db.insert(players).values(
       ['Thom van Testma', 'Tim van Testma', 'Bo van Testma', 'Sam da Proef'].map((sourceName) => ({
@@ -165,6 +165,29 @@ describe('the squad', () => {
       'Da Proef',
     ])
     expect(shortOf('Vente')).toBe('Vente')
+  })
+
+  it('gives the shirt number of each player on the day of the match, or null without one', async () => {
+    await addMatch(at(30))
+    await database.db
+      .update(players)
+      .set({ shirtNumber: 9 })
+      .where(eq(players.id, ids['Vente'] as number))
+    await database.db
+      .update(players)
+      .set({
+        previousShirtNumber: 29,
+        shirtNumber: 8,
+        shirtNumberFrom: at(24 * 30)
+          .toISOString()
+          .slice(0, 10),
+      })
+      .where(eq(players.id, ids['Smans'] as number))
+
+    const squad = await fjouwerSquad(database.db, (await fjouwerMatch(database.db, now))!)
+    const numberOf = (name: string) => squad.find((player) => player.name === name)?.shirtNumber
+
+    expect(['Vente', 'Smans', 'Proper'].map(numberOf)).toEqual([9, 29, null])
   })
 
   it('keeps a player who left for matches before he left, and keeps the line from the first use', async () => {
