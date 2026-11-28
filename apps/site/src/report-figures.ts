@@ -1,6 +1,8 @@
 import type { PlayerReportStats } from '@fansite/db/match-reports'
 import type { PlayerFiguresRow, TopScorersTableRow } from '@fansite/design-system'
 
+import { capitaliseName } from '@fansite/shared/player-name'
+
 import { playerHref } from './player-address'
 import { personNameParts, personSortName } from './player-name'
 
@@ -101,7 +103,7 @@ function hrefOf(stats: PlayerReportStats) {
 
 /** A player's name in the two parts `PlayerName` shows: his person's, else the whole name. */
 function nameOf(stats: PlayerReportStats) {
-  return personNameParts(stats) ?? { givenName: stats.name, surname: '' }
+  return personNameParts(stats) ?? { givenName: capitaliseName(stats.name), surname: '' }
 }
 
 /** What puts players with the same figure in order: the family name, then the whole name. */

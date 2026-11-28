@@ -8053,7 +8053,8 @@
 - **Alternatieven:** altijd bij een gedeelde achternaam (ook "J. de Jong" voor wie nooit samen speelde); alleen in hetzelfde seizoen (mist de Drosts); alleen het veld; een schakelaar per persoon.
 - **Later:** de beslissing _`goalsWithInitials` vergelijkt de namen_ in _Doelpunten tellen per persoon_ hierboven blijft gelden voor de doelpuntenmakers in een wedstrijdregel; alleen de letter komt nu uit de gedeelde functie.
 - **Later:** zie _Op het veld staat een speler van de tegenstander zonder voornaam_ (25 november 2026): spelers van tegenstanders vallen er niet meer buiten.
-- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): de beginletter geldt niet meer bij de doelpuntenmakers boven de score, want daar staat de volledige naam. Op het veld blijft de regel.
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): de beginletter geldt niet meer bij de doelpuntenmakers boven de score, want daar staat de volledige naam.
+  Op het veld blijft de regel.
 
 ## De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers
 
@@ -8393,7 +8394,8 @@
   De regel staat in `shortOpponentNames` in `apps/site/src/player-name.ts`.
 - **Waarom:** het veld toont onze spelers al met hun achternaam, en een hele naam neemt op een smal veld veel ruimte.
 - **Alternatieven:** de hele naam houden; alleen het laatste woord tonen (dan wordt "da Silva Moreira" alleen "Moreira"); een veld voor de korte naam in het beheer.
-- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): bij de doelpuntenmakers boven de score staat de volledige naam. Op het veld blijft de regel, en een achternaam die vooraan staat begint met een hoofdletter.
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ (28 november 2026): bij de doelpuntenmakers boven de score staat de volledige naam.
+  Op het veld blijft de regel, en een achternaam die vooraan staat begint met een hoofdletter.
 
 ## Per seizoen toont de minuten van een speler, als elke wedstrijd een opstelling heeft
 

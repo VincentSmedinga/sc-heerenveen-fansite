@@ -1,5 +1,6 @@
 import { isFansPartOn } from '@fansite/shared/fans-env'
 import { minutesPlayed, reportFinished } from '@fansite/shared/match-report'
+import { capitaliseName } from '@fansite/shared/player-name'
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
@@ -321,7 +322,7 @@ export async function ratingWindowOf(db: Database, match: RatingMatch, now = new
               assist: stored.goals.some((goal) => goal.ours && goal.assistAppearanceId === appearance.id),
               goal: stored.goals.some((goal) => goal.ours && !goal.ownGoal && goal.appearanceId === appearance.id),
               minutes,
-              name: appearance.name,
+              name: capitaliseName(appearance.name),
               position: positions.get(appearance.playerId) ?? null,
             },
           ]
