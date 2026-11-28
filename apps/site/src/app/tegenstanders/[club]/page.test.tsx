@@ -418,7 +418,7 @@ describe('the page of a club', () => {
   it('lists every meeting as a Match, the newest first, with the day and its year, the competition and the result', async () => {
     expect(meetingsOf(await render())).toEqual([
       'KNVB Beker · Speelronde 1 · zo 20 sep 2026 Testclub 1–0 n.v. (0–0) 1 tegen 0, na verlenging; na 90 minuten 0 tegen 0 sc Heerenveen 112’ minuut 112, Voorbeeld , Testclub',
-      'Eredivisie · Speelronde 2 · vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg str. , strafschop , sc Heerenveen , ; 40’ minuut 40, Midden , sc Heerenveen , ; 77’ minuut 77, Laat , sc Heerenveen',
+      'Eredivisie · Speelronde 2 · vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg str. , strafschop , sc Heerenveen · ; 40’ minuut 40, Midden , sc Heerenveen · ; 77’ minuut 77, Laat , sc Heerenveen',
       'Eredivisie · Speelronde 3 · za 1 mrt 2025 Oude Testclub 1–1 1 tegen 1 sc Heerenveen',
       'Eredivisie · Speelronde 4 · za 9 nov 2024 sc Heerenveen 2–0 2 tegen 0 Testclub',
       'Eredivisie · Speelronde 5 · zo 2 apr 2023 Testclub 2–4 2 tegen 4 sc Heerenveen',

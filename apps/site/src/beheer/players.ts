@@ -36,7 +36,7 @@ import { type NamedPlayer, readNamedPlayers, shownPlayerName, shownSearchTerm } 
 import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, count, eq, getTableColumns, gt, inArray, isNull, max, min, ne, or, sql } from 'drizzle-orm'
 
-import { splitPersonName } from '../player-name'
+import { splitStoredName } from '../player-name'
 import { adminFailure } from './failure'
 import { checkCountry, checkDeathYear, checkLine, checkName, checkPage } from './person-checks'
 import { personLabels } from './person-labels'
@@ -246,7 +246,7 @@ export function nameValuesOf(
     }
   }
 
-  const { givenName = '', surname } = splitPersonName(player.name)
+  const { givenName = '', surname } = splitStoredName(player.name)
   const words = (surname === '' ? player.name : surname).split(' ')
   const prefix = words.slice(0, -1).findIndex((word) => !/^['’]?\p{Ll}/u.test(word))
   const prefixWords = prefix === -1 ? words.length - 1 : prefix

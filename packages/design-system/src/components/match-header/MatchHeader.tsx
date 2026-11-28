@@ -67,7 +67,7 @@ export type MatchHeaderScorer = {
   ownGoal?: boolean | undefined
   /** Whether it was scored from the penalty spot. It is then written with "(str.)". */
   penalty?: boolean | undefined
-  /** The name as it is written in the list, such as the surname. */
+  /** The whole name of the scorer, such as `Thom van Bergen`. */
   player: string
   /** The minutes of added time after `minute`: 2 for "45+2". Leave it out in regular time. */
   stoppageMinutes?: null | number | undefined

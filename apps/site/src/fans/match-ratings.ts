@@ -11,7 +11,7 @@ import {
   staff,
   supporters,
 } from '@fansite/db/schema'
-import { shownAppearanceName, shownPlayerName } from '@fansite/db/shown-name'
+import { nameInFront, shownAppearanceName, shownPlayerName } from '@fansite/db/shown-name'
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
 
 import { cacheFor, cacheForKey } from '#src/cache'
@@ -91,7 +91,7 @@ export async function loadMatchRatings(
       appearanceId: matchAppearances.id,
       average: matchPlayerRatings.average,
       count: matchPlayerRatings.ratingCount,
-      name: shownPlayerName(),
+      name: nameInFront(shownPlayerName()),
       playerId: matchPlayerRatings.playerId,
     })
     .from(matchPlayerRatings)
@@ -158,7 +158,7 @@ export async function loadRunningRatings(db: Database, matchId: number): Promise
       appearanceId: matchAppearances.id,
       average: sql<string>`avg(${playerRatings.grade})`,
       count: sql<number>`count(*)`,
-      name: shownAppearanceName(),
+      name: nameInFront(shownAppearanceName()),
       playerId: matchAppearances.playerId,
     })
     .from(playerRatings)
@@ -279,7 +279,7 @@ export async function loadSeasonWinners(db: Database, season: string): Promise<S
       goalsFor: matches.goalsFor,
       home: matches.home,
       matchId: matches.id,
-      name: shownPlayerName(),
+      name: nameInFront(shownPlayerName()),
       opponent: matches.opponent,
       playerId: matchPlayerRatings.playerId,
     })

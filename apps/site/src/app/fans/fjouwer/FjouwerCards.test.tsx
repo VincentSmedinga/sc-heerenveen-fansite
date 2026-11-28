@@ -30,7 +30,7 @@ const player = (id: number, line: FormPlayer['line'], name: string, usesLeft = 1
   line,
   name,
   points: 31,
-  surname: name.split(' ').at(-1) ?? name,
+  shortName: name.split(' ').at(-1) ?? name,
   usesLeft,
 })
 

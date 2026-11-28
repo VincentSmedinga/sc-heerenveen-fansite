@@ -57,7 +57,8 @@ export type FormPlayer = {
   name: string
   /** What he scored this season in all matches with a finished report, for everybody alike. */
   points: number
-  surname: string
+  /** The name on the strip of the four: without the given name. */
+  shortName: string
   /** How many times the supporter can still use him this season (0 to 10). */
   usesLeft: number
 }

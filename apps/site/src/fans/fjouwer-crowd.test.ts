@@ -214,7 +214,7 @@ describe('the figures of Fjouwer for a match', () => {
     expect(found?.players?.map((player) => player.name)).toContain('Wolters')
   })
 
-  it('gives a player with a surname that another one has the whole name', async () => {
+  it('gives every player the whole name', async () => {
     const match = await addMatch()
     const [other] = await database.db.insert(players).values({
       position: 'aanvaller',

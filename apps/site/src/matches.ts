@@ -41,14 +41,7 @@ import { lastDayOf } from './match-format'
 import { letterOf, type MatchResult, resultOf, type Scored } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
 import { playerHref } from './player-address'
-import {
-  leadOfName,
-  type NameParts,
-  personNameParts,
-  personSortName,
-  splitPersonName,
-  textSortName,
-} from './player-name'
+import { type NameParts, personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -1003,46 +996,6 @@ function hasKnownGoals(match: PublicMatch): match is MatchWithGoals {
 }
 
 const emptyRow = (): FlowRow => ({ drawn: 0, lost: 0, matches: 0, points: 0, won: 0 })
-
-/**
- * The goals of one match for the line of the scorers, which shows the name as the page writes
- * it, mostly a surname. When two different people in the line have the same name, each gets
- * the first letter of his given name before it, as in `J. Trenskow`, so nobody sees one name
- * twice without a difference. When their initials are the same too, they get the whole given
- * name (`Jakob Trenskow` and `Jan Trenskow`). The names compare as the page writes them, so
- * with the prefix (`van Aken`). Two goals of one person never change, and a goal without a
- * person is left alone: there is nothing to tell it from.
- */
-export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
-  const people = new Map<string, Map<string, NameParts>>()
-
-  for (const goal of goals) {
-    const parts = goal.personId === null ? undefined : personNameParts(goal)
-
-    if (parts !== undefined) {
-      const same = people.get(goal.player) ?? new Map<string, NameParts>()
-
-      people.set(goal.player, same.set(keyOf(goal), parts))
-    }
-  }
-
-  return goals.map((goal) => {
-    const same = people.get(goal.player)
-    const parts = goal.personId === null ? undefined : same?.get(keyOf(goal))
-    const given = parts?.givenName?.trim() ?? ''
-
-    if (same === undefined || same.size < 2 || parts === undefined || parts.surname === '' || given === '') {
-      return goal
-    }
-
-    const lead = leadOfName(
-      given,
-      [...same.values()].filter((other) => other !== parts).map((other) => other.givenName),
-    )
-
-    return { ...goal, player: `${lead} ${goal.player}` }
-  })
-}
 
 /**
  * The played matches with a score, counted for home, away and both: those of the Eredivisie

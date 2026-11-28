@@ -1099,9 +1099,9 @@ await withEmptyDatabase((database) =>
       ),
       ['1 sc Heerenveen', '2 Demo Boys', '3 Proefstad SV', '4 Voorbeeld United', '5 Testdorp FC', '6 Nepstad Rangers'],
     )
-    // In the line of the scorers of one match the two are told apart by an initial.
-    assert.match(matchesHtml, /J\. Testvoort/)
-    assert.match(matchesHtml, /B\. Testvoort/)
+    // The line of the scorers of a match writes each name whole, so the two are told apart.
+    assert.match(matchesHtml, /Joris Testvoort/)
+    assert.match(matchesHtml, /Bas Testvoort/)
     // A match line says neither "Thuis" nor "Uit", and the results are one card for each
     // competition with a result.
     assert.doesNotMatch(matchesHtml, /<span>(?:Thuis|Uit)<\/span>/)

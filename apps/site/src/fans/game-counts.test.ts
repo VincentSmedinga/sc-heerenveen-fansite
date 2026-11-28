@@ -4,7 +4,7 @@ import { clubs, fantasyPicks, matches, players, quizEntries, quizzes, supporters
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { fjouwerSurnames } from './fjouwer'
+import { fjouwerNames } from './fjouwer'
 import { countFours, countParticipants } from './game-counts'
 
 let database: TestDatabase
@@ -102,13 +102,13 @@ describe('the number of fans who saved a four', () => {
   })
 })
 
-describe('the surnames of a four', () => {
+describe('the names of a four', () => {
   it('names a player who is no longer in the squad too', async () => {
     const [{ insertId }] = await database.db
       .insert(players)
-      .values({ inSquad: false, searchTerm: 'Vertrekker', season: '2026/27', sourceName: 'Piet de Vertrekker' })
+      .values({ inSquad: false, searchTerm: 'Vertrekker', season: '2026/27', sourceName: 'de Vertrekker' })
 
-    expect((await fjouwerSurnames(database.db, [insertId])).get(insertId)).toBe('de Vertrekker')
-    expect(await fjouwerSurnames(database.db, [])).toEqual(new Map())
+    expect((await fjouwerNames(database.db, [insertId])).get(insertId)).toBe('De Vertrekker')
+    expect(await fjouwerNames(database.db, [])).toEqual(new Map())
   })
 })

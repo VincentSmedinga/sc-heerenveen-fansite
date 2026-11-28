@@ -5,8 +5,10 @@ import {
   leadOfNamesake,
   personNameParts,
   personSortName,
+  shortNameWith,
   shortOpponentNames,
   splitPersonName,
+  splitStoredName,
   textSortName,
 } from './player-name'
 
@@ -29,6 +31,10 @@ describe('personNameParts', () => {
   it('puts the prefix before the family name, in the heavier weight', () => {
     expect(personNameParts(person('Joost', 'van', 'Aken'))).toEqual({ givenName: 'Joost', surname: 'van Aken' })
     expect(personNameParts(person('Ruud', 'van der', 'Sar'))).toEqual({ givenName: 'Ruud', surname: 'van der Sar' })
+  })
+
+  it('gives a surname without a given name a capital, with its prefix', () => {
+    expect(personNameParts(person(null, 'van der', 'Testma'))).toEqual({ surname: 'Van der Testma' })
   })
 
   it('gives only a surname for a person with one name', () => {
@@ -69,7 +75,9 @@ describe('splitPersonName', () => {
   })
 
   it('makes a name that starts with a prefix, or has one word, all surname', () => {
-    expect(splitPersonName('van Aken')).toEqual({ surname: 'van Aken' })
+    expect(splitPersonName('van Aken')).toEqual({ surname: 'Van Aken' })
+    expect(splitStoredName('van Aken')).toEqual({ surname: 'van Aken' })
+    expect(splitPersonName('’t Hart')).toEqual({ surname: '’t Hart' })
     expect(splitPersonName('Dinho')).toEqual({ surname: 'Dinho' })
   })
 
@@ -194,5 +202,12 @@ describe('leadOfName', () => {
     expect(leadOfName('gérard', ['Dennis'])).toBe('G.')
     expect(leadOfName('Dennis', ['Daan'])).toBe('Dennis')
     expect(leadOfName(null, ['Daan'])).toBe('')
+  })
+})
+
+describe('shortNameWith', () => {
+  it('has a capital without a lead, and keeps the stored prefix behind one', () => {
+    expect(shortNameWith('', 'van Testma')).toBe('Van Testma')
+    expect(shortNameWith('T.', 'van Testma')).toBe('T. van Testma')
   })
 })

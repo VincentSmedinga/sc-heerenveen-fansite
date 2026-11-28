@@ -1450,6 +1450,7 @@
   - **Het verslag:** het formulier toont de namen van de personen, en opslaan houdt bij een regel die er al was de naam van de bron en de persoon.
   - **Een speler zonder persoon** die in het beheer een andere naam krijgt, krijgt daarvoor een persoon, want de naam van de bron verandert niet.
 - **Alternatieven:** de naam van onze regels weghalen (migraties, een nieuwe sleutel voor de import, meer pull requests, en de schrijfwijze van de bron is weg); de naam bij een wijziging naar alle regels kopiëren (elke nieuwe koppeling of import kan weer afwijken); alleen onze spelers de persoon laten volgen (tegenstanders houden dan twee schrijfwijzen).
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ in `site.md` (28 november 2026): de doelpuntenregel toont de naam die we tonen, volledig, en niet meer de achternaam uit de persoon.
 
 ## Een persoon op een regel is niet verplicht
 

@@ -2383,6 +2383,8 @@ describe('the matches and the table of a season', () => {
         },
         { matchId: id, minute: 20, ours: true, playerId: farji, sourceName: 'Farji' },
         { matchId: id, minute: 25, ours: true, sourceName: 'Kemper', wikipediaPage: 'Boy Kemper' },
+        // A surname alone, without a person: it gets a capital (#1714).
+        { matchId: id, minute: 27, ours: true, sourceName: 'van Testma' },
         {
           matchId: id,
           minute: 30,
@@ -2407,13 +2409,14 @@ describe('the matches and the table of a season', () => {
           goal.personFamilyName,
         ]),
       ).toEqual([
-        ['Oyen', oyen, lucaPerson, 'Luca', null, 'Oyen'],
+        ['Luca Oyen', oyen, lucaPerson, 'Luca', null, 'Oyen'],
         ['Farji', farji, null, null, null, null],
         ['Kemper', null, null, null, null, null],
-        ['Van Aken', null, opponentPerson, 'Joost', 'van', 'Aken'],
+        ['Van Testma', null, null, null, null, null],
+        ['Joost van Aken', null, opponentPerson, 'Joost', 'van', 'Aken'],
       ])
       // The address name of the person goes with the goal: only a person who has one gives it.
-      expect(cup?.goals.map((goal) => goal.personSlug)).toEqual(['luca-oyen', null, null, null])
+      expect(cup?.goals.map((goal) => goal.personSlug)).toEqual(['luca-oyen', null, null, null, null])
     })
 
     it('gives a goal of ours that has only a squad row the person of that row', async () => {

@@ -320,12 +320,14 @@ const renderScorers = () => (
             competition="Eredivisie"
             dateTime="2026-10-18"
             goals={[
-              { minute: 34, ours: true, player: 'Proefman' },
-              { minute: 45, ours: true, player: 'Nepper', stoppageMinutes: 1 },
-              { minute: 80, ours: false, player: 'Teststraat' },
+              { minute: 34, ours: true, player: 'Piet Proefman' },
+              { minute: 45, ours: true, player: 'Nina Nepper', stoppageMinutes: 1 },
+              { minute: 62, ours: true, player: 'Daan van der Dummydijk' },
+              { minute: 80, ours: false, player: 'Tom van Teststraat' },
+              { minute: 88, ours: true, player: 'Van Oefenhoek' },
             ]}
             goalsAgainst={1}
-            goalsFor={2}
+            goalsFor={4}
             home
             opponent="Testdorp FC"
             round="Speelronde 1"
@@ -339,8 +341,8 @@ const renderScorers = () => (
             competition="Eredivisie"
             dateTime="2026-10-25"
             goals={[
-              { minute: 12, ours: true, player: 'Proefman' },
-              { minute: 77, ours: true, player: 'Proefman' },
+              { minute: 12, ours: true, player: 'Piet Proefman' },
+              { minute: 77, ours: true, player: 'Piet Proefman' },
             ]}
             goalsAgainst={0}
             goalsFor={2}
@@ -357,9 +359,9 @@ const renderScorers = () => (
             competition="Eredivisie"
             dateTime="2026-11-01"
             goals={[
-              { minute: 7, ours: false, ownGoal: true, player: 'Kopie' },
-              { minute: 23, ours: false, penalty: true, player: 'Teststraat' },
-              { minute: 90, ours: true, player: 'Nepper', stoppageMinutes: 4 },
+              { minute: 7, ours: false, ownGoal: true, player: 'Karel de Kopie' },
+              { minute: 23, ours: false, penalty: true, player: 'Tom van Teststraat' },
+              { minute: 90, ours: true, player: 'Nina Nepper', stoppageMinutes: 4 },
             ]}
             goalsAgainst={2}
             goalsFor={1}
@@ -377,9 +379,9 @@ const renderScorers = () => (
             dateTime="2026-11-25"
             extraTime
             goals={[
-              { minute: 18, ours: true, penalty: true, player: 'Proefman' },
-              { minute: 70, ours: false, player: 'Van der Voorbeeldstraat-Proefmans' },
-              { minute: 105, ours: true, ownGoal: true, player: 'Kopie' },
+              { minute: 18, ours: true, penalty: true, player: 'Piet Proefman' },
+              { minute: 70, ours: false, player: 'Maximiliaan van der Voorbeeldstraat-Proefmans' },
+              { minute: 105, ours: true, ownGoal: true, player: 'Karel de Kopie' },
             ]}
             goalsAgainst={1}
             goalsFor={2}

@@ -1459,6 +1459,7 @@
   De kleuren zijn de tokens `--hf-colour-outcome-win` en `--hf-colour-outcome-loss`, die al 4,5:1 halen op de vlakken (zie _Een uitslag toont de uitkomst in kleur, zonder letter_).
   In forced colours valt de kleur weg en blijft het vet over.
 - **Alternatieven:** per club een eigen regel met de naam van de club ervoor (duidelijker, maar langer; dit was het eerste besluit); één regel zonder enig onderscheid (wie een speler van de tegenstander niet kent, kan niet zien voor wie hij scoorde); twee kolommen naast elkaar (te breed voor een smalle kaart).
+- **Later:** zie _Een middenpunt tussen de doelpunten_ en _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ in `site.md` (28 november 2026): de regel toont volledige namen met een middenpunt ertussen in plaats van een komma.
 
 ## Eigen doelpunten staan bij de club die ervan profiteert
 

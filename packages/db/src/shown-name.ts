@@ -6,6 +6,7 @@
 
 import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
+import { capitaliseName } from '@fansite/shared/player-name'
 import { getTableColumns, type SQL, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
@@ -47,6 +48,13 @@ export const shownAppearanceName = () =>
 /** The name we show for a goal: that of its own person, and else of the person of its row. */
 export const shownGoalName = () =>
   nameOr(sql`coalesce(${qualified(matchGoals.personId)}, ${personOfRow(matchGoals.playerId)})`, matchGoals.sourceName)
+
+/**
+ * A shown name as a visitor reads it: with the capital of `capitaliseName`. A page for
+ * visitors wraps one of the names above in it. The admin and the importer don't, so they see
+ * the name as it is stored.
+ */
+export const nameInFront = (name: SQL<string>) => name.mapWith((value) => capitaliseName(String(value)))
 
 /** The name we show for a player in the squad of an opponent. */
 export const shownClubPlayerName = () => nameOr(qualified(clubSquadPlayers.personId), clubSquadPlayers.sourceName)

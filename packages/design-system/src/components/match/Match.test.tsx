@@ -830,7 +830,7 @@ describe('the scorers', () => {
     const line = container.querySelector('.hf-match-goals')
 
     expect(container.querySelectorAll('.hf-match-goals')).toHaveLength(1)
-    expect(seen(line)).toBe('34’ Trenskow, 45’+1 Vente, 80’ Vennegoor of Hesselink')
+    expect(seen(line)).toBe('34’ Trenskow · 45’+1 Vente · 80’ Vennegoor of Hesselink')
     expect(line?.previousElementSibling?.className).toBe('hf-match-clubs')
     expect(line?.nextElementSibling?.className).toContain('hf-match-where')
   })
@@ -860,6 +860,21 @@ describe('the scorers', () => {
     )
   })
 
+  it('keeps the middle dot with the goal before it, so no line starts with one', () => {
+    const { container } = render(
+      <Match
+        {...played}
+        goals={[
+          { minute: 41, ours: true, player: 'Piet Proefman' },
+          { minute: 57, ours: true, player: 'Daan van Testma' },
+        ]}
+      />,
+    )
+
+    // A non-breaking space before the dot, and the space where a line may break after it.
+    expect(container.querySelector('.hf-match-goals > [aria-hidden="true"]')?.textContent).toBe('\u00a0· ')
+  })
+
   it('writes e.d. and pen. after the name, as abbreviations with the full words', () => {
     const { container } = render(
       <Match
@@ -872,7 +887,7 @@ describe('the scorers', () => {
     )
     const line = container.querySelector('.hf-match-goals')
 
-    expect(seen(line)).toBe('7’ Klaverboer e.d., 23’ Chery str.')
+    expect(seen(line)).toBe('7’ Klaverboer e.d. · 23’ Chery str.')
     expect(
       [...container.querySelectorAll('.hf-match-goals abbr')].map((abbr) => [
         abbr.textContent,
@@ -899,7 +914,7 @@ describe('the scorers', () => {
       />,
     )
 
-    expect(seen(container.querySelector('.hf-match-goals'))).toBe('12’ Proefman, 77’ Proefman')
+    expect(seen(container.querySelector('.hf-match-goals'))).toBe('12’ Proefman · 77’ Proefman')
   })
 
   it('shows a minute in extra time as it is', () => {

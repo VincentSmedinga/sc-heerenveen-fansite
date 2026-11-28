@@ -5,7 +5,7 @@ import { eq, isNotNull } from 'drizzle-orm'
 
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
-import { compareByName, nameOrderOf, personNameParts, splitPersonName } from './player-name'
+import { compareByName, nameOrderOf, personNameParts, splitStoredName } from './player-name'
 import { periodsOf } from './player-page'
 
 /** The address of the overview of all players, by name, and by country. */
@@ -99,7 +99,7 @@ export function overviewOf(rows: readonly Row[]): PlayersOverview {
       rest =
         family === '' ? '' : [givenName, (first.familyNamePrefix ?? '').trim()].filter((part) => part !== '').join(' ')
     } else {
-      const split = splitPersonName(text)
+      const split = splitStoredName(text)
       const prefix = split.surname.slice(0, split.surname.length - sortName.length).trim()
 
       surname = sortName

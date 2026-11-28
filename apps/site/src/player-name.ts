@@ -1,4 +1,5 @@
 import { foldLetters } from '@fansite/db/slug-letters'
+import { capitaliseName } from '@fansite/shared/player-name'
 
 /** A player's name in the two parts `PlayerName` shows: the given name and the surname. */
 export type NameParts = {
@@ -20,7 +21,8 @@ export type PersonName = {
  * name in the normal weight, and the prefix and the family name together in the stronger one
  * (`Joost` and `van Aken`). A person with one name has a family name and no given name
  * (`Dinho`), and a person without a family name shows the given name alone, in the normal
- * weight. Nothing is guessed: when the importer kept no name, it gives `undefined`.
+ * weight. A surname with no given name starts with a capital (`Van Aken`). Nothing is
+ * guessed: when the importer kept no name, it gives `undefined`.
  */
 export function personNameParts(name: PersonName): NameParts | undefined {
   const given = (name.personGivenName ?? '').trim()
@@ -33,7 +35,7 @@ export function personNameParts(name: PersonName): NameParts | undefined {
     return given === '' ? undefined : { givenName: given, surname: '' }
   }
 
-  return given === '' ? { surname: family } : { givenName: given, surname: family }
+  return given === '' ? { surname: capitaliseName(family) } : { givenName: given, surname: family }
 }
 
 /**
@@ -102,30 +104,21 @@ export function leadOfName(
 }
 
 /**
+ * A name without the given name as it is shown: with the lead before it (see `leadOfName`),
+ * the surname as it is stored (`T. van Bergen`), and without one with a capital (`Van
+ * Bergen`).
+ */
+export const shortNameWith = (lead: string, shortName: string): string =>
+  lead === '' ? capitaliseName(shortName) : `${lead} ${shortName}`
+
+/**
  * How the players of the opponent in one line-up are shortened, on the pitch of a match and
  * among the scorers above the score (#1672): the name without the given name, in the order of
  * `players`. When two or more have the same short name, each gets a lead before it (see
  * `leadOfName`): `J.`, or the whole given name when the initial is shared too.
  */
 export function shortOpponentNames(players: readonly OpponentPlayer[]): { lead: string; shortName: string }[] {
-  const shortened = players.map(withoutGivenName)
-
-  return shortened.map((player, index) => {
-    const same = shortened.filter(
-      (other, at) => at !== index && other.shortName.toLowerCase() === player.shortName.toLowerCase(),
-    )
-
-    return {
-      lead:
-        same.length === 0
-          ? ''
-          : leadOfName(
-              player.givenName,
-              same.map((other) => other.givenName),
-            ),
-      shortName: player.shortName,
-    }
-  })
+  return withLeads(players.map(withoutGivenName))
 }
 
 /**
@@ -134,9 +127,20 @@ export function shortOpponentNames(players: readonly OpponentPlayer[]): { lead: 
  * the surname. When a word after the first is a prefix (`van`, `de`, `der`, ...), the surname
  * starts there, so a second given name stays with the first: `Jan Willem van Hanegem` is `Jan
  * Willem` and `van Hanegem`. A name that starts with a prefix, or of one word, is all surname.
- * Nothing else is guessed: `Jon Dahl Tomasson` is `Jon` and `Dahl Tomasson`.
+ * Nothing else is guessed: `Jon Dahl Tomasson` is `Jon` and `Dahl Tomasson`. A surname with
+ * no given name starts with a capital (`Van Aken`).
  */
 export function splitPersonName(name: string): NameParts {
+  const parts = splitStoredName(name)
+
+  return parts.givenName === undefined ? { surname: capitaliseName(parts.surname) } : parts
+}
+
+/**
+ * `splitPersonName` with the name as it is stored, without the capital: for the admin, and for
+ * a list on the surname, where something stands before the prefix.
+ */
+export function splitStoredName(name: string): NameParts {
   const words = name.trim().split(/\s+/)
   const [first = ''] = words
 
@@ -155,10 +159,35 @@ export function splitPersonName(name: string): NameParts {
  * without its prefix, so `Joost van Aken` stands under the A, like a person with a family name.
  */
 export function textSortName(name: string): string {
-  const words = splitPersonName(name).surname.split(' ')
+  const words = splitStoredName(name).surname.split(' ')
   const at = words.findIndex((word) => !isPrefix(word))
 
   return (at === -1 ? words : words.slice(at)).join(' ')
+}
+
+/**
+ * The players of one list, each with the lead that tells him from another with the same short
+ * name. It is empty for a player whose short name nobody else has.
+ */
+export function withLeads(
+  shortened: readonly { givenName: null | string | undefined; shortName: string }[],
+): { lead: string; shortName: string }[] {
+  return shortened.map((player, index) => {
+    const same = shortened.filter(
+      (other, at) => at !== index && other.shortName.toLowerCase() === player.shortName.toLowerCase(),
+    )
+
+    return {
+      lead:
+        same.length === 0
+          ? ''
+          : leadOfName(
+              player.givenName,
+              same.map((other) => other.givenName),
+            ),
+      shortName: player.shortName,
+    }
+  })
 }
 
 /**

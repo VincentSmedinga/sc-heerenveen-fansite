@@ -11,7 +11,6 @@ import {
   extremesOf,
   goalHref,
   goalsPerQuarter,
-  goalsWithInitials,
   homeAwayOf,
   lacksResult,
   lateGoalsOf,
@@ -1924,107 +1923,6 @@ describe('matchFlowOf', () => {
     matchFlowOf(matches)
 
     expect(matches).toEqual(copy)
-  })
-})
-
-describe('goalsWithInitials', () => {
-  const trenskow = (id: number, given: string, minute: number) =>
-    goal('Trenskow', {
-      minute,
-      personFamilyName: 'Trenskow',
-      personGivenName: given,
-      personId: id,
-    })
-
-  it('gives the whole given name when two players with the same name have the same initial', () => {
-    const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Jan', 20), trenskow(1, 'Jakob', 30)]
-
-    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual([
-      'Jakob Trenskow',
-      'Jan Trenskow',
-      'Jakob Trenskow',
-    ])
-  })
-
-  it('puts only the initial before the player whose initial nobody shares', () => {
-    const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Jan', 20), trenskow(3, 'Bram', 30)]
-
-    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual([
-      'Jakob Trenskow',
-      'Jan Trenskow',
-      'B. Trenskow',
-    ])
-  })
-
-  it('tells them apart when their given names start with different letters', () => {
-    const goals = [trenskow(1, 'Jakob', 10), trenskow(2, 'Bram', 20)]
-
-    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['J. Trenskow', 'B. Trenskow'])
-  })
-
-  it('leaves two goals of one player alone', () => {
-    const goals = [trenskow(1, 'Jakob', 10), trenskow(1, 'Jakob', 20)]
-
-    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['Trenskow', 'Trenskow'])
-  })
-
-  it('leaves players with different names alone, and goals without a player', () => {
-    const goals = [
-      trenskow(1, 'Jakob', 10),
-      goal('Oyen', { minute: 20, personFamilyName: 'Oyen', personGivenName: 'Luca', personId: 3 }),
-      goal('Trenskow', { minute: 30, ours: false }),
-    ]
-
-    expect(goalsWithInitials(goals)).toEqual(goals)
-  })
-
-  it('leaves the other fields of a goal as they are', () => {
-    const [changed] = goalsWithInitials([
-      { ...trenskow(1, 'Jakob', 10), penalty: true },
-      { ...trenskow(2, 'Bram', 20), ownGoal: true },
-    ])
-
-    expect(changed).toMatchObject({ minute: 10, penalty: true, personId: 1, player: 'J. Trenskow' })
-  })
-
-  it('does not shorten a name that has no given name to tell it from', () => {
-    const goals = [
-      goal('Dinho', { minute: 10, personFamilyName: 'Dinho', personId: 1 }),
-      goal('Dinho', { minute: 20, personFamilyName: 'Dinho', personId: 2 }),
-    ]
-
-    expect(goalsWithInitials(goals)).toEqual(goals)
-  })
-
-  it('compares the names as the match line writes them, with the prefix', () => {
-    const aken = (id: number, given: string) =>
-      goal('van Aken', {
-        personFamilyName: 'Aken',
-        personFamilyNamePrefix: 'van',
-        personGivenName: given,
-        personId: id,
-      })
-    const goals = [
-      aken(1, 'Joost'),
-      aken(2, 'Bram'),
-      goal('Aken', { personFamilyName: 'Aken', personGivenName: 'Cees', personId: 3 }),
-    ]
-
-    expect(goalsWithInitials(goals).map((item) => item.player)).toEqual(['J. van Aken', 'B. van Aken', 'Aken'])
-  })
-
-  it('leaves a goal alone whose person has the same name twice only as one person, under two titles', () => {
-    const goals = [
-      goal('Finnbogason', { personFamilyName: 'Finnbogason', personGivenName: 'Alfreð', personId: 1 }),
-      goal('Finnbogason', {
-        personFamilyName: 'Finnbogason',
-        personGivenName: 'Alfreð',
-        personId: 1,
-        playerPage: 'Alfred Finnbogason',
-      }),
-    ]
-
-    expect(goalsWithInitials(goals)).toEqual(goals)
   })
 })
 

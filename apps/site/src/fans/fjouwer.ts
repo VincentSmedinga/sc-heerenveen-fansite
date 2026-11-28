@@ -3,10 +3,10 @@ import type { PredictionMatch } from '@fansite/db/prediction-matches'
 
 import { clubs, fantasyPicks, fantasyPlayerLines, matches, persons, players } from '@fansite/db/schema'
 import { utcToAmsterdam } from '@fansite/db/season'
-import { shownPlayerName } from '@fansite/db/shown-name'
+import { nameInFront, shownPlayerName } from '@fansite/db/shown-name'
 import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm'
 
-import { personNameParts, personSortName, splitPersonName } from '../player-name'
+import { personNameParts, personSortName, shortNameWith, splitStoredName, withLeads } from '../player-name'
 import {
   checkPicks,
   closesAt,
@@ -46,8 +46,11 @@ const matchColumns = {
 
 const orderOf = (match: FjouwerMatch) => closesAt(match).getTime() - match.id / 1e9
 
-/** A player of the squad as the form shows him. */
-export type SquadPlayer = SquadMember & { surname: string }
+/**
+ * A player of the squad as the form shows him: `shortName` is the name on the strip of the
+ * four, the surname without the given name (see `withLeads`).
+ */
+export type SquadPlayer = SquadMember & { shortName: string }
 
 /**
  * The match of the card: the first match of the first team that is still to be played and has
@@ -90,6 +93,23 @@ export type SaveResult =
   { answer: 'closed' } | { answer: 'invalid'; errors: PickErrors } | { answer: 'saved'; closesAt: Date; four: Four }
 
 /**
+ * The names of players by their id, also of a player who is no longer in the squad: the four
+ * of a supporter keeps him.
+ */
+export async function fjouwerNames(db: Database, ids: readonly number[]): Promise<Map<number, string>> {
+  if (ids.length === 0) {
+    return new Map()
+  }
+
+  const rows = await db
+    .select({ id: players.id, name: nameInFront(shownPlayerName()) })
+    .from(players)
+    .where(inArray(players.id, [...ids]))
+
+  return new Map(rows.map((row) => [row.id, row.name]))
+}
+
+/**
  * The squad to choose from for a match: the players of the season that the squad list or the
  * editors gave, with a line. A player who left is still there for the matches before he left.
  * The line is the one kept for the game, or else the position the site has now (`players` and
@@ -106,7 +126,7 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
       inSquad: players.inSquad,
       keptLine: fantasyPlayerLines.line,
       leftSquadAt: players.leftSquadAt,
-      name: shownPlayerName(),
+      name: nameInFront(shownPlayerName()),
       position: sql<FjouwerLine | null>`coalesce(${players.position}, ${persons.line})`,
     })
     .from(players)
@@ -127,7 +147,7 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
       personFamilyNamePrefix: row.familyNamePrefix,
       personGivenName: row.givenName,
     })
-    const surname = parts?.surname || splitPersonName(row.name).surname
+    const { givenName, surname } = parts?.surname ? parts : splitStoredName(row.name)
     const sortName = (
       personSortName({
         personFamilyName: row.familyName,
@@ -136,17 +156,19 @@ export async function fjouwerSquad(db: Database, match: FjouwerMatch): Promise<S
       }) || surname.replace(prefixes, '')
     ).toLowerCase()
 
-    return [{ id: row.id, line, name: row.name, sortName, surname }]
+    return [{ givenName, id: row.id, line, name: row.name, shortName: surname, sortName }]
   })
+  const leads = withLeads(squad)
 
   return squad
+    .map((player, index) => ({ ...player, shortName: shortNameWith(leads[index]?.lead ?? '', player.shortName) }))
     .toSorted(
       (a, b) =>
         fjouwerLines.indexOf(a.line) - fjouwerLines.indexOf(b.line) ||
         a.sortName.localeCompare(b.sortName, 'nl') ||
         a.name.localeCompare(b.name, 'nl'),
     )
-    .map(({ id, line, name, surname }) => ({ id, line, name, surname }))
+    .map(({ id, line, name, shortName }) => ({ id, line, name, shortName }))
 }
 
 /**
@@ -167,40 +189,6 @@ export async function fjouwerState(db: Database, supporterId: number, match: Fjo
     saved: have !== undefined && !have.inherited,
     uses,
   }
-}
-
-/**
- * The surnames of players by their id, also of a player who is no longer in the squad: the four
- * of a supporter keeps him.
- */
-export async function fjouwerSurnames(db: Database, ids: readonly number[]): Promise<Map<number, string>> {
-  if (ids.length === 0) {
-    return new Map()
-  }
-
-  const rows = await db
-    .select({
-      familyName: persons.familyName,
-      familyNamePrefix: persons.familyNamePrefix,
-      givenName: persons.givenName,
-      id: players.id,
-      name: shownPlayerName(),
-    })
-    .from(players)
-    .leftJoin(persons, eq(players.personId, persons.id))
-    .where(inArray(players.id, [...ids]))
-
-  return new Map(
-    rows.map((row) => {
-      const parts = personNameParts({
-        personFamilyName: row.familyName,
-        personFamilyNamePrefix: row.familyNamePrefix,
-        personGivenName: row.givenName,
-      })
-
-      return [row.id, parts?.surname || splitPersonName(row.name).surname]
-    }),
-  )
 }
 
 /**

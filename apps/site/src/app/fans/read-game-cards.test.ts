@@ -11,11 +11,11 @@ const mocks = vi.hoisted(() => ({
   countParticipants: vi.fn(),
   findEntry: vi.fn(),
   findPrediction: vi.fn(),
+  fjouwerNames: vi.fn(),
   fjouwerRanking: vi.fn(),
   fjouwerSeasons: vi.fn(),
   fjouwerSquad: vi.fn(),
   fjouwerState: vi.fn(),
-  fjouwerSurnames: vi.fn(),
   loadMonthQuiz: vi.fn(),
   monthScores: vi.fn(),
   predictionRanking: vi.fn(),
@@ -50,9 +50,9 @@ vi.mock('#src/fans/fjouwer-ranking', async (importOriginal) => ({
 }))
 vi.mock('#src/fans/fjouwer', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  fjouwerNames: mocks.fjouwerNames,
   fjouwerSquad: mocks.fjouwerSquad,
   fjouwerState: mocks.fjouwerState,
-  fjouwerSurnames: mocks.fjouwerSurnames,
 }))
 vi.mock('#src/fans/fjouwer-points', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -120,11 +120,11 @@ beforeEach(() => {
   mocks.fjouwerSeasons.mockResolvedValue(['2026/27'])
   mocks.fjouwerRanking.mockResolvedValue({ hidden: new Map(), matchCount: 1, rows: fourRows })
   mocks.fjouwerSquad.mockResolvedValue(
-    ['Jansen', 'Veerman', 'Dijkstra', 'Hansen'].map((surname, index) => ({ id: index + 1, surname })),
+    ['Jansen', 'Veerman', 'Dijkstra', 'Hansen'].map((name, index) => ({ id: index + 1, name })),
   )
   mocks.fjouwerState.mockResolvedValue({ four: [], inherited: false, notCounting: [], saved: false })
-  mocks.fjouwerSurnames.mockResolvedValue(
-    new Map(['Jansen', 'Veerman', 'Dijkstra', 'Hansen', 'Vertrokken'].map((surname, index) => [index + 1, surname])),
+  mocks.fjouwerNames.mockResolvedValue(
+    new Map(['Jansen', 'Veerman', 'Dijkstra', 'Hansen', 'Vertrokken'].map((name, index) => [index + 1, name])),
   )
   mocks.supporterFours.mockResolvedValue([])
   mocks.loadMonthQuiz.mockResolvedValue({ id: 3, month: 11, questions: Array.from({ length: 10 }), year: 2026 })

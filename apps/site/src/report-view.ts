@@ -2,6 +2,7 @@ import type { ReportedMatch, ReportedPersonName, ReportedPlayerName, ReportPhase
 import type { MatchHeaderFact, MatchPlayerName } from '@fansite/design-system'
 
 import { oldSiteReportSource } from '@fansite/db/schema'
+import { capitaliseName } from '@fansite/shared/player-name'
 
 import type { MatchPageData } from './match-page'
 
@@ -129,8 +130,10 @@ export function nameOfPlayer(name: string, known: ReportedPlayerName | undefined
 }
 
 function partsOfPlayer(name: string, known: ReportedPlayerName | undefined): MatchPlayerName {
+  const whole = { givenName: capitaliseName(name), surname: '' }
+
   if (known === undefined) {
-    return { givenName: name, surname: '' }
+    return whole
   }
 
   const kept: NameParts | undefined = personNameParts({
@@ -148,8 +151,8 @@ function partsOfPlayer(name: string, known: ReportedPlayerName | undefined): Mat
   if (term !== null && term !== '' && name.endsWith(term)) {
     const given = name.slice(0, name.length - term.length).trim()
 
-    return given === '' ? { surname: term } : { givenName: given, surname: term }
+    return given === '' ? { surname: capitaliseName(term) } : { givenName: given, surname: term }
   }
 
-  return { givenName: name, surname: '' }
+  return whole
 }

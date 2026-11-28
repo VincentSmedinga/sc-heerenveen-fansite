@@ -1286,6 +1286,7 @@
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
   De achternaam heeft het gewicht van een rijkop (600) in plaats van het zwaardere (700); de voornaam blijft gewoon.
 - **Later:** zie _Het rugnummer en een regel achter de naam zijn opties van PlayerName, en ShortPlayer vervalt_ (7 november 2026): `PlayerName` heeft nu ook een rugnummer en een regel achter de naam, en het onderdeel `ShortPlayer`, dat de naam met een rugnummer toonde, is weg.
+- **Later:** zie _De volledige naam, behalve op het veld en de vakjes van Fjouwer_ en _Naamgenoten krijgen een beginletter_ in `site.md` (28 november 2026): de doelpuntenregel toont de volledige naam, en `goalsWithInitials` is weg.
 
 ## Staafjes en lijn zijn algemene onderdelen, de grafiek van het seizoen zet ze samen
 

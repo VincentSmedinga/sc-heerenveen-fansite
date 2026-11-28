@@ -34,7 +34,7 @@ import {
   standings,
   wikipediaPages,
 } from './schema.ts'
-import { shownGoalName, shownPlayerName, shownSearchTerm } from './shown-name.ts'
+import { nameInFront, shownGoalName, shownPlayerName, shownSearchTerm } from './shown-name.ts'
 import { squadSeasonNumber } from './squad-season-number.ts'
 import { stadiumOnTheDay } from './stadiums.ts'
 import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
@@ -1124,7 +1124,7 @@ export function listSeasonPlayers(db: Database, season: string) {
   return db
     .select({
       country: sql<null | string>`coalesce(${persons.country}, ${players.country})`,
-      name: shownPlayerName(),
+      name: nameInFront(shownPlayerName()),
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
@@ -1164,7 +1164,7 @@ export function listSeasonPlayerStats(db: Database, season: string) {
       competition: playerSeasonStats.competition,
       goals: playerSeasonStats.goals,
       inSquad: players.inSquad,
-      name: shownPlayerName(),
+      name: nameInFront(shownPlayerName()),
       playerId: players.id,
       position: players.position,
       wikipediaPage: players.wikipediaPage,
@@ -1215,7 +1215,7 @@ export function listSeasonStandings(db: Database, season: string) {
 export function listSquad(db: Database, season: string) {
   return db
     .select({
-      name: shownPlayerName(),
+      name: nameInFront(shownPlayerName()),
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,
       personGivenName: persons.givenName,
@@ -1479,25 +1479,6 @@ function omitId<T extends { id: number }>({ id, ...match }: T): Omit<T, 'id'> {
 }
 
 /**
- * The scorer as the line of the goals of a match writes him: the surname of his person with the
- * prefix (`Van Aken`), or the given name of a person without one, and else the name we show
- * (`shownGoalName`): that of a person without parts, or that of the source without a person.
- */
-function scorerNameOf(goal: {
-  name: string
-  personFamilyName: null | string
-  personFamilyNamePrefix: null | string
-  personGivenName: null | string
-}) {
-  const family = goal.personFamilyName?.trim() ?? ''
-  const written = [goal.personFamilyNamePrefix?.trim(), family].filter(Boolean).join(' ')
-  // A surname that stands alone starts with a capital, as in Dutch: `Van Aken`.
-  const surname = family === '' ? '' : written.charAt(0).toLocaleUpperCase('nl') + written.slice(1)
-
-  return surname || (goal.personGivenName?.trim() ?? '') || goal.name
-}
-
-/**
  * Gives each of `rows` its `goals`, found by its `id`: the scorers of the match in the order
  * of the clock, both clubs together. `where` picks the matches the rows are of, so one query
  * reads the goals of all of them, and a match without a goal gets an empty list. A match that
@@ -1508,7 +1489,7 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
     .select({
       matchId: matchGoals.matchId,
       minute: matchGoals.minute,
-      name: shownGoalName(),
+      name: nameInFront(shownGoalName()),
       ours: matchGoals.ours,
       ownGoal: matchGoals.ownGoal,
       penalty: matchGoals.penalty,
@@ -1549,7 +1530,8 @@ async function withGoals<T extends { id: number }>(db: Database, rows: T[], wher
         personGivenName: goal.personGivenName,
         personId: goal.personId,
         personSlug: goal.personSlug,
-        player: scorerNameOf(goal),
+        // The whole name: that of his person, and without a person that of the source (#1714).
+        player: goal.name,
         playerId: goal.playerId,
         playerPage: goal.playerPage,
         stoppageMinutes: goal.stoppageMinutes,
